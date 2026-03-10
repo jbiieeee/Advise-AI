@@ -1,0 +1,501 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  
+  <header class="bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] border-b sticky top-0 z-50 shadow-lg">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="bg-white p-2 rounded-lg shadow-md">
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-[#F55027]"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+          </div>
+          <div>
+            <h1 class="font-bold text-xl text-white">Adviser Dashboard</h1>
+            <p class="text-sm text-white/90">Student Support & Advising Portal</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="absolute top-1 right-1 size-2 bg-red-500 rounded-full"></span>
+          </button>
+          
+          <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
+            <div class="size-8 bg-white rounded-full flex items-center justify-center text-[#F55027] font-semibold shadow">
+              D
+            </div>
+            <div class="text-left">
+              <p class="text-sm font-semibold text-white">Dr. Adviser</p>
+              <p class="text-xs text-white/90">CS Department</p>
+            </div>
+          </div>
+          
+          <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Stat 1 -->
+      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
+        <div class="p-6 pt-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">45</h3>
+          <p class="text-sm text-gray-600">Total Advisees</p>
+        </div>
+      </div>
+
+      <!-- Stat 2 -->
+      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
+        <div class="p-6 pt-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">12</h3>
+          <p class="text-sm text-gray-600">Pending Inquiries</p>
+        </div>
+      </div>
+
+      <!-- Stat 3 -->
+      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
+        <div class="p-6 pt-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">3</h3>
+          <p class="text-sm text-gray-600">Appointments Today</p>
+        </div>
+      </div>
+
+       <!-- Stat 4 -->
+       <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
+        <div class="p-6 pt-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">8</h3>
+          <p class="text-sm text-gray-600">Forms to Review</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Tabs Container -->
+    <div class="space-y-6" id="dashboard-tabs">
+      <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto flex shadow-sm bg-gray-100">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="inquiries" data-state="active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          Student Inquiries
+        </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="appointments" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          Appointments
+        </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="forms" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Forms to Review
+        </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          My Students
+        </button>
+      </div>
+
+      <!-- Inquiries Tab -->
+      <div class="tab-content" id="tab-inquiries">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Inquiries & Problems</h3>
+            <p class="text-sm text-muted-foreground">Respond to student questions and resolve their concerns</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="space-y-4">
+
+              <!-- Inquiry 1 -->
+              <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
+                <div class="p-6 pt-6">
+                  <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="font-semibold text-lg">Course Prerequisites Question</h4>
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">medium</div>
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">pending</div>
+                      </div>
+                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          Juan Dela Cruz (2024-00001)
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          2026-03-04 09:30 AM
+                        </span>
+                      </div>
+                      <p class="text-gray-700 mb-4 p-3 bg-gray-50 rounded-lg">
+                        Hi Dr. Santos, I want to take CS-202 next semester but I'm not sure if I've completed all prerequisites. Can you help verify?
+                      </p>
+                      
+                      <!-- JS Control Section -->
+                      <div class="inquiry-controls" data-id="INQ-001">
+                        <div class="flex gap-2 default-actions">
+                          <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 text-white">Respond</button>
+                          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-3 bg-white">Mark Resolved</button>
+                        </div>
+                        <div class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <textarea class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
+                          <div class="flex gap-2">
+                            <button class="send-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 text-white">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                              Send Response
+                            </button>
+                            <button class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+               <!-- Inquiry 2 -->
+               <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-green-500 shadow-sm bg-white">
+                <div class="p-6 pt-6">
+                  <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="font-semibold text-lg">Shifting to Different Program</h4>
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">medium</div>
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground hover:bg-primary/80 bg-gray-900 text-white">resolved</div>
+                      </div>
+                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          Carlos Reyes (2024-00089)
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          2026-03-03 02:45 PM
+                        </span>
+                      </div>
+                      <p class="text-gray-700 mb-4 p-3 bg-gray-50 rounded-lg">
+                        I'm interested in shifting from BS IT to BS Computer Science. What are the requirements and process?
+                      </p>
+                      
+                      <!-- JS Control Section -->
+                      <div class="inquiry-controls" data-id="INQ-003">
+                        <div class="flex gap-2 default-actions">
+                          <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 text-white">Respond</button>
+                        </div>
+                        <div class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <textarea class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
+                          <div class="flex gap-2">
+                            <button class="send-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 text-white">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                              Send Response
+                            </button>
+                            <button class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div class="tab-content hidden" id="tab-appointments">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">Upcoming Appointments</h3>
+            <p class="text-sm text-muted-foreground">Manage your advising sessions with students</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="[&_tr]:border-b">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Purpose</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date & Time</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="[&_tr:last-child]:border-0">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle">
+                      <div>
+                        <p class="font-medium">Anna Cruz</p>
+                        <p class="text-sm text-gray-500">2024-00045</p>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle">Academic Performance Discussion</td>
+                    <td class="p-4 align-middle">
+                      <div>
+                        <p class="font-medium">2026-03-05</p>
+                        <p class="text-sm text-gray-500">10:00 AM</p>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-900 text-white">confirmed</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="flex gap-2">
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Details</button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle">
+                      <div>
+                        <p class="font-medium">Sofia Mendoza</p>
+                        <p class="text-sm text-gray-500">2024-00127</p>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle">Graduation Planning</td>
+                    <td class="p-4 align-middle">
+                      <div>
+                        <p class="font-medium">2026-03-06</p>
+                        <p class="text-sm text-gray-500">9:00 AM</p>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">pending</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="flex gap-2">
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Details</button>
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none hover:bg-primary/90 h-9 px-3 bg-green-500 hover:bg-green-600 text-white">Confirm</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+       <!-- Forms Tab -->
+       <div class="tab-content hidden" id="tab-forms">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">Forms Pending Review</h3>
+            <p class="text-sm text-muted-foreground">Review and approve student submissions</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="[&_tr]:border-b">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Form ID</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Form Type</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Submitted Date</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="[&_tr:last-child]:border-0">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle font-medium">FORM-001</td>
+                    <td class="p-4 align-middle">
+                      <div>
+                        <p class="font-medium">Juan Dela Cruz</p>
+                        <p class="text-sm text-gray-500">2024-00001</p>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle">Course Registration Form</td>
+                    <td class="p-4 align-middle">2026-03-03</td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">pending-review</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="flex gap-2">
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 text-white">Approve</button>
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">Request Changes</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students Tab -->
+      <div class="tab-content hidden" id="tab-students">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">My Advisees</h3>
+            <p class="text-sm text-muted-foreground">Overview of students under your advisement</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="[&_tr]:border-b">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student ID</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Program</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Year Level</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">GPA</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Pending Issues</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="[&_tr:last-child]:border-0">
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle font-medium">2024-00001</td>
+                    <td class="p-4 align-middle">Juan Dela Cruz</td>
+                    <td class="p-4 align-middle">BS Computer Science</td>
+                    <td class="p-4 align-middle">2nd Year</td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.75</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-red-500 text-white">1 issues</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
+                    </td>
+                  </tr>
+
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle font-medium">2024-00123</td>
+                    <td class="p-4 align-middle">Maria Santos</td>
+                    <td class="p-4 align-middle">BS Computer Science</td>
+                    <td class="p-4 align-middle">1st Year</td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.85</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-red-500 text-white">2 issues</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
+                    </td>
+                  </tr>
+
+                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
+                    <td class="p-4 align-middle font-medium">2024-00089</td>
+                    <td class="p-4 align-middle">Carlos Reyes</td>
+                    <td class="p-4 align-middle">BS Information Technology</td>
+                    <td class="p-4 align-middle">3rd Year</td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.50</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">No issues</div>
+                    </td>
+                    <td class="p-4 align-middle">
+                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tab switching logic
+        const triggers = document.querySelectorAll('.tab-trigger');
+        const contents = document.querySelectorAll('.tab-content');
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const targetId = `tab-${trigger.dataset.tab}`;
+                
+                // Reset all
+                triggers.forEach(t => {
+                    t.dataset.state = 'inactive';
+                    t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
+                });
+                contents.forEach(c => c.classList.add('hidden'));
+
+                // Set active
+                trigger.dataset.state = 'active';
+                trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+
+        // Inquiry Response Form Logic
+        const inquiryControls = document.querySelectorAll('.inquiry-controls');
+        
+        inquiryControls.forEach(control => {
+            const respondBtn = control.querySelector('.respond-btn');
+            const cancelBtn = control.querySelector('.cancel-btn');
+            const sendBtn = control.querySelector('.send-btn');
+            const defaultActions = control.querySelector('.default-actions');
+            const responseArea = control.querySelector('.response-area');
+            const textarea = control.querySelector('textarea');
+            const inquiryId = control.dataset.id;
+
+            if(respondBtn) {
+                respondBtn.addEventListener('click', () => {
+                    defaultActions.classList.add('hidden');
+                    responseArea.classList.remove('hidden');
+                });
+            }
+
+            if(cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    responseArea.classList.add('hidden');
+                    defaultActions.classList.remove('hidden');
+                    textarea.value = '';
+                });
+            }
+
+            if(sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    if(textarea.value.trim()) {
+                        alert(`Response sent to inquiry ${inquiryId}`);
+                        responseArea.classList.add('hidden');
+                        defaultActions.classList.remove('hidden');
+                        textarea.value = '';
+                        // You could add further logic here to visually mark the message as resolved
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Define your OKLCH color values here (Lightness Chroma Hue) */
+    /* This matches the orange brand color you have (#F55027) */
+    --color-brand: 63% 0.22 35; 
+  }
+}

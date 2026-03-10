@@ -1,0 +1,163 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-[#F55027] via-[#FF6B3D] to-[#F55027] py-8 px-4 relative overflow-hidden">
+  <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+  <div class="w-full max-w-2xl mx-auto relative z-10">
+    <!-- Back Button -->
+    <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/10 h-10 px-4 py-2 mb-4 text-white">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to Home
+    </a>
+
+    <!-- Logo Header -->
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-4">
+        <div class="bg-white p-4 rounded-full shadow-2xl">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-12 text-[#F55027]"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+        </div>
+      </div>
+      <h1 class="text-3xl font-bold text-white drop-shadow-lg">Create Account</h1>
+      <p class="text-white/90 mt-2 drop-shadow">Join Metro Manila HEIs</p>
+    </div>
+
+    <!-- Card -->
+    <div class="rounded-lg border bg-card text-card-foreground shadow-2xl border-0 bg-white">
+      <div class="flex flex-col space-y-1.5 p-6">
+        <h3 class="text-2xl font-semibold leading-none tracking-tight">Student Registration</h3>
+        <p class="text-sm text-muted-foreground text-gray-500">Fill in your information to get started</p>
+      </div>
+      <div class="p-6 pt-0">
+        <form id="register-form" method="POST" action="{% url 'register' %}" class="space-y-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label for="name" class="text-sm font-medium leading-none">Full Name *</label>
+              <input id="name" name="name" type="text" placeholder="Juan Dela Cruz" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            </div>
+
+            <div class="space-y-2">
+              <label for="studentId" class="text-sm font-medium leading-none">Student ID *</label>
+              <input id="studentId" name="studentId" type="text" placeholder="2024-00001" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="email" class="text-sm font-medium leading-none">Email Address *</label>
+            <input id="email" name="email" type="email" placeholder="student@university.edu.ph" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          </div>
+
+          <div class="space-y-2">
+            <label for="institution" class="text-sm font-medium leading-none">Institution *</label>
+            <!-- Native Select replacing Radix Select for vanilla HTML/JS approach -->
+            <select id="institution" name="institution" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-white">
+              <option value="" disabled selected>Select your institution</option>
+              <option value="Ateneo de Manila University">Ateneo de Manila University</option>
+              <option value="De La Salle University">De La Salle University</option>
+              <option value="University of the Philippines Manila">University of the Philippines Manila</option>
+              <option value="University of Santo Tomas">University of Santo Tomas</option>
+              <option value="Polytechnic University of the Philippines">Polytechnic University of the Philippines</option>
+              <option value="Far Eastern University">Far Eastern University</option>
+              <option value="Adamson University">Adamson University</option>
+              <option value="University of the East">University of the East</option>
+              <option value="Mapúa University">Mapúa University</option>
+              <option value="San Beda University">San Beda University</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label for="program" class="text-sm font-medium leading-none">Program/Course *</label>
+              <input id="program" name="program" type="text" placeholder="BS Computer Science" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            </div>
+
+            <div class="space-y-2">
+              <label for="yearLevel" class="text-sm font-medium leading-none">Year Level *</label>
+              <select id="yearLevel" name="yearLevel" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-white">
+                <option value="" disabled selected>Select year level</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="password" class="text-sm font-medium leading-none">Password *</label>
+            <div class="relative">
+              <input id="password" name="password" type="password" placeholder="Create a strong password" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 eye-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 eye-off-icon hidden"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="confirmPassword" class="text-sm font-medium leading-none">Confirm Password *</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter your password" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          </div>
+
+          <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-11 px-8 w-full bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] hover:opacity-90 shadow-md text-white">
+            Create Account
+          </button>
+
+          <p class="text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="text-[#F55027] hover:underline font-semibold">
+              Sign in here
+            </a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Password visibility toggles
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const input = toggle.parentElement.querySelector('input');
+                const eyeIcon = toggle.querySelector('.eye-icon');
+                const eyeOffIcon = toggle.querySelector('.eye-off-icon');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeIcon.classList.add('hidden');
+                    eyeOffIcon.classList.remove('hidden');
+                } else {
+                    input.type = 'password';
+                    eyeIcon.classList.remove('hidden');
+                    eyeOffIcon.classList.add('hidden');
+                }
+            });
+        });
+
+        // Form validation
+        const form = document.getElementById('register-form');
+        form.addEventListener('submit', (e) => {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters long');
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

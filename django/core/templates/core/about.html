@@ -1,0 +1,291 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-[#F55027] via-[#F54927] to-[#F527C2] border-b sticky top-0 z-50 shadow-lg">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          </a>
+          <div class="bg-white p-2 rounded-lg shadow-md">
+            <svg class="size-6 text-[#F55027]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+          </div>
+          <div>
+            <h1 class="font-bold text-xl text-white">About the System</h1>
+            <p class="text-sm text-white/90">Virtual Academic Advising Platform</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Hero -->
+    <div class="max-w-5xl mx-auto mb-16">
+      <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-[#F55027] shadow-xl bg-white">
+        <div class="p-6 pt-8">
+          <div class="flex flex-col md:flex-row items-start gap-6">
+            <div class="p-4 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-xl text-white shadow-lg shrink-0">
+               <svg class="size-12" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                Virtual Academic Advising & Enrollment Assistance System
+              </h2>
+              <p class="text-lg text-gray-700 mb-4">
+                A comprehensive digital solution designed specifically for Higher Education Institutions (HEIs) in Manila to modernize academic advising and enrollment processes.
+              </p>
+              <p class="text-base text-gray-600">
+                Our integrated platform addresses the challenges of traditional, disjointed advising methods that rely on walk-ins, emails, and phone calls - resulting in long waiting times, slow responses, and unequal access to services.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Problem -->
+    <div class="max-w-5xl mx-auto mb-16">
+      <h3 class="text-3xl font-bold text-gray-900 mb-6 text-center">The Challenge</h3>
+      <div class="rounded-lg border bg-card text-card-foreground bg-gray-50 border-2 border-gray-200">
+        <div class="p-6 pt-6">
+          <p class="text-lg text-gray-700 mb-4">
+            Academic advising and enrollment processes in Manila's universities remain <span class="font-semibold text-[#F55027]">disjointed and inefficient</span>, relying heavily on walk-ins, emails, and phone calls.
+          </p>
+          <p class="text-base text-gray-600">
+            This traditional approach results in:
+          </p>
+          <ul class="mt-4 space-y-2">
+            <li class="flex items-start gap-2">
+              <div class="mt-1 size-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div class="size-2 rounded-full bg-red-500"></div>
+              </div>
+              <span class="text-gray-700">Long waiting times for students seeking advising support</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <div class="mt-1 size-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div class="size-2 rounded-full bg-red-500"></div>
+              </div>
+              <span class="text-gray-700">Slow response times from overwhelmed advisors</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <div class="mt-1 size-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div class="size-2 rounded-full bg-red-500"></div>
+              </div>
+              <span class="text-gray-700">Unequal access to services, especially for students who commute or work while studying</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <div class="mt-1 size-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div class="size-2 rounded-full bg-red-500"></div>
+              </div>
+              <span class="text-gray-700">Lack of visibility into system performance and resource needs</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Objectives -->
+    <div class="max-w-5xl mx-auto mb-16">
+      <h3 class="text-3xl font-bold text-gray-900 mb-6 text-center">System Objectives</h3>
+      <p class="text-center text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
+        Modernizing academic infrastructure by transitioning from fragmented, manual processes to an integrated digital ecosystem
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-[#F55027] hover:shadow-lg transition-shadow bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-gradient-to-br from-[#F55027] to-[#F527C2] rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold leading-none tracking-tight text-lg">Centralize Academic Access</h3>
+                <p class="text-sm text-gray-600 mt-2">Unified portal serving as single entry point for all advising tasks</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-[#F55027] hover:shadow-lg transition-shadow bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-gradient-to-br from-[#F55027] to-[#F527C2] rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold leading-none tracking-tight text-lg">Reduce Administrative Latency</h3>
+                <p class="text-sm text-gray-600 mt-2">AI chatbot handles routine inquiries, decreasing response time</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-[#F55027] hover:shadow-lg transition-shadow bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-gradient-to-br from-[#F55027] to-[#F527C2] rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold leading-none tracking-tight text-lg">Enable Remote Participation</h3>
+                <p class="text-sm text-gray-600 mt-2">Remove physical presence requirement for working students and commuters</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+         <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-[#F55027] hover:shadow-lg transition-shadow bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-gradient-to-br from-[#F55027] to-[#F527C2] rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold leading-none tracking-tight text-lg">Empower Data-Driven Management</h3>
+                <p class="text-sm text-gray-600 mt-2">Real-time analytics for proactive resource allocation</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Core Features -->
+    <div class="max-w-6xl mx-auto mb-16">
+      <h3 class="text-3xl font-bold text-gray-900 mb-6 text-center">Four Integrated Solutions</h3>
+      <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
+        Our platform combines four powerful components to deliver comprehensive support for students and administrators
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Feature 1 -->
+        <div class="rounded-lg border bg-card text-card-foreground border-2 border-gray-200 hover:border-[#F55027] hover:shadow-xl transition-all bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="p-3 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-xl text-white shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-white"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold leading-none tracking-tight text-xl mb-2">Unified Web Platform</h3>
+              </div>
+            </div>
+            <p class="text-gray-700">Single point of access for all academic advising services. Students and advisors connect seamlessly through our centralized portal, eliminating the need for multiple communication channels.</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">24/7 accessibility</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Mobile-responsive design</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Secure authentication</span></div>
+            </div>
+          </div>
+        </div>
+
+         <!-- Feature 2 -->
+        <div class="rounded-lg border bg-card text-card-foreground border-2 border-gray-200 hover:border-[#F55027] hover:shadow-xl transition-all bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="p-3 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-xl text-white shadow-md">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-white"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold leading-none tracking-tight text-xl mb-2">AI-Powered FAQ Chatbot</h3>
+              </div>
+            </div>
+            <p class="text-gray-700">Intelligent chatbot provides instant responses to common inquiries, reducing email backlog and freeing up advisors for complex cases.</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Instant 24/7 responses</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">78% auto-resolution rate</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Natural language processing</span></div>
+            </div>
+          </div>
+        </div>
+
+         <!-- Feature 3 -->
+        <div class="rounded-lg border bg-card text-card-foreground border-2 border-gray-200 hover:border-[#F55027] hover:shadow-xl transition-all bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="p-3 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-xl text-white shadow-md">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-white"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold leading-none tracking-tight text-xl mb-2">Digital Form Tracking</h3>
+              </div>
+            </div>
+            <p class="text-gray-700">Submit enrollment and academic forms online with real-time status tracking. No more campus visits required - perfect for working students and commuters.</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Real-time status updates</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Document upload</span></div>
+              <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Automated notifications</span></div>
+            </div>
+          </div>
+        </div>
+
+         <!-- Feature 4 -->
+         <div class="rounded-lg border bg-card text-card-foreground border-2 border-gray-200 hover:border-[#F55027] hover:shadow-xl transition-all bg-white">
+          <div class="flex flex-col space-y-1.5 p-6">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="p-3 bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] rounded-xl text-white shadow-md">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-white"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold leading-none tracking-tight text-xl mb-2">Analytics Dashboards</h3>
+              </div>
+            </div>
+            <p class="text-gray-700">Data-driven insights for administrators to monitor system performance, track appointment trends, and optimize resource allocation.</p>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="space-y-2">
+               <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Real-time metrics</span></div>
+               <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Staff workload monitoring</span></div>
+               <div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-green-500 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="text-sm text-gray-600">Performance indicators</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Impact -->
+    <div class="max-w-5xl mx-auto">
+      <div class="rounded-lg border bg-gradient-to-br from-[#F55027] via-[#F54927] to-[#F527C2] text-white border-0 shadow-2xl relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=');"></div>
+        <div class="p-6 pt-12 pb-12 relative z-10">
+          <h3 class="text-3xl font-bold mb-6 text-center">Our Impact</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div class="text-5xl font-bold mb-2">78%</div>
+              <div class="text-white/90">AI Auto-Resolution</div>
+              <p class="text-sm text-white/80 mt-2">Instant answers without human intervention</p>
+            </div>
+            <div>
+              <div class="text-5xl font-bold mb-2">-65%</div>
+              <div class="text-white/90">Response Time</div>
+              <p class="text-sm text-white/80 mt-2">From hours to minutes with automation</p>
+            </div>
+            <div>
+              <div class="text-5xl font-bold mb-2">100%</div>
+              <div class="text-white/90">Remote Access</div>
+              <p class="text-sm text-white/80 mt-2">No campus visit required for forms</p>
+            </div>
+          </div>
+          <div class="text-center mt-8">
+            <a href="{% url 'register' %}" class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 bg-white text-[#F55027] hover:bg-gray-100 shadow-xl font-semibold">
+              Get Started Today
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
