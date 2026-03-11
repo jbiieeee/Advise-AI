@@ -1188,16 +1188,16 @@ video {
   background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
 }
 
+.bg-\[linear-gradient\(to_bottom_right_in_oklch\2c var\(--tw-gradient-stops\)\)\] {
+  background-image: linear-gradient(to bottom right in oklch,var(--tw-gradient-stops));
+}
+
+.bg-\[linear-gradient\(to_right_in_oklch\2c var\(--tw-gradient-stops\)\)\] {
+  background-image: linear-gradient(to right in oklch,var(--tw-gradient-stops));
+}
+
 .bg-\[url\(\'data\:image\/svg\+xml\;base64\2c PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI\+PGRlZnM\+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI\+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4\+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4\=\'\)\] {
   background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=');
-}
-
-.bg-gradient-to-br {
-  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-}
-
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
 
 .from-\[\#F527C2\] {
@@ -1206,38 +1206,37 @@ video {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-\[\#F54927\] {
-  --tw-gradient-from: #F54927 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(245 73 39 / 0) var(--tw-gradient-to-position);
+.from-\[oklch\(63\%_0\.22_35\)\] {
+  --tw-gradient-from: oklch(63% 0.22 35) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-\[\#F55027\] {
-  --tw-gradient-from: #F55027 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(245 80 39 / 0) var(--tw-gradient-to-position);
+.from-\[oklch\(63\.5\%_0\.22_36\)\] {
+  --tw-gradient-from: oklch(63.5% 0.22 36) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.via-\[\#F54927\] {
-  --tw-gradient-to: rgb(245 73 39 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), #F54927 var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-
-.via-\[\#FF6B3D\] {
-  --tw-gradient-to: rgb(255 107 61 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), #FF6B3D var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-
-.to-\[\#F527C2\] {
-  --tw-gradient-to: #F527C2 var(--tw-gradient-to-position);
-}
-
-.to-\[\#F54927\] {
-  --tw-gradient-to: #F54927 var(--tw-gradient-to-position);
+.via-\[oklch\(68\.5\%_0\.2_42\)\] {
+  --tw-gradient-to: rgb(255 255 255 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), oklch(68.5% 0.2 42) var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
 .to-\[\#F55027\] {
   --tw-gradient-to: #F55027 var(--tw-gradient-to-position);
+}
+
+.to-\[oklch\(63\%_0\.22_35\)\] {
+  --tw-gradient-to: oklch(63% 0.22 35) var(--tw-gradient-to-position);
+}
+
+.to-\[oklch\(63\.2\%_0\.25_338\)\] {
+  --tw-gradient-to: oklch(63.2% 0.25 338) var(--tw-gradient-to-position);
+}
+
+.to-\[oklch\(63\.5\%_0\.22_36\)\] {
+  --tw-gradient-to: oklch(63.5% 0.22 36) var(--tw-gradient-to-position);
 }
 
 .bg-clip-text {
