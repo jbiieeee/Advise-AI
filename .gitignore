@@ -52,3 +52,5 @@ celerybeat.pid
 .pytest_cache/
 .coverage
 htmlcov/
+
+.vscode/
