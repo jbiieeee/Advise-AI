@@ -1,6 +1,9 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50">
   
@@ -51,11 +54,29 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900">2,458</p>
+              <p class="text-2xl font-bold text-gray-900">{{ online_users }}</p>
               <p class="text-xs text-gray-600">Current Online Users</p>
             </div>
           </div>
-          <!-- Additional Metrics omitted for brevity but match layout -->
+          <!-- Metrics -->
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:shadow-md transition-shadow">
+            <div class="p-2 bg-blue-500 rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900">{{ total_forms }}</p>
+              <p class="text-xs text-gray-600">Total Forms</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:shadow-md transition-shadow">
+            <div class="p-2 bg-green-500 rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900">{{ total_appointments }}</p>
+              <p class="text-xs text-gray-600">Total Appointments</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -70,7 +91,7 @@
             </div>
             <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-700">+12%</div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">12,458</h3>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_students }}</h3>
           <p class="text-sm text-gray-600">Total Students</p>
         </div>
       </div>
@@ -98,6 +119,9 @@
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage" data-state="inactive">
           Manage Advisers
         </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage-admins" data-state="inactive">
+          Manage Admins
+        </button>
       </div>
 
       <!-- Main Dashboard Tab -->
@@ -112,7 +136,7 @@
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <!-- Example insight card -->
                 <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div class="text-3xl font-bold text-blue-600 mb-1">135</div>
+                  <div class="text-3xl font-bold text-blue-600 mb-1">{{ total_students }}</div>
                   <div class="text-sm text-gray-600">Active Student-Adviser Pairs</div>
                 </div>
               </div>
@@ -133,7 +157,7 @@
                 <div>
                   <div class="flex justify-between text-sm mb-2">
                     <span class="font-medium">Average Response Time</span>
-                    <span class="text-green-600 font-semibold">1.2 hours</span>
+                    <span class="text-green-600 font-semibold">{{ avg_response_time|default:"1.2 hours" }}</span>
                   </div>
                   <div class="relative w-full overflow-hidden rounded-full bg-secondary h-2 bg-gray-200">
                     <div class="h-full bg-primary transition-all bg-green-500" style="width: 85%;"></div>
@@ -201,11 +225,13 @@
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
+                {% for student in students %}
                 <tr class="border-b transition-colors hover:bg-gray-50">
-                  <td class="p-4 align-middle">2024-00127</td>
-                  <td class="p-4 align-middle">Sofia Mendoza</td>
-                  <td class="p-4 align-middle"><div class="inline-flex items-center rounded-md border bg-green-500 text-white px-2.5 py-0.5 text-xs font-semibold">active</div></td>
+                  <td class="p-4 align-middle">{{ student.student_id|default:"-" }}</td>
+                  <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                  <td class="p-4 align-middle"><div class="inline-flex items-center rounded-md border text-white px-2.5 py-0.5 text-xs font-semibold {% if student.enrollment_status == 'enrolled' %}bg-green-500{% elif student.enrollment_status == 'pending' %}bg-yellow-500{% else %}bg-red-500{% endif %}">{{ student.enrollment_status }}</div></td>
                 </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -273,23 +299,26 @@
               <p class="text-sm text-white/90">Fill in the details to create a new adviser account</p>
             </div>
             <div class="p-6 pt-6">
-              <form class="space-y-4">
+              <form class="space-y-4" method="POST" action="{% url 'admin_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_staff">
+                <input type="hidden" name="role" value="adviser">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="space-y-2">
                     <label class="text-sm font-medium leading-none">Full Name *</label>
-                    <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Dr. Juan Dela Cruz" required>
+                    <input name="name" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Dr. Juan Dela Cruz" required>
                   </div>
                   <div class="space-y-2">
-                    <label class="text-sm font-medium leading-none">Employee ID *</label>
-                    <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="EMP-2024-001" required>
+                    <label class="text-sm font-medium leading-none">Temporary Password *</label>
+                    <input name="password" type="password" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="******" required>
                   </div>
                 </div>
                 <div class="space-y-2">
                   <label class="text-sm font-medium leading-none">Email Address *</label>
-                  <input type="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="adviser@university.edu.ph" required>
+                  <input name="email" type="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="adviser@university.edu.ph" required>
                 </div>
                 <div class="flex gap-3 pt-2">
-                  <button type="button" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 shadow-md text-white">Create Adviser Account</button>
+                  <button type="submit" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 shadow-md text-white">Create Adviser Account</button>
                   <button type="button" id="close-adviser-modal" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white text-black">Cancel</button>
                 </div>
               </form>
@@ -313,18 +342,124 @@
                        <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
                      </tr>
                    </thead>
+                    <tbody class="[&_tr:last-child]:border-0">
+                      {% for adviser in advisers %}
+                      <tr class="border-b transition-colors hover:bg-gray-50">
+                        <td class="p-4 align-middle font-medium">{{ adviser.user.id }}</td>
+                        <td class="p-4 align-middle">{{ adviser.user.first_name }} {{ adviser.user.last_name }}</td>
+                        <td class="p-4 align-middle">{{ adviser.user.email }}</td>
+                        <td class="p-4 align-middle">
+                           <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if adviser.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if adviser.user.is_active %}active{% else %}inactive{% endif %}</div>
+                        </td>
+                        <td class="p-4 align-middle">
+                          <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="toggle_user_status">
+                            <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-gray-100 h-9 px-3 bg-white">
+                              {% if adviser.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                 </table>
+               </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Manage Admins Tab -->
+      <div class="tab-content hidden" id="tab-manage-admins">
+        <div class="space-y-6">
+          <div class="rounded-lg border bg-card text-card-foreground bg-white">
+            <div class="flex flex-col space-y-1.5 p-6">
+               <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="font-semibold leading-none tracking-tight text-2xl">Admin Management</h3>
+                    <p class="text-sm text-muted-foreground">Create and manage top-level admin accounts</p>
+                  </div>
+                  <button id="add-admin-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 shadow-md text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Add New Admin
+                  </button>
+               </div>
+            </div>
+          </div>
+
+          <!-- Add Admin Form Modal -->
+          <div id="add-admin-modal" class="hidden rounded-lg border-2 border-[#F55027] bg-card text-card-foreground bg-white">
+            <div class="flex flex-col space-y-1.5 p-6 bg-gray-900 text-white rounded-t-lg">
+              <h3 class="font-semibold leading-none tracking-tight text-2xl">Create New System Admin</h3>
+              <p class="text-sm text-white/90">Add another administrative user with full system access</p>
+            </div>
+            <div class="p-6 pt-6">
+              <form class="space-y-4" method="POST" action="{% url 'admin_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_staff">
+                <input type="hidden" name="role" value="admin">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none">Full Name *</label>
+                    <input name="name" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Admin Name" required>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none">Temporary Password *</label>
+                    <input name="password" type="password" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="******" required>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium leading-none">Email Address *</label>
+                  <input name="email" type="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="admin@university.edu.ph" required>
+                </div>
+                <div class="flex gap-3 pt-2">
+                  <button type="submit" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-gray-900 hover:opacity-90 shadow-md text-white">Create Admin Account</button>
+                  <button type="button" id="close-admin-modal" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white text-black">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="rounded-lg border bg-card text-card-foreground bg-white">
+            <div class="flex flex-col space-y-1.5 p-6">
+               <h3 class="font-semibold leading-none tracking-tight text-2xl">System Administrators</h3>
+            </div>
+            <div class="p-6 pt-0">
+               <div class="relative w-full overflow-auto">
+                 <table class="w-full caption-bottom text-sm">
+                   <thead class="[&_tr]:border-b">
+                     <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Admin ID</th>
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Email</th>
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
+                     </tr>
+                   </thead>
                    <tbody class="[&_tr:last-child]:border-0">
+                     {% for admin in admins %}
                      <tr class="border-b transition-colors hover:bg-gray-50">
-                       <td class="p-4 align-middle font-medium">ADV-001</td>
-                       <td class="p-4 align-middle">Dr. Maria Santos</td>
-                       <td class="p-4 align-middle">Computer Science</td>
+                       <td class="p-4 align-middle font-medium">{{ admin.user.id }}</td>
+                       <td class="p-4 align-middle">{{ admin.user.first_name }} {{ admin.user.last_name }}</td>
+                       <td class="p-4 align-middle">{{ admin.user.email }}</td>
                        <td class="p-4 align-middle">
-                          <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-500 text-white">active</div>
+                          <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if admin.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if admin.user.is_active %}active{% else %}inactive{% endif %}</div>
                        </td>
                        <td class="p-4 align-middle">
-                         <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-gray-100 h-9 px-3 bg-white">Deactivate</button>
+                         <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                           {% csrf_token %}
+                           <input type="hidden" name="action" value="toggle_user_status">
+                           <input type="hidden" name="user_id" value="{{ admin.user.id }}">
+                           <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-gray-100 h-9 px-3 bg-white">
+                             {% if admin.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                           </button>
+                         </form>
                        </td>
                      </tr>
+                     {% endfor %}
                    </tbody>
                  </table>
                </div>
@@ -378,6 +513,23 @@
         if(closeAdviserModalBtn && addAdviserModal) {
             closeAdviserModalBtn.addEventListener('click', () => {
                 addAdviserModal.classList.add('hidden');
+            });
+        }
+        
+        // Add Admin Modal toggling
+        const addAdminBtn = document.getElementById('add-admin-btn');
+        const addAdminModal = document.getElementById('add-admin-modal');
+        const closeAdminModalBtn = document.getElementById('close-admin-modal');
+
+        if(addAdminBtn && addAdminModal) {
+            addAdminBtn.addEventListener('click', () => {
+                addAdminModal.classList.toggle('hidden');
+            });
+        }
+
+        if(closeAdminModalBtn && addAdminModal) {
+            closeAdminModalBtn.addEventListener('click', () => {
+                addAdminModal.classList.add('hidden');
             });
         }
     });

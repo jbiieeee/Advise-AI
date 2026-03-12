@@ -1,6 +1,9 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50">
   
@@ -45,7 +48,7 @@
   <div class="px-4 sm:px-6 lg:px-8 py-8">
     
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <!-- Stat 1 -->
       <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
         <div class="p-6 pt-6">
@@ -54,7 +57,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">45</h3>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_advisees|default:"0" }}</h3>
           <p class="text-sm text-gray-600">Total Advisees</p>
         </div>
       </div>
@@ -67,7 +70,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">12</h3>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_inquiries|default:"0" }}</h3>
           <p class="text-sm text-gray-600">Pending Inquiries</p>
         </div>
       </div>
@@ -80,21 +83,8 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">3</h3>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ appointments_today|default:"0" }}</h3>
           <p class="text-sm text-gray-600">Appointments Today</p>
-        </div>
-      </div>
-
-       <!-- Stat 4 -->
-       <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] shadow-md bg-white">
-        <div class="p-6 pt-6">
-          <div class="flex justify-between items-start mb-4">
-            <div class="p-2 bg-[linear-gradient(to_bottom_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] rounded-lg text-white shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
-            </div>
-          </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">8</h3>
-          <p class="text-sm text-gray-600">Forms to Review</p>
         </div>
       </div>
     </div>
@@ -109,10 +99,6 @@
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="appointments" data-state="inactive">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
           Appointments
-        </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="forms" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
-          Forms to Review
         </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -130,98 +116,59 @@
           <div class="p-6 pt-0">
             <div class="space-y-4">
 
-              <!-- Inquiry 1 -->
+              {% for form in forms %}
+              <!-- Inquiry -->
               <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
                 <div class="p-6 pt-6">
                   <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
-                        <h4 class="font-semibold text-lg">Course Prerequisites Question</h4>
+                        <h4 class="font-semibold text-lg">{{ form.title }}</h4>
                         <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">medium</div>
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">pending</div>
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">{{ form.status }}</div>
                       </div>
                       <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
                         <span class="flex items-center gap-1">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                          Juan Dela Cruz (2024-00001)
+                          {{ form.student.first_name }} {{ form.student.last_name }} ({{ form.student.userprofile.student_id|default:"-" }})
                         </span>
                         <span class="flex items-center gap-1">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                          2026-03-04 09:30 AM
+                          {{ form.submitted_at|date:"Y-m-d h:i A" }}
                         </span>
                       </div>
                       <p class="text-gray-700 mb-4 p-3 bg-gray-50 rounded-lg">
-                        Hi Dr. Santos, I want to take CS-202 next semester but I'm not sure if I've completed all prerequisites. Can you help verify?
+                        {{ form.description }}
                       </p>
                       
                       <!-- JS Control Section -->
-                      <div class="inquiry-controls" data-id="INQ-001">
+                      <div class="inquiry-controls" data-id="INQ-{{ form.id }}">
                         <div class="flex gap-2 default-actions">
                           <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">Respond</button>
-                          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-3 bg-white">Mark Resolved</button>
                         </div>
-                        <div class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <textarea class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
+                        <form class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200" method="POST" action="{% url 'adviser_dashboard' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="action" value="update_form">
+                          <input type="hidden" name="form_id" value="{{ form.id }}">
+                          <input type="hidden" name="status" value="approved">
+                          <textarea name="adviser_notes" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
                           <div class="flex gap-2">
-                            <button class="send-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">
                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                              Send Response
+                              Send Response & Mark Resolved
                             </button>
-                            <button class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white">Cancel</button>
+                            <button type="button" class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-white h-10 px-4 py-2 text-black hover:bg-gray-50">Cancel</button>
                           </div>
-                        </div>
+                        </form>
                       </div>
 
                     </div>
                   </div>
                 </div>
               </div>
-
-               <!-- Inquiry 2 -->
-               <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-green-500 shadow-sm bg-white">
-                <div class="p-6 pt-6">
-                  <div class="flex justify-between items-start mb-4">
-                    <div class="flex-1">
-                      <div class="flex items-center gap-2 mb-2">
-                        <h4 class="font-semibold text-lg">Shifting to Different Program</h4>
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">medium</div>
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground hover:bg-primary/80 bg-gray-900 text-white">resolved</div>
-                      </div>
-                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                        <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                          Carlos Reyes (2024-00089)
-                        </span>
-                        <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                          2026-03-03 02:45 PM
-                        </span>
-                      </div>
-                      <p class="text-gray-700 mb-4 p-3 bg-gray-50 rounded-lg">
-                        I'm interested in shifting from BS IT to BS Computer Science. What are the requirements and process?
-                      </p>
-                      
-                      <!-- JS Control Section -->
-                      <div class="inquiry-controls" data-id="INQ-003">
-                        <div class="flex gap-2 default-actions">
-                          <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">Respond</button>
-                        </div>
-                        <div class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <textarea class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
-                          <div class="flex gap-2">
-                            <button class="send-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                              Send Response
-                            </button>
-                            <button class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white">Cancel</button>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {% empty %}
+              <div class="p-8 text-center text-gray-500">No pending inquiries at the moment.</div>
+              {% endfor %}
 
             </div>
           </div>
@@ -248,54 +195,69 @@
                   </tr>
                 </thead>
                 <tbody class="[&_tr:last-child]:border-0">
+                  {% for apt in pending_appointments %}
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
                     <td class="p-4 align-middle">
                       <div>
-                        <p class="font-medium">Anna Cruz</p>
-                        <p class="text-sm text-gray-500">2024-00045</p>
+                        <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
+                        <p class="text-sm text-gray-500">{{ apt.student.userprofile.student_id|default:"-" }}</p>
                       </div>
                     </td>
-                    <td class="p-4 align-middle">Academic Performance Discussion</td>
+                    <td class="p-4 align-middle">{{ apt.purpose }}</td>
                     <td class="p-4 align-middle">
                       <div>
-                        <p class="font-medium">2026-03-05</p>
-                        <p class="text-sm text-gray-500">10:00 AM</p>
+                        <p class="font-medium">{{ apt.date_time|date:"Y-m-d" }}</p>
+                        <p class="text-sm text-gray-500">{{ apt.date_time|date:"h:i A" }}</p>
                       </div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-900 text-white">confirmed</div>
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-900">{{ apt.status }}</div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="flex gap-2">
-                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Details</button>
-                      </div>
+                      <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_appointment">
+                        <input type="hidden" name="apt_id" value="{{ apt.id }}">
+                        <input type="text" name="adviser_notes" placeholder="Zoom link or details..." class="border rounded px-2 py-1 text-xs">
+                        <div class="flex gap-2">
+                          <button name="status" value="confirmed" type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-8 px-2 bg-green-500 hover:bg-green-600 text-white">Approve / Reply</button>
+                        </div>
+                      </form>
                     </td>
                   </tr>
+                  {% endfor %}
                   
+                  {% for apt in confirmed_appointments %}
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
                     <td class="p-4 align-middle">
                       <div>
-                        <p class="font-medium">Sofia Mendoza</p>
-                        <p class="text-sm text-gray-500">2024-00127</p>
+                        <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
+                        <p class="text-sm text-gray-500">{{ apt.student.userprofile.student_id|default:"-" }}</p>
                       </div>
                     </td>
-                    <td class="p-4 align-middle">Graduation Planning</td>
+                    <td class="p-4 align-middle">{{ apt.purpose }}</td>
                     <td class="p-4 align-middle">
                       <div>
-                        <p class="font-medium">2026-03-06</p>
-                        <p class="text-sm text-gray-500">9:00 AM</p>
+                        <p class="font-medium">{{ apt.date_time|date:"Y-m-d" }}</p>
+                        <p class="text-sm text-gray-500">{{ apt.date_time|date:"h:i A" }}</p>
                       </div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">pending</div>
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-900">{{ apt.status }}</div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="flex gap-2">
-                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Details</button>
-                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none hover:bg-primary/90 h-9 px-3 bg-green-500 hover:bg-green-600 text-white">Confirm</button>
-                      </div>
+                      <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_appointment">
+                        <input type="hidden" name="apt_id" value="{{ apt.id }}">
+                        <input type="text" name="adviser_notes" placeholder="Update details..." value="{{ apt.adviser_notes|default:'' }}" class="border rounded px-2 py-1 text-xs">
+                        <div class="flex gap-2">
+                          <button name="status" value="completed" type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border h-8 px-2 bg-white hover:bg-gray-50">Complete</button>
+                        </div>
+                      </form>
                     </td>
                   </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -303,53 +265,7 @@
         </div>
       </div>
 
-       <!-- Forms Tab -->
-       <div class="tab-content hidden" id="tab-forms">
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
-          <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Forms Pending Review</h3>
-            <p class="text-sm text-muted-foreground">Review and approve student submissions</p>
-          </div>
-          <div class="p-6 pt-0">
-            <div class="relative w-full overflow-auto">
-              <table class="w-full caption-bottom text-sm">
-                <thead class="[&_tr]:border-b">
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Form ID</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Form Type</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Submitted Date</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="[&_tr:last-child]:border-0">
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
-                    <td class="p-4 align-middle font-medium">FORM-001</td>
-                    <td class="p-4 align-middle">
-                      <div>
-                        <p class="font-medium">Juan Dela Cruz</p>
-                        <p class="text-sm text-gray-500">2024-00001</p>
-                      </div>
-                    </td>
-                    <td class="p-4 align-middle">Course Registration Form</td>
-                    <td class="p-4 align-middle">2026-03-03</td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">pending-review</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div class="flex gap-2">
-                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] hover:opacity-90 text-white">Approve</button>
-                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">Request Changes</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Students Tab -->
       <div class="tab-content hidden" id="tab-students">
@@ -373,53 +289,43 @@
                   </tr>
                 </thead>
                 <tbody class="[&_tr:last-child]:border-0">
+                  {% for student in my_students %}
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
-                    <td class="p-4 align-middle font-medium">2024-00001</td>
-                    <td class="p-4 align-middle">Juan Dela Cruz</td>
-                    <td class="p-4 align-middle">BS Computer Science</td>
-                    <td class="p-4 align-middle">2nd Year</td>
+                    <td class="p-4 align-middle font-medium">{{ student.student_id|default:"-" }}</td>
+                    <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                    <td class="p-4 align-middle">{{ student.program|default:"-" }}</td>
+                    <td class="p-4 align-middle">{{ student.year_level|default:"-" }}</td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.75</div>
+                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent {% if student.enrollment_status == 'enrolled' %}bg-green-500{% else %}bg-yellow-500{% endif %} text-white">{{ student.enrollment_status }}</div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-red-500 text-white">1 issues</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
+                      <button onclick="document.getElementById('student-modal-{{ student.id }}').classList.remove('hidden')" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
                     </td>
                   </tr>
 
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
-                    <td class="p-4 align-middle font-medium">2024-00123</td>
-                    <td class="p-4 align-middle">Maria Santos</td>
-                    <td class="p-4 align-middle">BS Computer Science</td>
-                    <td class="p-4 align-middle">1st Year</td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.85</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-red-500 text-white">2 issues</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
-                    </td>
-                  </tr>
-
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-gray-50">
-                    <td class="p-4 align-middle font-medium">2024-00089</td>
-                    <td class="p-4 align-middle">Carlos Reyes</td>
-                    <td class="p-4 align-middle">BS Information Technology</td>
-                    <td class="p-4 align-middle">3rd Year</td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500 text-white">3.50</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-gray-100 text-gray-900">No issues</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
-                    </td>
-                  </tr>
+                  <!-- Student Profile Modal -->
+                  <div id="student-modal-{{ student.id }}" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+                      <div class="p-6 border-b bg-gray-50">
+                        <h3 class="text-xl font-bold text-gray-900">Student Profile</h3>
+                        <p class="text-sm text-gray-500 mt-1">Details for {{ student.user.first_name }} {{ student.user.last_name }}</p>
+                      </div>
+                      <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                          <div><span class="text-gray-500 block">Student ID</span><span class="font-medium">{{ student.student_id }}</span></div>
+                          <div><span class="text-gray-500 block">Email</span><span class="font-medium">{{ student.user.email }}</span></div>
+                          <div><span class="text-gray-500 block">Program</span><span class="font-medium">{{ student.program }}</span></div>
+                          <div><span class="text-gray-500 block">Year Level</span><span class="font-medium">{{ student.year_level }}</span></div>
+                          <div><span class="text-gray-500 block">Institution</span><span class="font-medium">{{ student.institution }}</span></div>
+                          <div><span class="text-gray-500 block">Status</span><span class="font-medium capitalize">{{ student.enrollment_status }}</span></div>
+                        </div>
+                      </div>
+                      <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                        <button type="button" onclick="document.getElementById('student-modal-{{ student.id }}').classList.add('hidden')" class="px-6 py-2 text-sm font-medium text-white bg-[#F55027] rounded-md hover:bg-[#D44521] shadow-md">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -457,17 +363,14 @@
             });
         });
 
-        // Inquiry Response Form Logic
         const inquiryControls = document.querySelectorAll('.inquiry-controls');
         
         inquiryControls.forEach(control => {
             const respondBtn = control.querySelector('.respond-btn');
             const cancelBtn = control.querySelector('.cancel-btn');
-            const sendBtn = control.querySelector('.send-btn');
             const defaultActions = control.querySelector('.default-actions');
             const responseArea = control.querySelector('.response-area');
             const textarea = control.querySelector('textarea');
-            const inquiryId = control.dataset.id;
 
             if(respondBtn) {
                 respondBtn.addEventListener('click', () => {
@@ -481,18 +384,6 @@
                     responseArea.classList.add('hidden');
                     defaultActions.classList.remove('hidden');
                     textarea.value = '';
-                });
-            }
-
-            if(sendBtn) {
-                sendBtn.addEventListener('click', () => {
-                    if(textarea.value.trim()) {
-                        alert(`Response sent to inquiry ${inquiryId}`);
-                        responseArea.classList.add('hidden');
-                        defaultActions.classList.remove('hidden');
-                        textarea.value = '';
-                        // You could add further logic here to visually mark the message as resolved
-                    }
                 });
             }
         });

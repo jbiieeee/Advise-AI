@@ -1,6 +1,9 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50">
   
@@ -25,15 +28,15 @@
           
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <div class="size-8 bg-white rounded-full flex items-center justify-center text-[#F55027] font-semibold shadow">
-              J
+              {{ user.first_name|default:user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-white">Juan Dela Cruz</p>
-              <p class="text-xs text-white/90">2024-00001</p>
+              <p class="text-sm font-semibold text-white">{{ user.first_name }} {{ user.last_name }}</p>
+              <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }}</p>
             </div>
           </div>
           
-          <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+          <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
           </a>
@@ -48,22 +51,32 @@
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
         
+        {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-600 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-600 border border-green-200{% else %}bg-blue-100 text-blue-600 border border-blue-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Welcome Header -->
         <div class="rounded-lg border bg-card text-card-foreground shadow-xl border-0 bg-[linear-gradient(to_bottom_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] text-white relative overflow-hidden">
           <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
           <div class="p-6 pt-6 relative z-10">
             <div>
-              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back, Juan! 👋</h2>
+              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}! 👋</h2>
               <p class="text-white/95 mb-6 drop-shadow-sm text-lg">
                 Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant AI support.
               </p>
               
               <div class="flex gap-3">
-                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 bg-white text-secondary-foreground hover:bg-white/80 shadow-lg font-semibold text-[#F55027]">
+                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 bg-white text-secondary-foreground hover:bg-white/80 shadow-lg font-semibold text-[#F55027]" onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
                   Schedule New Advising
                 </button>
-                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 border-2 border-white text-white hover:bg-white/20 shadow-lg font-semibold">
+                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 border-2 border-white text-white hover:bg-white/20 shadow-lg font-semibold" onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                   Submit Forms
                 </button>
@@ -74,18 +87,34 @@
 
         <!-- Status Cards - Quick View -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-green-500 bg-white">
+          <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 {% if enrollment_status == 'enrolled' %}border-l-green-500{% elif enrollment_status == 'pending' %}border-l-yellow-500{% else %}border-l-red-500{% endif %} bg-white">
             <div class="p-6 pt-6">
               <div class="flex items-start justify-between mb-2">
                 <div>
                   <p class="text-sm text-gray-600 mb-1">Enrollment Status</p>
-                  <p class="text-2xl font-bold text-gray-900">Enrolled</p>
+                  <p class="text-2xl font-bold text-gray-900">
+                    {% if enrollment_status == 'enrolled' %}Enrolled
+                    {% elif enrollment_status == 'pending' %}Pending
+                    {% else %}Not Enrolled{% endif %}
+                  </p>
                 </div>
-                <div class="p-2 bg-green-100 rounded-lg">
+                <div class="p-2 rounded-lg {% if enrollment_status == 'enrolled' %}bg-green-100{% elif enrollment_status == 'pending' %}bg-yellow-100{% else %}bg-red-100{% endif %}">
+                  {% if enrollment_status == 'enrolled' %}
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-green-600"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  {% elif enrollment_status == 'pending' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-yellow-600"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-red-600"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  {% endif %}
                 </div>
               </div>
-              <p class="text-xs text-gray-500">2nd Semester, AY 2025-2026</p>
+              {% if enrollment_status == 'not_enrolled' %}
+                <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')" class="text-xs text-[#F55027] hover:underline font-semibold mt-1">Verify Enrollment &rarr;</button>
+              {% elif enrollment_status == 'pending' %}
+                <p class="text-xs text-gray-500 mt-1">Waiting for adviser review</p>
+              {% else %}
+                <p class="text-xs text-gray-500 mt-1">2nd Semester, AY 2025-2026</p>
+              {% endif %}
             </div>
           </div>
 
@@ -94,13 +123,13 @@
               <div class="flex items-start justify-between mb-2">
                 <div>
                   <p class="text-sm text-gray-600 mb-1">Pending Approvals</p>
-                  <p class="text-2xl font-bold text-gray-900">2</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ pending_approvals }}</p>
                 </div>
                 <div class="p-2 bg-yellow-100 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-yellow-600"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
               </div>
-              <p class="text-xs text-gray-500">Forms under review</p>
+              <p class="text-xs text-gray-500 mt-1">Forms under review</p>
             </div>
           </div>
 
@@ -109,13 +138,13 @@
               <div class="flex items-start justify-between mb-2">
                 <div>
                   <p class="text-sm text-gray-600 mb-1">Appointments</p>
-                  <p class="text-2xl font-bold text-gray-900">1</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ appointments_count }}</p>
                 </div>
                 <div class="p-2 bg-blue-100 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-blue-600"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 </div>
               </div>
-              <p class="text-xs text-gray-500">Upcoming this week</p>
+              <p class="text-xs text-gray-500 mt-1">Upcoming this week</p>
             </div>
           </div>
         </div>
@@ -128,7 +157,7 @@
           </div>
           <div class="p-6 pt-0">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F55027] hover:shadow-lg transition-all group">
+              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F55027] hover:shadow-lg transition-all group" onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
                 <div class="p-4 rounded-full bg-[linear-gradient(to_bottom_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.5%_0.22_36)] text-white shadow-md group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
                 </div>
@@ -138,7 +167,7 @@
                 </div>
               </button>
 
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F54927] hover:shadow-lg transition-all group">
+              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F54927] hover:shadow-lg transition-all group" onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
                 <div class="p-4 rounded-full bg-[linear-gradient(to_bottom_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63.5%_0.22_36)] to-[oklch(63.2%_0.25_338)] text-white shadow-md group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                 </div>
@@ -148,7 +177,7 @@
                 </div>
               </button>
 
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F527C2] hover:shadow-lg transition-all group">
+              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-[#F527C2] hover:shadow-lg transition-all group" onclick="document.getElementById('history-modal').classList.remove('hidden')">
                 <div class="p-4 rounded-full bg-[linear-gradient(to_bottom_right_in_oklch,var(--tw-gradient-stops))] from-[#F527C2] to-[#F55027] text-white shadow-md group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
@@ -182,116 +211,46 @@
           <!-- Courses Tab -->
           <div class="tab-content" id="tab-courses">
             <div class="space-y-4">
-              <!-- Course 1 -->
-              <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] bg-white">
-                <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                        Introduction to Programming
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">CS-101</div>
-                      </h3>
-                      <div class="text-sm text-muted-foreground mt-2">
-                        <div class="flex flex-col gap-1 text-gray-500">
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            MWF 9:00 AM - 10:30 AM
-                          </span>
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Dr. Maria Santos
-                          </span>
+              {% if enrollment_status != 'enrolled' %}
+                <div class="p-8 text-center bg-white rounded-lg border text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-12 mx-auto mb-4 opacity-50"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  <h3 class="text-lg font-semibold text-gray-700">No Courses Yet</h3>
+                  <p class="text-sm">Your courses will appear here once your enrollment is verified.</p>
+                </div>
+              {% elif courses %}
+                {% for enrollment in courses %}
+                  <!-- Dynamic Course Listing -->
+                  <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] bg-white">
+                    <div class="flex flex-col space-y-1.5 p-6 pb-2">
+                      <div class="flex justify-between items-start">
+                        <div>
+                          <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
+                            {{ enrollment.course.title }}
+                            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">{{ enrollment.course.code }}</div>
+                          </h3>
+                          <div class="text-sm text-muted-foreground mt-2">
+                            <div class="flex flex-col gap-1 text-gray-500">
+                              <span class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                {{ enrollment.course.schedule }}
+                              </span>
+                              <span class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                {{ enrollment.course.instructor }}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                {% endfor %}
+              {% else %}
+                <!-- Placeholder for enrolled but empty -->
+                <div class="p-8 text-center bg-white rounded-lg border text-gray-500">
+                  <p class="text-sm">You are enrolled, but you have no course records yet.</p>
                 </div>
-                <div class="p-6 pt-0">
-                  <div class="space-y-2 mt-4">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Progress</span>
-                      <span class="font-semibold">75%</span>
-                    </div>
-                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-secondary bg-gray-200">
-                      <div class="h-full bg-primary transition-all bg-[#F55027]" style="transform: translateX(-25%)"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Course 2 -->
-              <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] bg-white">
-                <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                        Calculus II
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">MATH-201</div>
-                      </h3>
-                      <div class="text-sm text-muted-foreground mt-2">
-                        <div class="flex flex-col gap-1 text-gray-500">
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            TTH 1:00 PM - 2:30 PM
-                          </span>
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Prof. Jose Reyes
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6 pt-0">
-                  <div class="space-y-2 mt-4">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Progress</span>
-                      <span class="font-semibold">60%</span>
-                    </div>
-                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-secondary bg-gray-200">
-                      <div class="h-full bg-primary transition-all bg-[#F55027]" style="transform: translateX(-40%)"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-               <!-- Course 3 -->
-               <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-[#F55027] bg-white">
-                <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                        Technical Writing
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">ENG-102</div>
-                      </h3>
-                      <div class="text-sm text-muted-foreground mt-2">
-                        <div class="flex flex-col gap-1 text-gray-500">
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            MWF 2:00 PM - 3:30 PM
-                          </span>
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Dr. Anna Cruz
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6 pt-0">
-                  <div class="space-y-2 mt-4">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Progress</span>
-                      <span class="font-semibold">85%</span>
-                    </div>
-                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-secondary bg-gray-200">
-                      <div class="h-full bg-primary transition-all bg-[#F55027]" style="transform: translateX(-15%)"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {% endif %}
             </div>
           </div>
 
@@ -412,49 +371,36 @@
       <!-- Sidebar -->
       <div class="space-y-6">
         
-        <!-- Today's Schedule -->
+        <!-- Pending Appointments Sidebar -->
         <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-[#F55027] bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
             <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-[#F55027]"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-              Today's Schedule
+              Upcoming & Pending
             </h3>
-            <p class="text-sm text-muted-foreground">Wednesday, March 4, 2026</p>
+            <p class="text-sm text-muted-foreground">Adviser appointments status</p>
           </div>
-          <div class="p-6 pt-0">
-            <div class="space-y-3">
-              <div>
-                <div class="flex items-start gap-3">
-                  <div class="bg-[#F55027] text-white px-2 py-1 rounded text-sm font-semibold shadow">9:00 AM</div>
-                  <div class="flex-1">
-                    <p class="font-semibold text-sm">CS-101</p>
-                    <p class="text-xs text-gray-600">Room 301</p>
-                  </div>
+          <div class="p-6 pt-0 space-y-3">
+            {% for apt in student_appointments %}
+              {% if apt.status == 'pending' or apt.status == 'confirmed' %}
+              <div class="p-3 border rounded-lg bg-gray-50 flex items-start gap-3">
+                <div class="bg-white p-2 rounded-full border shadow-sm shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" class="size-4 text-[#F55027]"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 </div>
-                <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200 my-3"></div>
-              </div>
-              
-              <div>
-                <div class="flex items-start gap-3">
-                  <div class="bg-[#F55027] text-white px-2 py-1 rounded text-sm font-semibold shadow">1:00 PM</div>
-                  <div class="flex-1">
-                    <p class="font-semibold text-sm">MATH-201</p>
-                    <p class="text-xs text-gray-600">Room 205</p>
-                  </div>
-                </div>
-                <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200 my-3"></div>
-              </div>
-
-              <div>
-                <div class="flex items-start gap-3">
-                  <div class="bg-[#F55027] text-white px-2 py-1 rounded text-sm font-semibold shadow">2:00 PM</div>
-                  <div class="flex-1">
-                    <p class="font-semibold text-sm">ENG-102</p>
-                    <p class="text-xs text-gray-600">Room 412</p>
-                  </div>
+                <div>
+                  <p class="font-semibold text-sm text-gray-900">{{ apt.purpose }}</p>
+                  <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
+                  <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                    {{ apt.status }}
+                  </span>
                 </div>
               </div>
-            </div>
+              {% endif %}
+            {% empty %}
+              <div class="text-center py-4 text-gray-500 text-sm">
+                  <p>No upcoming appointments.</p>
+              </div>
+            {% endfor %}
           </div>
         </div>
 
@@ -472,33 +418,35 @@
               <div class="h-full w-full rounded-[inherit]" style="overflow-y: auto;">
                 <div class="space-y-3 pb-2 pt-1">
                   
-                  <div class="p-3 rounded-lg bg-[#F55027]/10 border border-[#F55027]/30">
-                    <div class="flex justify-between items-start mb-1">
-                      <p class="font-semibold text-sm">Academic Advisor</p>
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground text-xs bg-[#F55027] text-white">New</div>
+                  {% if adviser_messages %}
+                    {% for msg in adviser_messages %}
+                    <div class="p-3 rounded-lg {% if not msg.is_read %}bg-[#F55027]/10 border border-[#F55027]/30{% else %}bg-gray-50{% endif %}">
+                      <div class="flex justify-between items-start mb-1">
+                        <p class="font-semibold text-sm">{% if msg.sender.userprofile.role == 'adviser' %}Advisor {{ msg.sender.first_name }}{% else %}{{ msg.sender.first_name }}{% endif %}</p>
+                        {% if not msg.is_read %}
+                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground text-xs bg-[#F55027] text-white">New</div>
+                        {% endif %}
+                      </div>
+                      <p class="text-sm text-gray-700 mb-1">{{ msg.content }}</p>
+                      <p class="text-xs text-gray-500">{{ msg.sent_at|timesince }} ago</p>
                     </div>
-                    <p class="text-sm text-gray-700 mb-1">Your enrollment for next semester is now open.</p>
-                    <p class="text-xs text-gray-500">2 hours ago</p>
-                  </div>
-
-                  <div class="p-3 rounded-lg bg-gray-50">
-                    <div class="flex justify-between items-start mb-1">
-                      <p class="font-semibold text-sm">Course Advisor</p>
-                    </div>
-                    <p class="text-sm text-gray-700 mb-1">Complete pre-enrollment requirements by March 15.</p>
-                    <p class="text-xs text-gray-500">1 day ago</p>
-                  </div>
+                    {% endfor %}
+                  {% else %}
+                  <div class="text-center text-sm text-gray-500 py-4">No new messages from advisors.</div>
+                  {% endif %}
 
                 </div>
               </div>
             </div>
             
-            <div class="mt-4 flex gap-2">
-              <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type message...">
-              <button class="inline-flex items-center justify-center rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 w-10 bg-[#F55027] hover:bg-[#D44521] shadow-md text-white">
+            <form class="mt-4 flex gap-2" method="POST" action="{% url 'student_dashboard' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="send_message">
+              <input name="content" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type message to adviser..." required>
+              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 w-10 bg-[#F55027] hover:bg-[#D44521] shadow-md text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -506,11 +454,226 @@
     </div>
   </div>
 
-  <!-- Chatbot Widget Placeholder (Bottom Right) -->
+  <!-- Chatbot Widget -->
   <div class="fixed bottom-6 right-6 z-50">
-      <button class="bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-transform">
+      <button id="chatbot-toggle" class="bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-transform">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-white"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
       </button>
+  </div>
+
+  <!-- Chatbot Window -->
+  <div id="chatbot-window" class="fixed bottom-24 right-6 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 hidden flex-col overflow-hidden transition-all transform origin-bottom-right duration-300">
+    <!-- Header -->
+    <div class="bg-[linear-gradient(to_right_in_oklch,var(--tw-gradient-stops))] from-[oklch(63%_0.22_35)] to-[oklch(63.2%_0.25_338)] p-4 flex justify-between items-center text-white">
+      <div class="flex items-center gap-2">
+        <div class="bg-white/20 p-2 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-sm">Advise AI Assistant</h3>
+          <p class="text-xs text-white/80 flex items-center gap-1"><span class="size-2 bg-green-400 rounded-full inline-block"></span> Online</p>
+        </div>
+      </div>
+      <button id="chatbot-close" class="hover:bg-white/20 p-1 rounded-md transition-colors text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    
+    <!-- Messages Area -->
+    <div id="chatbot-messages" class="h-[350px] p-4 overflow-y-auto flex flex-col gap-3 bg-gray-50">
+      <!-- Bot Message -->
+      <div class="flex gap-2 w-5/6">
+        <div class="shrink-0 size-8 rounded-full bg-[#F55027] flex items-center justify-center text-white mt-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        </div>
+        <div class="bg-white p-3 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100 text-sm text-gray-700">
+          Hello{% if user.first_name %} {{ user.first_name }}{% endif %}! 👋 I'm your AI Academic Advisor. How can I help you today?
+        </div>
+      </div>
+    </div>
+    
+    <!-- Input Area -->
+    <div class="p-3 bg-white border-t border-gray-100">
+      <form id="chatbot-form" class="flex gap-2">
+        <input type="text" id="chatbot-input" class="flex-1 h-10 rounded-full border border-gray-300 px-4 text-sm focus:outline-none focus:border-[#F55027] focus:ring-1 focus:ring-[#F55027]" placeholder="Type your message..." autocomplete="off">
+        <button type="submit" class="shrink-0 size-10 rounded-full bg-[#F55027] flex items-center justify-center text-white hover:bg-[#D44521] transition-colors shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 -ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 border-b flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">Request History</h3>
+          <p class="text-sm text-gray-500 mt-1">Track your submitted forms and appointments.</p>
+        </div>
+        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')" class="inline-flex w-full sm:w-auto items-center justify-center rounded-md font-semibold transition-colors hover:bg-[#D44521] h-12 px-6 py-2 bg-[#F55027] shadow-lg text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-3"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          Go Back
+        </button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto space-y-6">
+        <!-- Appointments History -->
+        <div>
+          <h4 class="font-semibold text-lg border-b pb-2 mb-4 text-[#F55027]">Appointments</h4>
+          <div class="space-y-4">
+            {% for apt in student_appointments %}
+            <div class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if apt.status == 'confirmed' %}border-l-green-500{% elif apt.status == 'cancelled' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h5 class="font-medium text-gray-900">{{ apt.purpose }}</h5>
+                  <p class="text-sm text-gray-500">{{ apt.date_time|date:"F j, Y, P" }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% elif apt.status == 'cancelled' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
+                  {{ apt.status }}
+                </span>
+              </div>
+              
+              {% if apt.adviser_notes %}
+              <div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0 text-blue-500"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+                <div>
+                  <p class="font-semibold text-blue-900 mb-1">Adviser's Message:</p>
+                  <p>{{ apt.adviser_notes }}</p>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500 italic">No appointments booked yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Forms History -->
+        <div>
+          <h4 class="font-semibold text-lg border-b pb-2 mb-4 text-[#F55027]">Forms & Inquiries</h4>
+          <div class="space-y-4">
+            {% for form in student_forms %}
+            <div class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if form.status == 'approved' %}border-l-green-500{% elif form.status == 'rejected' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h5 class="font-medium text-gray-900">{{ form.title }}</h5>
+                  <p class="text-xs text-gray-500">{{ form.submitted_at|date:"M j, Y, P" }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if form.status == 'approved' %}bg-green-100 text-green-700{% elif form.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
+                  {{ form.status }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-700 bg-gray-50 p-2 rounded truncate max-h-16 overflow-hidden">{{ form.description }}</p>
+
+              {% if form.adviser_notes %}
+              <div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0 text-blue-500"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+                <div>
+                  <p class="font-semibold text-blue-900 mb-1">Response:</p>
+                  <p>{{ form.adviser_notes }}</p>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500 italic">No forms submitted yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-6 border-t bg-gray-50 flex justify-end">
+        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')" class="px-8 py-3 text-sm font-bold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 shadow-sm w-full sm:w-auto">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enrollment Verification Modal -->
+  <div id="enrollment-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+      <div class="p-6 border-b">
+        <h3 class="text-xl font-bold text-gray-900">Verify Enrollment</h3>
+        <p class="text-sm text-gray-500 mt-1">Enter your curriculum or registration code to verify your enrollment status.</p>
+      </div>
+      <form method="POST" action="{% url 'student_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="enroll_verification">
+        <div class="p-6 space-y-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Curriculum Code *</label>
+            <input name="curriculum_code" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. BSCS-2026-A">
+          </div>
+        </div>
+        <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+          <button type="button" onclick="document.getElementById('enrollment-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-[#F55027] rounded-md hover:opacity-90 shadow-md">Submit Verification</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Submit Form Modal -->
+  <div id="submit-form-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+      <div class="p-6 border-b">
+        <h3 class="text-xl font-bold text-gray-900">Submit Digital Form</h3>
+        <p class="text-sm text-gray-500 mt-1">Submit a request or form securely.</p>
+      </div>
+      <form method="POST" action="{% url 'student_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="submit_form">
+        <div class="p-6 space-y-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Form Type / Title *</label>
+            <input name="form_title" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. Leave of Absence Request">
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Description</label>
+            <textarea name="form_desc" rows="3" class="flex w-full rounded-md border text-sm px-3 py-2" placeholder="Briefly describe your request..."></textarea>
+          </div>
+        </div>
+        <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+          <button type="button" onclick="document.getElementById('submit-form-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-[#F55027] rounded-md hover:opacity-90 shadow-md">Submit Form</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedule Appointment Modal -->
+  <div id="appointment-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+      <div class="p-6 border-b">
+        <h3 class="text-xl font-bold text-gray-900">Schedule Advising</h3>
+        <p class="text-sm text-gray-500 mt-1">Book an appointment with your academic advisor.</p>
+      </div>
+      <form method="POST" action="{% url 'student_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="schedule_appointment">
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Date *</label>
+              <input name="appointment_date" type="date" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Time *</label>
+              <input name="appointment_time" type="time" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Purpose *</label>
+            <input name="appointment_purpose" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. Schedule clearance, Grade checking">
+          </div>
+        </div>
+        <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+          <button type="button" onclick="document.getElementById('appointment-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-[#F55027] rounded-md hover:opacity-90 shadow-md">Schedule</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -538,6 +701,91 @@
                 document.getElementById(targetId).classList.remove('hidden');
             });
         });
+
+        // Chatbot Logic
+        const chatToggle = document.getElementById('chatbot-toggle');
+        const chatWindow = document.getElementById('chatbot-window');
+        const chatClose = document.getElementById('chatbot-close');
+        const chatForm = document.getElementById('chatbot-form');
+        const chatInput = document.getElementById('chatbot-input');
+        const chatMessages = document.getElementById('chatbot-messages');
+
+        function toggleChat() {
+            if (chatWindow.classList.contains('hidden')) {
+                chatWindow.classList.remove('hidden');
+                chatWindow.classList.add('flex');
+            } else {
+                chatWindow.classList.add('hidden');
+                chatWindow.classList.remove('flex');
+            }
+        }
+
+        chatToggle.addEventListener('click', toggleChat);
+        chatClose.addEventListener('click', toggleChat);
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            const userHtml = `
+              <div class="flex gap-2 w-5/6 self-end justify-end">
+                <div class="bg-[#F55027] p-3 rounded-2xl rounded-br-sm shadow-sm text-sm text-white">
+                  ${message}
+                </div>
+              </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', userHtml);
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Simulate AI typing indicator
+            const typingId = 'typing-' + Date.now();
+            const typingHtml = `
+              <div id="${typingId}" class="flex gap-2 w-5/6">
+                <div class="shrink-0 size-8 rounded-full bg-[#F55027] flex items-center justify-center text-white mt-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                </div>
+                <div class="bg-white p-3 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100 text-sm text-gray-700 flex gap-1 items-center">
+                  <div class="size-2 rounded-full bg-gray-300 animate-bounce delay-100"></div>
+                  <div class="size-2 rounded-full bg-gray-300 animate-bounce delay-200"></div>
+                  <div class="size-2 rounded-full bg-gray-300 animate-bounce delay-300"></div>
+                </div>
+              </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', typingHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Simulate API response
+            setTimeout(() => {
+                document.getElementById(typingId).remove();
+                // Simple response logic
+                let reply = "I'm looking into that for you. For complex inquiries, you might want to consider booking an appointment with an adviser.";
+                const lowerMsg = message.toLowerCase();
+                if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+                    reply = "Hello! How can I assist you with your academics today?";
+                } else if (lowerMsg.includes('enroll')) {
+                    reply = "To enroll, make sure you enter your curriculum code in the Verify Enrollment section first. It might take some time for your adviser to review it.";
+                } else if (lowerMsg.includes('where is')) {
+                    reply = "You can find most services right here on the dashboard. Use the navigation buttons above!";
+                }
+
+                const botHtml = `
+                  <div class="flex gap-2 w-5/6">
+                    <div class="shrink-0 size-8 rounded-full bg-[#F55027] flex items-center justify-center text-white mt-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100 text-sm text-gray-700">
+                      ${reply}
+                    </div>
+                  </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', botHtml);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1500);
+        });
+
     });
 </script>
 {% endblock %}
