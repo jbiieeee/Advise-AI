@@ -83,5 +83,3 @@ class Message(models.Model):
     
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username} at {self.sent_at}"
-
-    adviser_notes = models.TextField(blank=True, null=True)

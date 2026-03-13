@@ -352,14 +352,24 @@
                            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if adviser.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if adviser.user.is_active %}active{% else %}inactive{% endif %}</div>
                         </td>
                         <td class="p-4 align-middle">
-                          <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="toggle_user_status">
-                            <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
-                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-gray-100 h-9 px-3 bg-white">
-                              {% if adviser.user.is_active %}Deactivate{% else %}Activate{% endif %}
-                            </button>
-                          </form>
+                          <div class="flex gap-2">
+                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                              {% csrf_token %}
+                              <input type="hidden" name="action" value="toggle_user_status">
+                              <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
+                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white">
+                                {% if adviser.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                              </button>
+                            </form>
+                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Adviser account? This action cannot be undone.');">
+                              {% csrf_token %}
+                              <input type="hidden" name="action" value="delete_user">
+                              <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
+                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-red-500 hover:bg-red-50 text-red-600 h-9 px-3 bg-white">
+                                Delete
+                              </button>
+                            </form>
+                          </div>
                         </td>
                       </tr>
                       {% endfor %}
@@ -449,14 +459,24 @@
                           <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if admin.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if admin.user.is_active %}active{% else %}inactive{% endif %}</div>
                        </td>
                        <td class="p-4 align-middle">
-                         <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
-                           {% csrf_token %}
-                           <input type="hidden" name="action" value="toggle_user_status">
-                           <input type="hidden" name="user_id" value="{{ admin.user.id }}">
-                           <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-gray-100 h-9 px-3 bg-white">
-                             {% if admin.user.is_active %}Deactivate{% else %}Activate{% endif %}
-                           </button>
-                         </form>
+                         <div class="flex gap-2">
+                           <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                             {% csrf_token %}
+                             <input type="hidden" name="action" value="toggle_user_status">
+                             <input type="hidden" name="user_id" value="{{ admin.user.id }}">
+                             <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white">
+                               {% if admin.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                             </button>
+                           </form>
+                           <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Admin account? This action cannot be undone.');">
+                             {% csrf_token %}
+                             <input type="hidden" name="action" value="delete_user">
+                             <input type="hidden" name="user_id" value="{{ admin.user.id }}">
+                             <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-red-500 hover:bg-red-50 text-red-600 h-9 px-3 bg-white">
+                               Delete
+                             </button>
+                           </form>
+                         </div>
                        </td>
                      </tr>
                      {% endfor %}

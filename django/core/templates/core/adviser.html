@@ -16,27 +16,32 @@
           </div>
           <div>
             <h1 class="font-bold text-xl text-white">Adviser Dashboard</h1>
-            <p class="text-sm text-white/90">Student Support & Advising Portal</p>
+            <p class="text-sm text-white/90">Student Support &amp; Advising Portal</p>
           </div>
         </div>
         
         <div class="flex items-center gap-3">
-          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
+          <!-- Messages bell with unread badge -->
+          <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative" title="Messages">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            {% if total_unread > 0 %}
+            <span class="absolute top-1 right-1 size-4 bg-red-500 rounded-full text-[9px] font-bold flex items-center justify-center">{{ total_unread }}</span>
+            {% else %}
             <span class="absolute top-1 right-1 size-2 bg-red-500 rounded-full"></span>
+            {% endif %}
           </button>
           
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
-              D
+              {{ adviser_user.first_name|default:adviser_user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-white">Dr. Adviser</p>
-              <p class="text-xs text-white/90">CS Department</p>
+              <p class="text-sm font-semibold text-white">{{ adviser_user.first_name }} {{ adviser_user.last_name }}</p>
+              <p class="text-xs text-white/90">Adviser</p>
             </div>
           </div>
           
-          <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+          <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
           </a>
@@ -44,6 +49,17 @@
       </div>
     </div>
   </header>
+
+  <!-- Django Flash Messages -->
+  {% if messages %}
+  <div class="px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
+    {% for message in messages %}
+    <div class="p-3 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %} flex justify-between items-start shadow-sm">
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <div class="px-4 sm:px-6 lg:px-8 py-8">
     
@@ -100,6 +116,13 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
           Appointments
         </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="messages" data-state="inactive" id="messages-tab-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Messages
+          {% if total_unread > 0 %}
+          <span class="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">{{ total_unread }}</span>
+          {% endif %}
+        </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           My Students
@@ -110,7 +133,7 @@
       <div class="tab-content" id="tab-inquiries">
         <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Inquiries & Problems</h3>
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Inquiries &amp; Problems</h3>
             <p class="text-sm text-muted-foreground">Respond to student questions and resolve their concerns</p>
           </div>
           <div class="p-6 pt-0">
@@ -145,6 +168,13 @@
                       <div class="inquiry-controls" data-id="INQ-{{ form.id }}">
                         <div class="flex gap-2 default-actions">
                           <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">Respond</button>
+                          <!-- Quick message link to this student -->
+                          <button class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
+                            data-student-id="{{ form.student.id }}"
+                            data-student-name="{{ form.student.first_name }} {{ form.student.last_name }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 mr-1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Message Student
+                          </button>
                         </div>
                         <form class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200" method="POST" action="{% url 'adviser_dashboard' %}">
                           {% csrf_token %}
@@ -155,7 +185,7 @@
                           <div class="flex gap-2">
                             <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">
                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                              Send Response & Mark Resolved
+                              Send Response &amp; Mark Resolved
                             </button>
                             <button type="button" class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-white h-10 px-4 py-2 text-black hover:bg-light-gray">Cancel</button>
                           </div>
@@ -189,7 +219,7 @@
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Purpose</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date & Time</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date &amp; Time</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
                   </tr>
@@ -265,6 +295,158 @@
         </div>
       </div>
 
+      <!-- ============================= MESSAGES TAB ============================= -->
+      <div class="tab-content hidden" id="tab-messages">
+        <div class="rounded-lg border shadow-sm bg-white overflow-hidden" style="height: 600px;">
+          <div class="flex h-full">
+
+            <!-- Left panel: student list -->
+            <div class="w-72 border-r flex flex-col bg-gray-50 shrink-0">
+              <div class="p-4 border-b bg-white">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-light-blue"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Conversations
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">Direct messages with students</p>
+              </div>
+
+              <!-- Search -->
+              <div class="p-3 border-b bg-white">
+                <div class="relative">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input id="student-search" type="text" placeholder="Search students..." class="w-full pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue bg-gray-50">
+                </div>
+              </div>
+
+              <!-- Student list: those with existing threads first, then all others -->
+              <div class="flex-1 overflow-y-auto" id="student-thread-list">
+
+                {% if student_threads %}
+                <div class="px-3 pt-3 pb-1">
+                  <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Active Threads</p>
+                </div>
+                {% for thread in student_threads %}
+                <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
+                        data-student-id="{{ thread.profile.user.id }}"
+                        data-student-name="{{ thread.profile.user.first_name }} {{ thread.profile.user.last_name }}"
+                        data-student-initials="{{ thread.profile.user.first_name|make_list|first|upper }}{{ thread.profile.user.last_name|make_list|first|upper }}">
+                  <div class="relative shrink-0">
+                    <div class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
+                      {{ thread.profile.user.first_name|make_list|first|upper }}{{ thread.profile.user.last_name|make_list|first|upper }}
+                    </div>
+                    {% if thread.unread > 0 %}
+                    <span class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ thread.unread }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start">
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name }} {{ thread.profile.user.last_name }}</p>
+                      <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{ thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
+                    </div>
+                    <p class="text-xs text-gray-500 truncate mt-0.5">
+                      {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{ thread.last_msg.content|truncatechars:35 }}
+                    </p>
+                  </div>
+                </button>
+                {% endfor %}
+                {% endif %}
+
+                <!-- All students (no thread yet) -->
+                <div class="px-3 pt-3 pb-1">
+                  <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">All Students</p>
+                </div>
+                {% for student in my_students %}
+                <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3"
+                        data-student-id="{{ student.user.id }}"
+                        data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
+                        data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
+                  <div class="size-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold shrink-0">
+                    {{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name }} {{ student.user.last_name }}</p>
+                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ student.student_id|default:"—" }} · {{ student.program|default:"No program" }}</p>
+                  </div>
+                </button>
+                {% endfor %}
+
+                {% if not my_students %}
+                <div class="p-6 text-center text-gray-400 text-sm">No students registered yet.</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Right panel: conversation view -->
+            <div class="flex-1 flex flex-col min-w-0" id="chat-panel">
+
+              <!-- Empty state -->
+              <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+                <div class="size-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h4 class="font-semibold text-gray-500 text-lg mb-1">Select a conversation</h4>
+                <p class="text-sm text-gray-400 max-w-xs">Choose a student from the left panel to view and reply to their messages.</p>
+              </div>
+
+              <!-- Chat header (hidden until student selected) -->
+              <div id="chat-header" class="hidden border-b p-4 bg-white flex items-center gap-3 shrink-0">
+                <div id="chat-avatar" class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">??</div>
+                <div class="flex-1 min-w-0">
+                  <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Student Name</p>
+                  <p class="text-xs text-green-500 flex items-center gap-1"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span>Active student</p>
+                </div>
+                <a id="chat-view-profile-link" href="#" class="text-xs text-light-blue hover:underline font-medium">View Profile</a>
+              </div>
+
+              <!-- Messages area -->
+              <div id="chat-messages-area" class="hidden flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
+                <!-- Messages rendered by JS -->
+              </div>
+
+              <!-- Loading state -->
+              <div id="chat-loading" class="hidden flex-1 flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3 text-gray-400">
+                  <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin"></div>
+                  <p class="text-sm">Loading messages...</p>
+                </div>
+              </div>
+
+              <!-- No messages yet -->
+              <div id="chat-no-messages" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-200 mb-3"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+                <p class="text-sm font-medium text-gray-500">No messages yet</p>
+                <p class="text-xs text-gray-400 mt-1">Start the conversation below!</p>
+              </div>
+
+              <!-- Input area -->
+              <div id="chat-input-area" class="hidden border-t bg-white p-4 shrink-0">
+                <form id="adviser-msg-form" method="POST" action="{% url 'adviser_dashboard' %}" class="flex gap-3 items-end">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="send_message">
+                  <input type="hidden" name="student_id" id="msg-student-id" value="">
+                  <div class="flex-1">
+                    <textarea
+                      id="msg-content"
+                      name="content"
+                      rows="1"
+                      required
+                      placeholder="Type your message to the student..."
+                      class="w-full resize-none rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-light-blue focus:ring-1 focus:ring-light-blue transition-colors bg-gray-50 leading-relaxed"
+                      style="max-height: 120px;"
+                    ></textarea>
+                  </div>
+                  <button type="submit"
+                    class="shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center hover:opacity-90 transition-all shadow-md active:scale-95"
+                    title="Send message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ============================= END MESSAGES TAB ============================= -->
 
 
       <!-- Students Tab -->
@@ -283,8 +465,7 @@
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Program</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Year Level</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">GPA</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Pending Issues</th>
+                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
@@ -298,8 +479,15 @@
                     <td class="p-4 align-middle">
                       <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent {% if student.enrollment_status == 'enrolled' %}bg-green-500{% else %}bg-yellow-500{% endif %} text-white">{{ student.enrollment_status }}</div>
                     </td>
-                    <td class="p-4 align-middle">
+                    <td class="p-4 align-middle flex gap-2">
                       <button onclick="document.getElementById('student-modal-{{ student.id }}').classList.remove('hidden')" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
+                      <button class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
+                        data-student-id="{{ student.user.id }}"
+                        data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
+                        data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3 mr-1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Message
+                      </button>
                     </td>
                   </tr>
 
@@ -340,53 +528,206 @@
 
 {% block extra_scripts %}
 <script>
+    // All adviser+admin user IDs — messages from these are shown on the RIGHT (blue)
+    const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
+    let activeStudentId = null;
+    let pollTimer = null;
+
     document.addEventListener('DOMContentLoaded', () => {
-        // Tab switching logic
+
+        // ─── Tab switching ─────────────────────────────────────────────────────
         const triggers = document.querySelectorAll('.tab-trigger');
         const contents = document.querySelectorAll('.tab-content');
 
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', () => {
-                const targetId = `tab-${trigger.dataset.tab}`;
-                
-                // Reset all
-                triggers.forEach(t => {
-                    t.dataset.state = 'inactive';
-                    t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
-                });
-                contents.forEach(c => c.classList.add('hidden'));
+        function activateTab(tabName) {
+            triggers.forEach(t => {
+                t.dataset.state = 'inactive';
+                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
+            });
+            contents.forEach(c => c.classList.add('hidden'));
+            const trigger = document.querySelector(`.tab-trigger[data-tab="${tabName}"]`);
+            const content = document.getElementById(`tab-${tabName}`);
+            if (trigger) { trigger.dataset.state = 'active'; trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm'); }
+            if (content) content.classList.remove('hidden');
+            if (tabName === 'messages') startPolling(); else stopPolling();
+        }
 
-                // Set active
-                trigger.dataset.state = 'active';
-                trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
-                document.getElementById(targetId).classList.remove('hidden');
+        triggers.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
+
+        // Bell → Messages tab
+        document.getElementById('msg-bell-btn').addEventListener('click', () => activateTab('messages'));
+
+        // ─── Inquiry respond/cancel ────────────────────────────────────────────
+        document.querySelectorAll('.inquiry-controls').forEach(control => {
+            const respondBtn = control.querySelector('.respond-btn');
+            const cancelBtn  = control.querySelector('.cancel-btn');
+            const defaultAct = control.querySelector('.default-actions');
+            const responseArea = control.querySelector('.response-area');
+            const textarea   = control.querySelector('textarea');
+            if (respondBtn) respondBtn.addEventListener('click', () => { defaultAct.classList.add('hidden'); responseArea.classList.remove('hidden'); });
+            if (cancelBtn)  cancelBtn.addEventListener('click',  () => { responseArea.classList.add('hidden'); defaultAct.classList.remove('hidden'); if (textarea) textarea.value = ''; });
+        });
+
+        // ─── Student search filter ─────────────────────────────────────────────
+        const searchInput = document.getElementById('student-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.toLowerCase();
+                document.querySelectorAll('.student-item').forEach(btn => {
+                    btn.style.display = btn.dataset.studentName.toLowerCase().includes(q) ? '' : 'none';
+                });
+            });
+        }
+
+        // ─── Chat state helpers ────────────────────────────────────────────────
+        function showChatState(state) {
+            ['chat-empty-state','chat-loading','chat-messages-area','chat-no-messages','chat-header','chat-input-area']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
+            if (state === 'empty')      document.getElementById('chat-empty-state').classList.remove('hidden');
+            if (state === 'loading')    { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-loading').classList.remove('hidden'); }
+            if (state === 'messages')   { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-messages-area').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
+            if (state === 'no-messages'){ document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-no-messages').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+        }
+
+        function appendSeparator(area, label) {
+            const sep = document.createElement('div');
+            sep.className = 'flex items-center gap-3 my-2';
+            sep.innerHTML = `<div class="flex-1 h-px bg-gray-200"></div><span class="text-[10px] text-gray-400 font-medium whitespace-nowrap px-2">${label}</span><div class="flex-1 h-px bg-gray-200"></div>`;
+            area.appendChild(sep);
+        }
+
+        function renderMessages(msgs, isPolling) {
+            const area = document.getElementById('chat-messages-area');
+            if (!msgs || msgs.length === 0) { showChatState('no-messages'); return; }
+
+            const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+            showChatState('messages');
+            area.innerHTML = '';
+
+            msgs.forEach((m, idx) => {
+                // Use shared adviser ID set — not just the logged-in adviser
+                const isAdviser = ALL_ADVISER_IDS.has(m.sender_id);
+
+                // Date separator
+                const dateStr = m.sent_at.split(' ').slice(0, 3).join(' ');
+                const prevDateStr = idx > 0 ? msgs[idx-1].sent_at.split(' ').slice(0, 3).join(' ') : null;
+                if (idx === 0 || prevDateStr !== dateStr) appendSeparator(area, dateStr);
+
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex gap-2 ${isAdviser ? 'justify-end' : 'justify-start'}`;
+
+                if (!isAdviser) {
+                    const initials = (m.sender_name || '?').split(' ').filter(Boolean).map(w => w[0]).join('').substring(0,2).toUpperCase();
+                    wrapper.innerHTML = `
+                        <div class="shrink-0 size-8 rounded-full bg-gray-300 text-white text-xs font-bold flex items-center justify-center mt-auto shadow-sm">${initials}</div>
+                        <div class="max-w-xs lg:max-w-sm">
+                            <p class="text-[10px] text-gray-400 mb-1 ml-1">${escapeHtml(m.sender_name)}</p>
+                            <div class="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-sm text-gray-800 leading-relaxed">${escapeHtml(m.content)}</div>
+                            <p class="text-[10px] text-gray-400 mt-1 ml-1">${m.sent_at}</p>
+                        </div>`;
+                } else {
+                    wrapper.innerHTML = `
+                        <div class="max-w-xs lg:max-w-sm">
+                            <p class="text-[10px] text-gray-400 mb-1 mr-1 text-right">${escapeHtml(m.sender_name)}</p>
+                            <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-sm leading-relaxed">${escapeHtml(m.content)}</div>
+                            <p class="text-[10px] text-gray-400 mt-1 mr-1 text-right">${m.sent_at}</p>
+                        </div>`;
+                }
+                area.appendChild(wrapper);
+            });
+
+            if (!isPolling || wasAtBottom) area.scrollTop = area.scrollHeight;
+        }
+
+        function loadConversation(studentId, studentName, initials, isPolling) {
+            if (!isPolling) {
+                activeStudentId = studentId;
+                document.getElementById('chat-avatar').textContent = initials || '??';
+                document.getElementById('chat-student-name').textContent = studentName || 'Student';
+                document.getElementById('msg-student-id').value = studentId;
+                document.querySelectorAll('.student-item').forEach(b => {
+                    const active = b.dataset.studentId === String(studentId);
+                    b.classList.toggle('bg-blue-100', active);
+                });
+                showChatState('loading');
+            }
+
+            fetch(`/adviser/conversation/${studentId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(data => { renderMessages(data.messages, isPolling); })
+                .catch(err => { console.error('Conversation fetch error:', err); if (!isPolling) showChatState('no-messages'); });
+        }
+
+        // ─── Polling every 5 seconds for real-time sync ─────────────────────
+        function startPolling() {
+            stopPolling();
+            pollTimer = setInterval(() => {
+                if (activeStudentId) loadConversation(activeStudentId, null, null, true);
+            }, 5000);
+        }
+        function stopPolling() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        }
+
+        // ─── Student click ─────────────────────────────────────────────────────
+        document.querySelectorAll('.student-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                activateTab('messages');
+                loadConversation(btn.dataset.studentId, btn.dataset.studentName, btn.dataset.studentInitials, false);
             });
         });
 
-        const inquiryControls = document.querySelectorAll('.inquiry-controls');
-        
-        inquiryControls.forEach(control => {
-            const respondBtn = control.querySelector('.respond-btn');
-            const cancelBtn = control.querySelector('.cancel-btn');
-            const defaultActions = control.querySelector('.default-actions');
-            const responseArea = control.querySelector('.response-area');
-            const textarea = control.querySelector('textarea');
-
-            if(respondBtn) {
-                respondBtn.addEventListener('click', () => {
-                    defaultActions.classList.add('hidden');
-                    responseArea.classList.remove('hidden');
-                });
-            }
-
-            if(cancelBtn) {
-                cancelBtn.addEventListener('click', () => {
-                    responseArea.classList.add('hidden');
-                    defaultActions.classList.remove('hidden');
-                    textarea.value = '';
-                });
-            }
+        // ─── "Message Student" shortcuts from Inquiries / My Students ──────────
+        document.querySelectorAll('.open-chat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'ST').substring(0,2).toUpperCase();
+                activateTab('messages');
+                setTimeout(() => loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false), 50);
+            });
         });
-    });
+
+        // ─── Send message form — save context, restore after redirect ──────────
+        const msgForm = document.getElementById('adviser-msg-form');
+        if (msgForm) {
+            msgForm.addEventListener('submit', function() {
+                if (activeStudentId) {
+                    sessionStorage.setItem('adv_sid',     activeStudentId);
+                    sessionStorage.setItem('adv_sname',   document.getElementById('chat-student-name').textContent);
+                    sessionStorage.setItem('adv_sinit',   document.getElementById('chat-avatar').textContent.trim());
+                }
+                const submitBtn = msgForm.querySelector('button[type=submit]');
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50'); }
+            });
+        }
+
+        // ─── Textarea: auto-resize + Enter to send ─────────────────────────────
+        const msgContent = document.getElementById('msg-content');
+        if (msgContent && msgForm) {
+            msgContent.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            msgContent.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (this.value.trim()) msgForm.submit(); }
+            });
+        }
+
+        // ─── Restore conversation after POST redirect ──────────────────────────
+        const savedSid   = sessionStorage.getItem('adv_sid');
+        const savedName  = sessionStorage.getItem('adv_sname');
+        const savedInit  = sessionStorage.getItem('adv_sinit');
+        if (savedSid) {
+            sessionStorage.removeItem('adv_sid');
+            sessionStorage.removeItem('adv_sname');
+            sessionStorage.removeItem('adv_sinit');
+            activateTab('messages');
+            setTimeout(() => loadConversation(savedSid, savedName || 'Student', savedInit || '??', false), 150);
+        }
+
+    }); // end DOMContentLoaded
 </script>
 {% endblock %}
