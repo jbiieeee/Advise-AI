@@ -120,3 +120,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'core' / 'static',
 ]
+
+# Workaround for Windows Registry mimetype issue with Chrome
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
+

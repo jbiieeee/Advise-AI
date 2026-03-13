@@ -7,8 +7,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Example of an OKLCH color using a CSS variable
-        brand: 'oklch(var(--color-brand) / <alpha-value>)',
+        navy: '#0F172A',
+        'light-blue': '#38BDF8',
+        white: '#FFFFFF',
+        'light-gray': '#F1F5F9',
+        brand: '#0F172A', // fallback to navy
       }
     },
   },
