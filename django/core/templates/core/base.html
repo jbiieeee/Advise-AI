@@ -22,5 +22,71 @@
     {% endblock %}
 
     {% block extra_scripts %}{% endblock %}
+
+    <script>
+      function syncNotifications() {
+          fetch('/api/notifications/count/')
+          .then(r => r.json())
+          .then(data => {
+              const badge = document.getElementById('msg-bell-badge');
+              if (badge) {
+                  badge.textContent = data.count;
+                  if (data.count > 0) {
+                      badge.classList.remove('hidden');
+                  } else {
+                      badge.classList.add('hidden');
+                  }
+              }
+          })
+          .catch(e => console.error('Notification sync error', e));
+      }
+      setInterval(syncNotifications, 5000);
+
+      document.addEventListener('DOMContentLoaded', () => {
+          const bellBtn = document.getElementById('msg-bell-btn');
+          const dropdown = document.getElementById('notifications-dropdown');
+          const notifList = document.getElementById('notifications-list');
+
+          if (bellBtn && dropdown) {
+              bellBtn.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  dropdown.classList.toggle('hidden');
+                  
+                  if (!dropdown.classList.contains('hidden')) {
+                      notifList.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">Loading...</div>';
+                      fetch('/api/notifications/latest/')
+                      .then(r => r.json())
+                      .then(data => {
+                          if (!data.notifications || data.notifications.length === 0) {
+                              notifList.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">No unread notifications.</div>';
+                              return;
+                          }
+                          notifList.innerHTML = '';
+                          data.notifications.forEach(n => {
+                              notifList.insertAdjacentHTML('beforeend', `
+                                  <div class="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 border-light-blue cursor-default">
+                                      <div class="flex justify-between items-start mb-1">
+                                          <p class="text-sm font-semibold text-gray-900">${n.title}</p>
+                                          <span class="text-[10px] text-gray-400">${n.time}</span>
+                                      </div>
+                                      <p class="text-xs text-gray-600 truncate">${n.content}</p>
+                                  </div>
+                              `);
+                          });
+                      })
+                      .catch(e => {
+                          notifList.innerHTML = '<div class="p-4 text-center text-sm text-red-400">Error loading notifications.</div>';
+                      });
+                  }
+              });
+
+              document.addEventListener('click', (e) => {
+                  if (!dropdown.contains(e.target) && e.target !== bellBtn && !bellBtn.contains(e.target)) {
+                      dropdown.classList.add('hidden');
+                  }
+              });
+          }
+      });
+    </script>
 </body>
 </html>

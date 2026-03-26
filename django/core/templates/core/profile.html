@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block title %}Manage Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-light-gray flex flex-col">
+  <header class="bg-gradient-to-r from-navy to-light-blue border-b sticky top-0 z-50 shadow-lg">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="bg-white p-2 rounded-lg shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-light-blue"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <h1 class="font-bold text-xl text-white">Manage Profile</h1>
+            <p class="text-sm text-white/90">View and update your account settings</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          {% if role == 'student' %}
+            <a href="{% url 'student_dashboard' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">Back to Dashboard</a>
+          {% elif role == 'adviser' %}
+            <a href="{% url 'adviser_dashboard' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">Back to Dashboard</a>
+          {% elif role == 'admin' %}
+            <a href="{% url 'admin_dashboard' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">Back to Dashboard</a>
+          {% else %}
+            <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">Back</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-2xl mx-auto py-12 px-6 w-full flex-grow">
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-600 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-600 border border-green-200{% else %}bg-blue-100 text-blue-600 border border-blue-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="rounded-lg border bg-card text-card-foreground shadow-xl bg-white">
+      <div class="flex flex-col space-y-1.5 p-6 bg-gradient-to-r from-light-blue/10 to-transparent border-b">
+        <h3 class="font-semibold leading-none tracking-tight text-2xl">Profile Settings</h3>
+        <p class="text-sm text-muted-foreground mt-2">You cannot change your name directly. Please contact administration for name changes.</p>
+      </div>
+      
+      <div class="p-6">
+        <form method="POST" action="{% url 'profile' %}" class="space-y-6">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_profile">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none text-muted-foreground">First Name</label>
+              <input type="text" class="flex h-10 w-full rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-gray-500 cursor-not-allowed" value="{{ user.first_name }}" disabled>
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none text-muted-foreground">Last Name</label>
+              <input type="text" class="flex h-10 w-full rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-gray-500 cursor-not-allowed" value="{{ user.last_name }}" disabled>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium leading-none">Email Address</label>
+            <input type="email" name="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue" value="{{ user.email }}" required>
+            <p class="text-[12px] text-gray-500">Updating your email will also alter your login username.</p>
+          </div>
+
+          <hr class="my-6">
+
+          <div class="space-y-2">
+            <h4 class="font-medium text-lg">Change Password</h4>
+            <p class="text-xs text-muted-foreground">Leave blank if you do not want to change your password.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">New Password</label>
+              <input type="password" name="password" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue">
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">Confirm New Password</label>
+              <input type="password" name="confirm_password" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue">
+            </div>
+          </div>
+
+          <div class="pt-4 mt-6">
+            <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-light-blue hover:bg-navy text-white transition-colors shadow-md">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

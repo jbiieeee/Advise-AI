@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import UserProfile
 
 def landing_page(request):
@@ -155,6 +156,9 @@ def student_dashboard(request):
                 adviser_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
                 admin_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
                 all_staff_ids = list(set(adviser_ids + admin_ids))
+                
+                if profile.assigned_adviser:
+                    all_staff_ids = [profile.assigned_adviser.id]
 
                 target_adviser = None
                 if adviser_id:
@@ -202,13 +206,15 @@ def student_dashboard(request):
     pending_approvals = student_forms.filter(status='pending').count()
     appointments_count = student_appointments.filter(status='pending').count()
     
-    # Adviser messages: fetch all mapped advisers to form a dropdown array
-    from django.db.models import Q
     adviser_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
     admin_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
     all_staff_ids = list(set(adviser_ids + admin_ids))
     
-    advisers_list = User.objects.filter(id__in=all_staff_ids).order_by('first_name', 'last_name')
+    if profile.assigned_adviser:
+        advisers_list = User.objects.filter(id=profile.assigned_adviser.id)
+        all_staff_ids = [profile.assigned_adviser.id]
+    else:
+        advisers_list = User.objects.filter(id__in=all_staff_ids).order_by('first_name', 'last_name')
     
     # We will pass a JSON array with all staff IDs to help the student UI align message bubbles properly
     import json
@@ -230,40 +236,55 @@ def student_dashboard(request):
 @login_required(login_url='login')
 def student_get_conversation(request):
     """
-    Returns the real-time conversation between the current student and ALL advisers.
-    Marking adviser messages unread dynamically if not fetched.
+    Returns the real-time conversation between the current student and a specific adviser.
+    Accepts optional ?adviser_id= GET param to filter by adviser.
     """
     if request.user.userprofile.role != 'student':
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     user = request.user
+    from django.db.models import Q
+    from django.utils.timezone import localtime
     
     adviser_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
     admin_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
     all_staff_ids = list(set(adviser_ids + admin_ids))
     
+    # If student has assigned adviser, restrict to that adviser
+    assigned = user.userprofile.assigned_adviser
+    if assigned:
+        all_staff_ids = [assigned.id]
+
+    # If specific adviser_id requested (from JS), filter to that adviser only
+    requested_adviser_id = request.GET.get('adviser_id')
+    if requested_adviser_id:
+        try:
+            req_id = int(requested_adviser_id)
+            if req_id in all_staff_ids:
+                all_staff_ids = [req_id]
+        except (ValueError, TypeError):
+            pass
+
     # Mark messages FROM any staff TO this student as read
     Message.objects.filter(
         sender__in=all_staff_ids, receiver=user, is_read=False
     ).update(is_read=True)
 
-    # Fetch ALL conversation involved between student and any staff
+    # Fetch conversation between student and the target staff
     msgs = Message.objects.filter(
-        (Q(sender=user) & Q(receiver__in=all_staff_ids)) |
-        (Q(sender__in=all_staff_ids) & Q(receiver=user))
+        Q(sender=user, receiver__in=all_staff_ids) |
+        Q(sender__in=all_staff_ids, receiver=user)
     ).order_by('sent_at')
 
-    from django.utils.timezone import localtime
     data = []
     for m in msgs:
-        # Determine if the message came from the student or an adviser
         is_student = (m.sender == user)
-        # To match the UI styling
         data.append({
             'id': m.id,
             'content': m.content,
             'is_student': is_student,
             'sender_id': m.sender.id,
+            'receiver_id': m.receiver.id if m.receiver else None,
             'sender_name': 'You' if is_student else (m.sender.first_name or m.sender.username),
             'sent_at': localtime(m.sent_at).strftime("%b %d, %H:%M"),
         })
@@ -310,6 +331,11 @@ def adviser_dashboard(request):
                     apt = Appointment.objects.get(id=apt_id)
                     apt.status = status
                     apt.adviser = user
+                    if status == 'confirmed':
+                        sp = getattr(apt.student, 'userprofile', None)
+                        if sp and sp.assigned_adviser is None:
+                            sp.assigned_adviser = user
+                            sp.save()
                     if adviser_notes:
                         apt.adviser_notes = adviser_notes
                         Message.objects.create(sender=user, receiver=apt.student, content=f"Appointment Update ({apt.purpose}): {adviser_notes}")
@@ -325,20 +351,38 @@ def adviser_dashboard(request):
                 try:
                     student_user = User.objects.get(id=student_id)
                     # Adviser sends as themselves; student will see message from this adviser
-                    Message.objects.create(sender=user, receiver=student_user, content=content, is_read=False)
+                    m = Message.objects.create(sender=user, receiver=student_user, content=content, is_read=False)
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        from django.utils.timezone import localtime
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': {
+                                'id': m.id,
+                                'sender_id': m.sender.id,
+                                'sender_name': m.sender.first_name or m.sender.username,
+                                'content': m.content,
+                                'sent_at': localtime(m.sent_at).strftime('%b %d, %Y %I:%M %p'),
+                                'is_adviser': True,
+                            }
+                        })
                     messages.success(request, 'Message sent successfully.')
                 except User.DoesNotExist:
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'error': 'Student not found.'}, status=404)
                     messages.error(request, 'Student not found.')
+            else:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'error': 'Content cannot be empty.'}, status=400)
                     
         return redirect('adviser_dashboard')
 
     pending_forms = FormSubmission.objects.filter(status__in=['pending', 'pending-review']).order_by('-submitted_at')
     pending_appointments = Appointment.objects.filter(status='pending').order_by('date_time')
-    confirmed_appointments = Appointment.objects.filter(status='confirmed').order_by('date_time')
-    my_students = UserProfile.objects.filter(role='student')
+    confirmed_appointments = Appointment.objects.filter(status='confirmed', adviser=user).order_by('date_time')
+    my_students = UserProfile.objects.filter(Q(role='student') & (Q(assigned_adviser__isnull=True) | Q(assigned_adviser=user)))
 
     # Build per-student conversation threads
-    # A thread between a student and ANY adviser/admin is visible to all advisers
+    # A thread between a student and ANY adviser/admin is visible to all advisers unless assigned to a specific adviser
     student_threads = []
     for sp in my_students:
         s = sp.user
@@ -399,10 +443,13 @@ def get_conversation(request, student_id):
 
     try:
         student_user = User.objects.get(id=student_id)
+        student_profile = student_user.userprofile
+        if student_profile.assigned_adviser and student_profile.assigned_adviser != adviser and not adviser.is_superuser:
+            return JsonResponse({'error': 'Student is assigned to another adviser'}, status=403)
     except User.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
 
-    # Get all adviser/admin user IDs for shared inbox
+    # Get all adviser/admin user IDs for shared inbox (will be filtered if assigned)
     adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
     admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
     all_adviser_ids = list(set(adviser_user_ids + admin_user_ids))
@@ -460,6 +507,26 @@ def admin_dashboard(request):
                 
                 UserProfile.objects.create(user=user, role=role)
                 messages.success(request, f'{role.capitalize()} account created successfully.')
+            else:
+                messages.error(request, 'Email already registered.')
+                
+        elif action == 'add_student':
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            student_id = request.POST.get('student_id')
+            
+            if not User.objects.filter(username=email).exists():
+                user = User.objects.create_user(username=email, email=email, password=password)
+                if name:
+                    parts = name.split()
+                    user.first_name = parts[0]
+                    if len(parts) > 1:
+                        user.last_name = " ".join(parts[1:])
+                user.save()
+                
+                UserProfile.objects.create(user=user, role='student', student_id=student_id, enrollment_status='enrolled')
+                messages.success(request, 'Student account created successfully.')
             else:
                 messages.error(request, 'Email already registered.')
                 
@@ -534,3 +601,119 @@ def admin_users(request):
 
 def admin_settings(request):
     return render(request, 'core/admin.html')
+
+@login_required(login_url='login')
+def profile_view(request):
+    user = request.user
+    role = None
+    if hasattr(user, 'userprofile'):
+        role = user.userprofile.role
+    elif user.is_superuser:
+        role = 'admin'
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'update_profile':
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+
+            if email and email != user.email:
+                if User.objects.filter(username=email).exclude(id=user.id).exists():
+                    messages.error(request, 'Email is already in use by another account.')
+                else:
+                    user.email = email
+                    user.username = email
+                    user.save()
+                    messages.success(request, 'Email successfully updated.')
+            
+            if password:
+                if password == confirm_password:
+                    user.set_password(password)
+                    user.save()
+                    update_session_auth_hash(request, user)
+                    messages.success(request, 'Password successfully updated.')
+                else:
+                    messages.error(request, 'Passwords do not match.')
+
+            return redirect('profile')
+
+    context = {
+        'user': user,
+        'role': role
+    }
+    return render(request, 'core/profile.html', context)
+
+
+@login_required(login_url='login')
+def get_notification_count(request):
+    from django.http import JsonResponse
+    user = request.user
+    role = None
+    if hasattr(user, 'userprofile'):
+        role = user.userprofile.role
+    elif user.is_superuser:
+        role = 'admin'
+    
+    count = 0
+    if role == 'student':
+        # Retrieve count directly without circular dependency
+        from core.models import UserProfile, Message
+        adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
+        admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
+        all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
+        count = Message.objects.filter(receiver=user, sender__in=all_staff_ids, is_read=False).count()
+        
+    elif role in ['adviser', 'admin']:
+        from core.models import UserProfile, Message
+        adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
+        admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
+        all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
+        count = Message.objects.filter(
+            sender__userprofile__role='student',
+            receiver__in=all_staff_ids,
+            is_read=False
+        ).count()
+        
+    return JsonResponse({'count': count})
+
+
+@login_required(login_url='login')
+def get_latest_notifications(request):
+    from django.http import JsonResponse
+    from core.models import UserProfile, Message
+    user = request.user
+    role = getattr(user, 'userprofile', None)
+    role = role.role if role else ('admin' if user.is_superuser else None)
+    
+    notifications = []
+    
+    if role == 'student':
+        staff = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True)) + \
+                list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
+        msgs = Message.objects.filter(receiver=user, sender__in=staff, is_read=False).order_by('-sent_at')[:5]
+        for m in msgs:
+            notifications.append({
+                'id': m.id,
+                'title': f'New message from Adviser {m.sender.first_name or m.sender.username}',
+                'content': m.content[:50] + ('...' if len(m.content) > 50 else ''),
+                'time': m.sent_at.strftime('%b %d, %H:%M')
+            })
+            
+    elif role in ['adviser', 'admin']:
+        staff = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True)) + \
+                list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
+        msgs = Message.objects.filter(
+            sender__userprofile__role='student',
+            receiver__in=staff,
+            is_read=False
+        ).order_by('-sent_at')[:5]
+        for m in msgs:
+            notifications.append({
+                'id': m.id,
+                'title': f'New message from Student {m.sender.first_name or m.sender.username}',
+                'content': m.content[:50] + ('...' if len(m.content) > 50 else ''),
+                'time': m.sent_at.strftime('%b %d, %H:%M')
+            })
+            
+    return JsonResponse({'notifications': notifications})

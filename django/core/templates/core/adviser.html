@@ -24,12 +24,17 @@
           <!-- Messages bell with unread badge -->
           <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative" title="Messages">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            {% if total_unread > 0 %}
-            <span class="absolute top-1 right-1 size-4 bg-red-500 rounded-full text-[9px] font-bold flex items-center justify-center">{{ total_unread }}</span>
-            {% else %}
-            <span class="absolute top-1 right-1 size-2 bg-red-500 rounded-full"></span>
-            {% endif %}
+            <span id="msg-bell-badge" class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{ unread_notifications_count }}</span>
           </button>
+          
+          <!-- Dropdown -->
+          <div id="notifications-dropdown" class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right text-gray-900">
+            <div class="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
+            </div>
+            <div id="notifications-list" class="max-h-64 overflow-y-auto divide-y divide-gray-100 text-gray-900">
+            </div>
+          </div>
           
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
@@ -40,6 +45,11 @@
               <p class="text-xs text-white/90">Adviser</p>
             </div>
           </div>
+          
+          <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white" title="Manage Profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            Profile
+          </a>
           
           <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -593,14 +603,7 @@
             return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
         }
 
-        function appendSeparator(area, label) {
-            const sep = document.createElement('div');
-            sep.className = 'flex items-center gap-3 my-2';
-            sep.innerHTML = `<div class="flex-1 h-px bg-gray-200"></div><span class="text-[10px] text-gray-400 font-medium whitespace-nowrap px-2">${label}</span><div class="flex-1 h-px bg-gray-200"></div>`;
-            area.appendChild(sep);
-        }
-
-        function renderMessages(msgs, isPolling) {
+              function renderMessages(msgs, isPolling) {
             const area = document.getElementById('chat-messages-area');
             if (!msgs || msgs.length === 0) { showChatState('no-messages'); return; }
 
@@ -609,35 +612,48 @@
             area.innerHTML = '';
 
             msgs.forEach((m, idx) => {
-                // Use shared adviser ID set — not just the logged-in adviser
-                const isAdviser = ALL_ADVISER_IDS.has(m.sender_id);
+                // Use the returned is_adviser flag instead of set checks
+                const isAdviser = m.is_adviser;
 
                 // Date separator
-                const dateStr = m.sent_at.split(' ').slice(0, 3).join(' ');
-                const prevDateStr = idx > 0 ? msgs[idx-1].sent_at.split(' ').slice(0, 3).join(' ') : null;
-                if (idx === 0 || prevDateStr !== dateStr) appendSeparator(area, dateStr);
+                const currentDate = m.sent_at.split(',')[0] || m.sent_at.split(' ').slice(0,3).join(' ');
+                const prevDate = idx > 0 ? (msgs[idx-1].sent_at.split(',')[0] || msgs[idx-1].sent_at.split(' ').slice(0,3).join(' ')) : null;
 
-                const wrapper = document.createElement('div');
-                wrapper.className = `flex gap-2 ${isAdviser ? 'justify-end' : 'justify-start'}`;
-
-                if (!isAdviser) {
-                    const initials = (m.sender_name || '?').split(' ').filter(Boolean).map(w => w[0]).join('').substring(0,2).toUpperCase();
-                    wrapper.innerHTML = `
-                        <div class="shrink-0 size-8 rounded-full bg-gray-300 text-white text-xs font-bold flex items-center justify-center mt-auto shadow-sm">${initials}</div>
-                        <div class="max-w-xs lg:max-w-sm">
-                            <p class="text-[10px] text-gray-400 mb-1 ml-1">${escapeHtml(m.sender_name)}</p>
-                            <div class="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-sm text-gray-800 leading-relaxed">${escapeHtml(m.content)}</div>
-                            <p class="text-[10px] text-gray-400 mt-1 ml-1">${m.sent_at}</p>
-                        </div>`;
-                } else {
-                    wrapper.innerHTML = `
-                        <div class="max-w-xs lg:max-w-sm">
-                            <p class="text-[10px] text-gray-400 mb-1 mr-1 text-right">${escapeHtml(m.sender_name)}</p>
-                            <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-sm leading-relaxed">${escapeHtml(m.content)}</div>
-                            <p class="text-[10px] text-gray-400 mt-1 mr-1 text-right">${m.sent_at}</p>
-                        </div>`;
+                if (idx === 0 || currentDate !== prevDate) {
+                    area.insertAdjacentHTML('beforeend', `
+                        <div class="flex items-center gap-3 my-2">
+                            <div class="flex-1 h-px bg-gray-200"></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">${currentDate}</span>
+                            <div class="flex-1 h-px bg-gray-200"></div>
+                        </div>
+                    `);
                 }
-                area.appendChild(wrapper);
+
+                if (isAdviser) {
+                    area.insertAdjacentHTML('beforeend', `
+                        <div class="flex gap-2 justify-end mb-4 group transform transition-all duration-300 hover:translate-x-0 origin-right">
+                            <div class="max-w-[85%] relative">
+                                <p class="text-[10px] text-gray-400 mb-1 mr-1 text-right">${escapeHtml(m.sender_name)}</p>
+                                <div class="hidden group-hover:block absolute -left-12 top-[22px] text-[9px] text-gray-400">${m.sent_at.includes(',') ? m.sent_at.split(',').slice(1).join(',').trim() : m.sent_at.split(' ')[3]}</div>
+                                <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-md text-sm leading-relaxed">${escapeHtml(m.content)}</div>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    const avatarInitials = (m.sender_name || 'ST').substring(0, 2).toUpperCase();
+                    area.insertAdjacentHTML('beforeend', `
+                        <div class="flex gap-2 justify-start mb-4 group transform transition-all duration-300 hover:translate-x-0 origin-left">
+                            <div class="shrink-0 size-8 rounded-full bg-white border border-gray-200 text-light-blue text-xs font-bold flex items-center justify-center shadow-sm mt-4">
+                                ${avatarInitials}
+                            </div>
+                            <div class="max-w-[85%] relative">
+                                <p class="text-[10px] text-gray-400 mb-1 ml-1">${escapeHtml(m.sender_name)}</p>
+                                <div class="hidden group-hover:block absolute -right-12 top-[22px] text-[9px] text-gray-400">${m.sent_at.includes(',') ? m.sent_at.split(',').slice(1).join(',').trim() : m.sent_at.split(' ')[3]}</div>
+                                <div class="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] text-sm text-gray-800 leading-relaxed">${escapeHtml(m.content)}</div>
+                            </div>
+                        </div>
+                    `);
+                }
             });
 
             if (!isPolling || wasAtBottom) area.scrollTop = area.scrollHeight;
@@ -690,42 +706,70 @@
             });
         });
 
-        // ─── Send message form — save context, restore after redirect ──────────
+        // ─── Send message form ─────────────────────────────────────────────
         const msgForm = document.getElementById('adviser-msg-form');
+        const msgContent = document.getElementById('msg-content');
+
         if (msgForm) {
-            msgForm.addEventListener('submit', function() {
-                if (activeStudentId) {
-                    sessionStorage.setItem('adv_sid',     activeStudentId);
-                    sessionStorage.setItem('adv_sname',   document.getElementById('chat-student-name').textContent);
-                    sessionStorage.setItem('adv_sinit',   document.getElementById('chat-avatar').textContent.trim());
-                }
+            msgForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const content = document.getElementById('msg-content').value.trim();
+                const studentId = document.getElementById('msg-student-id').value;
+
+                if (!content) { alert('Please type a message.'); return; }
+                if (!studentId) { alert('Please select a student first.'); return; }
+
                 const submitBtn = msgForm.querySelector('button[type=submit]');
-                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50'); }
+                if (submitBtn) { submitBtn.disabled = true; }
+
+                const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
+                const csrftoken = csrfInput ? csrfInput.value : '';
+
+                const postData = new URLSearchParams();
+                postData.append('action', 'send_message');
+                postData.append('student_id', studentId);
+                postData.append('content', content);
+                postData.append('csrfmiddlewaretoken', csrftoken);
+
+                fetch('{% url "adviser_dashboard" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: postData.toString()
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error('Server error: ' + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    document.getElementById('msg-content').value = '';
+                    document.getElementById('msg-content').style.height = 'auto';
+                    if (activeStudentId) loadConversation(activeStudentId, null, null, true);
+                })
+                .catch(err => console.error('Send error:', err))
+                .finally(() => {
+                    if (submitBtn) { submitBtn.disabled = false; }
+                });
             });
         }
 
         // ─── Textarea: auto-resize + Enter to send ─────────────────────────────
-        const msgContent = document.getElementById('msg-content');
         if (msgContent && msgForm) {
             msgContent.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             });
             msgContent.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (this.value.trim()) msgForm.submit(); }
+                if (e.key === 'Enter' && !e.shiftKey) { 
+                    e.preventDefault(); 
+                    if (this.value.trim()) msgForm.dispatchEvent(new Event('submit')); 
+                }
             });
-        }
-
-        // ─── Restore conversation after POST redirect ──────────────────────────
-        const savedSid   = sessionStorage.getItem('adv_sid');
-        const savedName  = sessionStorage.getItem('adv_sname');
-        const savedInit  = sessionStorage.getItem('adv_sinit');
-        if (savedSid) {
-            sessionStorage.removeItem('adv_sid');
-            sessionStorage.removeItem('adv_sname');
-            sessionStorage.removeItem('adv_sinit');
-            activateTab('messages');
-            setTimeout(() => loadConversation(savedSid, savedName || 'Student', savedInit || '??', false), 150);
         }
 
     }); // end DOMContentLoaded

@@ -20,11 +20,21 @@
           </div>
         </div>
         
-        <div class="flex items-center gap-3">
-          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
+
+        <div class="flex items-center gap-3 relative">
+          <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span class="absolute top-1 right-1 size-2 bg-red-500 rounded-full"></span>
+            <span id="msg-bell-badge" class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{ unread_notifications_count }}</span>
           </button>
+          
+          <!-- Dropdown -->
+          <div id="notifications-dropdown" class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right">
+            <div class="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
+            </div>
+            <div id="notifications-list" class="max-h-64 overflow-y-auto divide-y divide-gray-100">
+            </div>
+          </div>
           
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
@@ -36,6 +46,11 @@
             </div>
           </div>
           
+          <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white" title="Manage Profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            Profile
+          </a>
+          
           <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
@@ -45,7 +60,20 @@
     </div>
   </header>
 
-  <div class="px-4 sm:px-6 lg:px-8 py-8">
+  <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+    <div class="inline-flex h-10 items-center justify-center rounded-md p-1 w-auto flex shadow-sm bg-gray-200">
+      <button id="nav-overview" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 shadow-sm bg-white text-gray-900" onclick="switchTopView('overview')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        Dashboard
+      </button>
+      <button id="nav-messages" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 text-gray-600 hover:text-gray-900" onclick="switchTopView('messages')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Messages
+      </button>
+    </div>
+  </div>
+
+  <div class="px-4 sm:px-6 lg:px-8 pb-8" id="view-overview">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- Main Content -->
@@ -404,46 +432,102 @@
           </div>
         </div>
 
-        <!-- Academic Advisor Inbox -->
-        <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-light-blue bg-white flex flex-col h-[400px]">
-          <div class="flex flex-col space-y-1.5 p-4 border-b bg-gray-50/50">
-            <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
-              Advising Inbox
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= MESSAGES TAB ============================= -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8 hidden" id="view-messages">
+    <div class="rounded-lg border shadow-sm bg-white overflow-hidden" style="height: 700px;">
+      <div class="flex h-full">
+
+        <!-- Left panel: assigned adviser or unassigned pool -->
+        <div class="w-72 border-r flex flex-col bg-gray-50 shrink-0">
+          <div class="p-4 border-b bg-white">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-light-blue"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Advisers
             </h3>
-            <p class="text-xs text-muted-foreground">Live chat with your advisers</p>
+            <p class="text-xs text-gray-500 mt-0.5">Live chat with your advisers</p>
           </div>
-          
-          <!-- Message history taking up remaining space -->
-          <div class="flex-1 overflow-hidden p-4 relative" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
-            <div id="student-chat-loading" class="absolute inset-0 bg-white/50 z-10 flex flex-col items-center justify-center hidden">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-light-blue mb-2"></div>
-                <p class="text-sm text-gray-500 font-medium">Syncing...</p>
+
+          <div class="flex-1 overflow-y-auto" id="student-thread-list">
+            <div class="px-3 pt-3 pb-1">
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Available Contacts</p>
             </div>
-            
-            <div id="student-messages-area" class="h-full overflow-y-auto space-y-4 pr-2 flex flex-col">
-                <!-- Messages injected here by JS -->
+            {% for adv in advisers_list %}
+            <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
+                    data-student-id="{{ adv.id }}"
+                    data-student-name="Adviser {{ adv.first_name|default:adv.username }}"
+                    data-student-initials="{{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}">
+              <div class="relative shrink-0">
+                <div class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
+                  {{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">Adviser {{ adv.first_name|default:adv.username }} {{ adv.last_name }}</p>
+                <p class="text-xs text-green-500 flex items-center gap-1 mt-0.5"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span> Available</p>
+              </div>
+            </button>
+            {% endfor %}
+            {% if not advisers_list %}
+            <div class="p-6 text-center text-gray-400 text-sm">No assigned advisers.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Right panel: conversation view -->
+        <div class="flex-1 flex flex-col min-w-0 bg-white relative" id="chat-panel">
+          <!-- Empty state -->
+          <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+            <div class="size-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h4 class="font-semibold text-gray-500 text-lg mb-1">Select an Adviser</h4>
+            <p class="text-sm text-gray-400 max-w-xs">Choose an adviser from the left panel to start messaging.</p>
+          </div>
+
+          <!-- Chat header -->
+          <div id="chat-header" class="hidden border-b p-4 bg-white flex items-center gap-3 shrink-0">
+            <div id="chat-avatar" class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">??</div>
+            <div class="flex-1 min-w-0">
+              <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Adviser</p>
+              <p class="text-xs text-green-500 flex items-center gap-1"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span>Online</p>
             </div>
           </div>
-          
-          <!-- Form -->
-          <div class="p-4 bg-white border-t">
-            <form id="student-msg-form" class="space-y-3" method="POST" action="{% url 'student_dashboard' %}">
+
+          <!-- Chat loading state -->
+          <div id="chat-loading" class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 bg-white/50 backdrop-blur-sm">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-light-blue mb-2"></div>
+            <p class="text-sm font-medium">Syncing messages...</p>
+          </div>
+
+          <!-- Chat no messages state -->
+          <div id="chat-no-messages" class="hidden flex-1 flex-col items-center justify-center text-gray-400 bg-gray-50/50">
+            <p class="text-sm">No messages yet. Say hello to start the conversation.</p>
+          </div>
+
+          <!-- Chat messages area -->
+          <div id="chat-messages-area" class="hidden flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 relative" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
+             <!-- Message bubbles injected via JS -->
+          </div>
+
+          <!-- Input area -->
+          <div id="chat-input-area" class="hidden p-4 bg-white border-t">
+            <form id="student-msg-form-new" method="POST" action="{% url 'student_dashboard' %}">
               {% csrf_token %}
               <input type="hidden" name="action" value="send_message">
-              
-              <select name="adviser_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" required>
-                  <option value="" disabled selected>Select an Adviser to notify...</option>
-                  {% for adv in advisers_list %}
-                  <option value="{{ adv.id }}">Adviser {{ adv.first_name }} {{ adv.last_name }}</option>
-                  {% endfor %}
-              </select>
-
-              <div class="flex gap-2">
-                  <input name="content" id="student-msg-content" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-blue focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your message..." required autocomplete="off">
-                  <button type="submit" class="shrink-0 inline-flex items-center justify-center rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 w-10 bg-light-blue hover:bg-navy shadow-md text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                  </button>
+              <input type="hidden" name="adviser_id" id="msg-adviser-id">
+              <div class="flex items-end gap-2">
+                <div class="flex-1 relative">
+                  <textarea name="content" id="msg-content" rows="1" class="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue resize-none shadow-inner" placeholder="Type your message here..." required></textarea>
+                </div>
+                <button type="submit" class="shrink-0 size-12 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-light-blue focus:ring-offset-2 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-[-2px]"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
               </div>
             </form>
           </div>
@@ -786,9 +870,40 @@
         });
 
         // ==========================================
-        // Real-time Chat Sync for Student Inbox
+        // Top-Level Navigation Tabs
+        // ==========================================
+        window.switchTopView = function(viewName) {
+            const overviewBtn = document.getElementById('nav-overview');
+            const messagesBtn = document.getElementById('nav-messages');
+            const overviewContainer = document.getElementById('view-overview');
+            const messagesContainer = document.getElementById('view-messages');
+
+            if (viewName === 'overview') {
+                overviewBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
+                overviewBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+                
+                messagesBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+                messagesBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
+
+                overviewContainer.classList.remove('hidden');
+                messagesContainer.classList.add('hidden');
+            } else {
+                messagesBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
+                messagesBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+                
+                overviewBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+                overviewBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
+
+                messagesContainer.classList.remove('hidden');
+                overviewContainer.classList.add('hidden');
+            }
+        };
+
+        // ==========================================
+        // Real-time Chat Sync for Student Messages (Dual-Pane)
         // ==========================================
         let pollTimer = null;
+        let activeAdviserId = null;
         let lastMessageCount = 0;
 
         function escapeHtml(str) {
@@ -800,128 +915,204 @@
                 .replace(/\n/g, '<br>');
         }
 
-        function loadStudentConversation(showLoading = false) {
-            if (showLoading && lastMessageCount === 0) {
-                document.getElementById('student-chat-loading').classList.remove('hidden');
+        const chatEmptyState = document.getElementById('chat-empty-state');
+        const chatHeader = document.getElementById('chat-header');
+        const chatLoading = document.getElementById('chat-loading');
+        const chatNoMessages = document.getElementById('chat-no-messages');
+        const chatMessagesArea = document.getElementById('chat-messages-area');
+        const chatInputArea = document.getElementById('chat-input-area');
+        const msgAdviserIdInput = document.getElementById('msg-adviser-id');
+        const msgContent = document.getElementById('msg-content');
+
+        window.loadConversation = function(adviserId, adviserName, initials, isPolling) {
+            activeAdviserId = adviserId;
+            msgAdviserIdInput.value = adviserId;
+
+            if (adviserName) {
+                document.getElementById('chat-student-name').textContent = adviserName;
+                document.getElementById('chat-avatar').textContent = initials;
             }
 
-            fetch('/student/conversation/', {
+            chatEmptyState.classList.add('hidden');
+            chatHeader.classList.remove('hidden');
+            chatInputArea.classList.remove('hidden');
+
+            if (!isPolling) {
+                chatMessagesArea.classList.add('hidden');
+                chatNoMessages.classList.add('hidden');
+                chatLoading.classList.remove('hidden');
+                lastMessageCount = 0;
+            }
+
+            // Highlight active adviser
+            document.querySelectorAll('.student-item').forEach(el => {
+                if (el.dataset.studentId === String(adviserId)) {
+                    el.classList.add('bg-blue-50', 'border-l-4', 'border-l-light-blue');
+                } else {
+                    el.classList.remove('bg-blue-50', 'border-l-4', 'border-l-light-blue');
+                }
+            });
+
+            fetch(`/student/conversation/?adviser_id=${adviserId}`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(data => {
-                if (showLoading) document.getElementById('student-chat-loading').classList.add('hidden');
-                
                 if (data.error) {
-                    console.error("Error fetching messages:", data.error);
+                    console.error('Conversation error:', data.error);
+                    chatLoading.classList.add('hidden');
                     return;
                 }
 
                 const msgs = data.messages || [];
-                // Only re-render if count changed (basic check)
-                if (msgs.length === lastMessageCount && !showLoading) return;
+
+                // Skip re-render if polling and no new messages
+                if (isPolling && msgs.length === lastMessageCount) return;
                 lastMessageCount = msgs.length;
 
-                const area = document.getElementById('student-messages-area');
-                area.innerHTML = '';
+                chatLoading.classList.add('hidden');
+                chatMessagesArea.innerHTML = '';
 
                 if (msgs.length === 0) {
-                    area.innerHTML = '<div class="text-center text-sm text-gray-400 py-10">No messages yet. Send a message to start a conversation with your advisers.</div>';
+                    chatNoMessages.classList.remove('hidden');
+                    chatMessagesArea.classList.add('hidden');
                     return;
                 }
 
+                chatNoMessages.classList.add('hidden');
+                chatMessagesArea.classList.remove('hidden');
+
                 msgs.forEach((m, idx) => {
                     // Date separator
-                    if (idx === 0 || msgs[idx - 1].sent_at.split(',')[0] !== m.sent_at.split(',')[0]) {
-                        const sep = document.createElement('div');
-                        sep.className = 'flex items-center gap-3 my-2';
-                        sep.innerHTML = `<div class="flex-1 h-px bg-gray-200"></div><span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">${m.sent_at.split(',')[0]}</span><div class="flex-1 h-px bg-gray-200"></div>`;
-                        area.appendChild(sep);
+                    const dateStr = m.sent_at.split(',')[0] || m.sent_at;
+                    const prevDate = idx > 0 ? (msgs[idx-1].sent_at.split(',')[0] || msgs[idx-1].sent_at) : null;
+                    if (idx === 0 || dateStr !== prevDate) {
+                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+                            <div class="flex items-center gap-3 my-2">
+                                <div class="flex-1 h-px bg-gray-200"></div>
+                                <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">${dateStr}</span>
+                                <div class="flex-1 h-px bg-gray-200"></div>
+                            </div>
+                        `);
                     }
 
-                    const wrapper = document.createElement('div');
-                    wrapper.className = `flex gap-2 ${m.is_student ? 'justify-end' : 'justify-start'}`;
-
-                    if (!m.is_student) {
-                        // Adviser bubble (Left side)
-                        wrapper.innerHTML = `
-                            <div class="shrink-0 size-8 rounded-full bg-light-blue text-white text-xs font-bold flex items-center justify-center mt-auto shadow-sm">
-                                ${(m.sender_name || '?').substring(0, 2).toUpperCase()}
+                    if (m.is_student) {
+                        // Student message (right side)
+                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+                            <div class="flex gap-2 justify-end mb-4 group">
+                                <div class="max-w-[85%] relative">
+                                    <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-md text-sm leading-relaxed">${escapeHtml(m.content)}</div>
+                                    <p class="text-[10px] text-gray-400 mt-1 mr-1 text-right">${m.sent_at.split(',').slice(1).join(',').trim() || ''}</p>
+                                </div>
                             </div>
-                            <div class="max-w-[85%]">
-                                <p class="text-[10px] text-gray-400 mb-1 ml-1 font-medium">Adviser ${m.sender_name}</p>
-                                <div class="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-sm text-gray-800 leading-relaxed">${escapeHtml(m.content)}</div>
-                                <p class="text-[10px] text-gray-400 mt-1 ml-1">${m.sent_at.split(',').slice(1).join(',').trim()}</p>
-                            </div>
-                        `;
+                        `);
                     } else {
-                        // Student bubble (Right side)
-                        wrapper.innerHTML = `
-                            <div class="max-w-[85%]">
-                                <p class="text-[10px] text-gray-400 mb-1 mr-1 text-right font-medium">You</p>
-                                <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-sm leading-relaxed">${escapeHtml(m.content)}</div>
-                                <p class="text-[10px] text-gray-400 mt-1 mr-1 text-right">${m.sent_at.split(',').slice(1).join(',').trim()}</p>
+                        // Adviser message (left side)
+                        const av = (m.sender_name || 'A').substring(0, 2).toUpperCase();
+                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+                            <div class="flex gap-2 justify-start mb-4 group">
+                                <div class="shrink-0 size-8 rounded-full bg-white border border-gray-200 text-light-blue text-xs font-bold flex items-center justify-center mt-auto shadow-sm">${av}</div>
+                                <div class="max-w-[85%] relative">
+                                    <p class="text-[10px] text-gray-400 mb-1 ml-1">${escapeHtml(m.sender_name)}</p>
+                                    <div class="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] text-sm text-gray-800 leading-relaxed">${escapeHtml(m.content)}</div>
+                                </div>
                             </div>
-                        `;
+                        `);
                     }
-
-                    area.appendChild(wrapper);
                 });
 
-                area.scrollTop = area.scrollHeight;
+                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
             })
             .catch(err => {
-                if (showLoading) document.getElementById('student-chat-loading').classList.add('hidden');
-                console.error("Failed to fetch student conversation", err);
+                chatLoading.classList.add('hidden');
+                console.error('Failed to fetch conversation:', err);
             });
-        }
+        };
 
-        // Start polling immediately
-        loadStudentConversation(true);
-        pollTimer = setInterval(() => {
-            loadStudentConversation(false);
-        }, 5000);
+        document.querySelectorAll('.student-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'AD').substring(0,2).toUpperCase();
+                loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false);
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(() => {
+                    if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
+                }, 5000);
+            });
+        });
 
-        // Handle sending without full page reload for a smoother experience
-        const msgForm = document.getElementById('student-msg-form');
+        // ─── Send message form ─────────────────────────────────────────────
+        const msgForm = document.getElementById('student-msg-form-new');
+
         if (msgForm) {
             msgForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const contentInput = document.getElementById('student-msg-content');
-                const content = contentInput.value.trim();
-                const adviserSelect = msgForm.querySelector('select[name="adviser_id"]');
-                const adviserId = adviserSelect.value;
+                e.stopPropagation();
 
-                if (!content || !adviserId) return;
+                const content = document.getElementById('msg-content').value.trim();
+                const adviserId = document.getElementById('msg-adviser-id').value;
 
-                const formData = new FormData(msgForm);
-                const btn = msgForm.querySelector('button[type=submit]');
-                btn.disabled = true;
-                btn.classList.add('opacity-50');
+                if (!content) { alert('Please type a message.'); return; }
+                if (!adviserId) { alert('Please select an adviser first.'); return; }
 
-                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                fetch(msgForm.action, {
+                const submitBtn = msgForm.querySelector('button[type=submit]');
+                if (submitBtn) { submitBtn.disabled = true; }
+
+                // Build form data manually
+                const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
+                const csrftoken = csrfInput ? csrfInput.value : '';
+
+                const postData = new URLSearchParams();
+                postData.append('action', 'send_message');
+                postData.append('adviser_id', adviserId);
+                postData.append('content', content);
+                postData.append('csrfmiddlewaretoken', csrftoken);
+
+                fetch('{% url "student_dashboard" %}', {
                     method: 'POST',
-                    body: formData,
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRFToken': csrftoken
-                    }
+                    },
+                    body: postData.toString()
                 })
                 .then(r => {
-                    if (r.redirected || r.ok) {
-                        contentInput.value = '';
-                        lastMessageCount = 0; // force re-render
-                        loadStudentConversation();
-                        adviserSelect.value = ""; // Reset dropdown if you want, or leave it. Setting to empty is optional.
+                    if (!r.ok) throw new Error('Server error: ' + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    document.getElementById('msg-content').value = '';
+                    if (document.getElementById('msg-content').style) {
+                        document.getElementById('msg-content').style.height = 'auto';
                     }
+                    // Reload conversation immediately
+                    if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
+                })
+                .catch(err => {
+                    console.error('Send error:', err);
                 })
                 .finally(() => {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50');
+                    if (submitBtn) { submitBtn.disabled = false; }
                 });
             });
         }
+
+        if (msgContent && msgForm) {
+            msgContent.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            msgContent.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) { 
+                    e.preventDefault(); 
+                    if (this.value.trim()) msgForm.dispatchEvent(new Event('submit')); 
+                }
+            });
+        }
+
 
     });
 </script>

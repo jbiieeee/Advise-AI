@@ -17,6 +17,7 @@ class UserProfile(models.Model):
     # New fields for enrollment workflow
     enrollment_status = models.CharField(max_length=20, choices=ENROLLMENT_STATUS, default='not_enrolled')
     curriculum_code = models.CharField(max_length=50, blank=True, null=True)
+    assigned_adviser = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='assigned_students', null=True, blank=True)
     
     def __str__(self):
         return self.user.username

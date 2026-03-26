@@ -19,11 +19,20 @@
             <p class="text-sm text-white/90">Analytics & Management Platform</p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
-          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
+        <div class="flex items-center gap-3 relative">
+          <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span class="absolute top-1 right-1 size-2 bg-red-500 rounded-full"></span>
+            <span id="msg-bell-badge" class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{ unread_notifications_count }}</span>
           </button>
+          
+          <!-- Dropdown -->
+          <div id="notifications-dropdown" class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right text-gray-900">
+            <div class="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
+            </div>
+            <div id="notifications-list" class="max-h-64 overflow-y-auto divide-y divide-gray-100 text-gray-900">
+            </div>
+          </div>
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">A</div>
             <div class="text-left">
@@ -31,7 +40,11 @@
               <p class="text-xs text-white/90">Administrator</p>
             </div>
           </div>
-          <a href="{% url 'landing' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+          <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white" title="Manage Profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            Profile
+          </a>
+          <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
           </a>
@@ -111,7 +124,7 @@
           Enrollments
         </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
-          Students
+          Manage Students
         </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="workload" data-state="inactive">
           Staff Workload
@@ -211,29 +224,112 @@
 
        <!-- Students Tab -->
        <div class="tab-content hidden" id="tab-students">
-        <div class="rounded-lg border bg-card text-card-foreground bg-white">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-light-blue bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Management</h3>
+            <div class="flex items-center justify-between">
+               <div>
+                  <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Management</h3>
+                  <p class="text-sm text-muted-foreground mt-1">Manage all student accounts and their current statuses.</p>
+               </div>
+               <button id="add-student-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-navy/90 h-10 px-4 py-2 bg-light-blue text-primary-foreground text-white shadow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                  Add New Student
+                </button>
+             </div>
           </div>
+          
+          <!-- Add Student Form Modal -->
+          <div id="add-student-modal" class="hidden rounded-lg border-2 border-light-blue bg-card text-card-foreground bg-white mx-6 mb-6">
+            <div class="flex flex-col space-y-1.5 p-6 bg-gradient-to-r from-navy to-light-blue text-white rounded-t-lg">
+              <h3 class="font-semibold leading-none tracking-tight text-2xl">Create New Student Account</h3>
+              <p class="text-sm text-white/90">Fill in the details to dynamically import a student directly</p>
+            </div>
+            <div class="p-6 pt-6">
+              <form class="space-y-4" method="POST" action="{% url 'admin_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_student">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none">Full Name *</label>
+                    <input name="name" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Juan Dela Cruz" required>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none">Temporary Password *</label>
+                    <input name="password" type="password" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="******" required>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium leading-none">Email Address *</label>
+                      <input name="email" type="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="student@university.edu.ph" required>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium leading-none">Student ID</label>
+                      <input name="student_id" type="text" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="1234567" required>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                  <button type="button" id="cancel-add-student" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border shadow hover:bg-gray-100 h-10 px-4 py-2">
+                    Cancel
+                  </button>
+                  <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-navy/90 h-10 px-4 py-2 bg-light-blue text-white shadow">
+                    Create Student
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+
           <div class="p-6 pt-0">
-            <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b">
-                <tr class="border-b transition-colors hover:bg-muted/50">
-                  <th class="h-12 px-4 text-left font-medium text-muted-foreground">Student ID</th>
-                  <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
-                  <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
-                </tr>
-              </thead>
-              <tbody class="[&_tr:last-child]:border-0">
-                {% for student in students %}
-                <tr class="border-b transition-colors hover:bg-light-gray">
-                  <td class="p-4 align-middle">{{ student.student_id|default:"-" }}</td>
-                  <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
-                  <td class="p-4 align-middle"><div class="inline-flex items-center rounded-md border text-white px-2.5 py-0.5 text-xs font-semibold {% if student.enrollment_status == 'enrolled' %}bg-green-500{% elif student.enrollment_status == 'pending' %}bg-yellow-500{% else %}bg-red-500{% endif %}">{{ student.enrollment_status }}</div></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+             <div class="relative w-full overflow-auto">
+                <table class="w-full caption-bottom text-sm">
+                  <thead class="[&_tr]:border-b">
+                    <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Student ID</th>
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Email</th>
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="[&_tr:last-child]:border-0">
+                    {% for student in students %}
+                    <tr class="border-b transition-colors hover:bg-light-gray">
+                      <td class="p-4 align-middle font-medium">{{ student.student_id|default:"-" }}</td>
+                      <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                      <td class="p-4 align-middle">{{ student.user.email }}</td>
+                      <td class="p-4 align-middle">
+                          <div class="inline-flex items-center rounded-md border text-white px-2.5 py-0.5 text-xs font-semibold {% if student.enrollment_status == 'enrolled' %}bg-green-500{% elif student.enrollment_status == 'pending' %}bg-yellow-500{% else %}bg-red-500{% endif %}">
+                              {{ student.enrollment_status }}
+                          </div>
+                          {% if not student.user.is_active %}<span class="text-xs text-red-500 ml-1">(deactivated)</span>{% endif %}
+                      </td>
+                      <td class="p-4 align-middle">
+                          <div class="flex gap-2">
+                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                              {% csrf_token %}
+                              <input type="hidden" name="action" value="toggle_user_status">
+                              <input type="hidden" name="user_id" value="{{ student.user.id }}">
+                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white" title="Toggle Account Status">
+                                {% if student.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                              </button>
+                            </form>
+                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Student account? This action cannot be undone.');">
+                              {% csrf_token %}
+                              <input type="hidden" name="action" value="delete_user">
+                              <input type="hidden" name="user_id" value="{{ student.user.id }}">
+                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-red-500 hover:bg-red-50 text-red-600 h-9 px-3 bg-white" title="Delete Student">
+                                Delete
+                              </button>
+                            </form>
+                          </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+             </div>
           </div>
         </div>
       </div>
@@ -550,6 +646,23 @@
         if(closeAdminModalBtn && addAdminModal) {
             closeAdminModalBtn.addEventListener('click', () => {
                 addAdminModal.classList.add('hidden');
+            });
+        }
+
+        // Add Student Modal toggling
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const addStudentModal = document.getElementById('add-student-modal');
+        const cancelAddStudentBtn = document.getElementById('cancel-add-student');
+
+        if(addStudentBtn && addStudentModal) {
+            addStudentBtn.addEventListener('click', () => {
+                addStudentModal.classList.toggle('hidden');
+            });
+        }
+
+        if(cancelAddStudentBtn && addStudentModal) {
+            cancelAddStudentBtn.addEventListener('click', () => {
+                addStudentModal.classList.add('hidden');
             });
         }
     });
