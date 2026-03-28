@@ -18,4 +18,11 @@ urlpatterns = [
     path('forms_portal/', views.forms_portal, name='forms_portal'),
     path('admin/users/', views.admin_users, name='admin_users'),
     path('admin/settings/', views.admin_settings, name='admin_settings'),
+
+    # ── Curriculum & Enrollment Code APIs ─────────────────────
+    path('api/curriculum/', views.get_all_curriculum, name='get_all_curriculum'),
+    path('api/curriculum/<int:student_id>/', views.get_student_curriculum, name='get_student_curriculum'),
+    path('api/curriculum/mine/', views.get_my_curriculum, name='get_my_curriculum'),
+    path('api/curriculum/update-subject/', views.update_student_subject, name='update_student_subject'),
+    path('api/enrollment/generate-code/', views.generate_enrollment_code, name='generate_enrollment_code'),
 ]

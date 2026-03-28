@@ -6,38 +6,54 @@
 
 {% block content %}
 <div class="min-h-screen bg-light-gray">
-  
+
   <header class="bg-gradient-to-r from-navy to-light-blue border-b sticky top-0 z-50 shadow-lg">
     <div class="px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
           <div class="bg-white p-2 rounded-lg shadow-md">
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-light-blue"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-light-blue">
+              <path
+                d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z" />
+              <path d="M12 12h.01" />
+            </svg>
           </div>
           <div>
             <h1 class="font-bold text-xl text-white">Adviser Dashboard</h1>
             <p class="text-sm text-white/90">Student Support &amp; Advising Portal</p>
           </div>
         </div>
-        
+
         <div class="flex items-center gap-3">
           <!-- Messages bell with unread badge -->
-          <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative" title="Messages">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span id="msg-bell-badge" class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{ unread_notifications_count }}</span>
+          <button id="msg-bell-btn"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative"
+            title="Messages">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            <span id="msg-bell-badge"
+              class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{
+              unread_notifications_count }}</span>
           </button>
-          
+
           <!-- Dropdown -->
-          <div id="notifications-dropdown" class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right text-gray-900">
+          <div id="notifications-dropdown"
+            class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right text-gray-900">
             <div class="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
-                <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
+              <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
             </div>
             <div id="notifications-list" class="max-h-64 overflow-y-auto divide-y divide-gray-100 text-gray-900">
             </div>
           </div>
-          
+
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
-            <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
+            <div
+              class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
               {{ adviser_user.first_name|default:adviser_user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
@@ -45,14 +61,26 @@
               <p class="text-xs text-white/90">Adviser</p>
             </div>
           </div>
-          
-          <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white" title="Manage Profile">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+
+          <a href="{% url 'profile' %}"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white"
+            title="Manage Profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+              <circle cx="12" cy="8" r="5" />
+              <path d="M20 21a8 8 0 0 0-16 0" />
+            </svg>
             Profile
           </a>
-          
-          <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+
+          <a href="{% url 'logout' %}"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
             Logout
           </a>
         </div>
@@ -64,7 +92,8 @@
   {% if messages %}
   <div class="px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
     {% for message in messages %}
-    <div class="p-3 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %} flex justify-between items-start shadow-sm">
+    <div
+      class="p-3 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %} flex justify-between items-start shadow-sm">
       <span>{{ message }}</span>
     </div>
     {% endfor %}
@@ -72,15 +101,22 @@
   {% endif %}
 
   <div class="px-4 sm:px-6 lg:px-8 py-8">
-    
+
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <!-- Stat 1 -->
-      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
+      <div
+        class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
         <div class="p-6 pt-6">
           <div class="flex justify-between items-start mb-4">
             <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
             </div>
           </div>
           <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_advisees|default:"0" }}</h3>
@@ -89,11 +125,15 @@
       </div>
 
       <!-- Stat 2 -->
-      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
+      <div
+        class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
         <div class="p-6 pt-6">
           <div class="flex justify-between items-start mb-4">
             <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6">
+                <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+              </svg>
             </div>
           </div>
           <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_inquiries|default:"0" }}</h3>
@@ -102,11 +142,18 @@
       </div>
 
       <!-- Stat 3 -->
-      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
+      <div
+        class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
         <div class="p-6 pt-6">
           <div class="flex justify-between items-start mb-4">
             <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+              </svg>
             </div>
           </div>
           <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ appointments_today|default:"0" }}</h3>
@@ -117,30 +164,69 @@
 
     <!-- Dashboard Tabs Container -->
     <div class="space-y-6" id="dashboard-tabs">
-      <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto flex shadow-sm bg-gray-100">
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="inquiries" data-state="active">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+      <div
+        class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto flex shadow-sm bg-gray-100">
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          data-tab="inquiries" data-state="active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+          </svg>
           Student Inquiries
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="appointments" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          data-tab="appointments" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <line x1="16" x2="16" y1="2" y2="6" />
+            <line x1="8" x2="8" y1="2" y2="6" />
+            <line x1="3" x2="21" y1="10" y2="10" />
+          </svg>
           Appointments
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="messages" data-state="inactive" id="messages-tab-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          data-tab="messages" data-state="inactive" id="messages-tab-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           Messages
           {% if total_unread > 0 %}
-          <span class="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">{{ total_unread }}</span>
+          <span class="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">{{
+            total_unread }}</span>
           {% endif %}
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          data-tab="students" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
           My Students
+        </button>
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          data-tab="curriculum" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+            <path d="M6 2v20"/><path d="M10 7h7"/><path d="M10 11h7"/><path d="M10 15h7"/>
+          </svg>
+          Curriculum & Enrollment
         </button>
       </div>
 
       <!-- Inquiries Tab -->
       <div class="tab-content" id="tab-inquiries">
+
         <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
             <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Inquiries &amp; Problems</h3>
@@ -151,53 +237,86 @@
 
               {% for form in forms %}
               <!-- Inquiry -->
-              <div class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
+              <div
+                class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
                 <div class="p-6 pt-6">
                   <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
                         <h4 class="font-semibold text-lg">{{ form.title }}</h4>
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">medium</div>
-                        <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">{{ form.status }}</div>
+                        <div
+                          class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">
+                          medium</div>
+                        <div
+                          class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">
+                          {{ form.status }}</div>
                       </div>
                       <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
                         <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                          {{ form.student.first_name }} {{ form.student.last_name }} ({{ form.student.userprofile.student_id|default:"-" }})
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="size-4">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                          {{ form.student.first_name }} {{ form.student.last_name }} ({{
+                          form.student.userprofile.student_id|default:"-" }})
                         </span>
                         <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="size-4">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                          </svg>
                           {{ form.submitted_at|date:"Y-m-d h:i A" }}
                         </span>
                       </div>
                       <p class="text-gray-700 mb-4 p-3 bg-light-gray rounded-lg">
                         {{ form.description }}
                       </p>
-                      
+
                       <!-- JS Control Section -->
                       <div class="inquiry-controls" data-id="INQ-{{ form.id }}">
                         <div class="flex gap-2 default-actions">
-                          <button class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">Respond</button>
+                          <button
+                            class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">Respond</button>
                           <!-- Quick message link to this student -->
-                          <button class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
+                          <button
+                            class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
                             data-student-id="{{ form.student.id }}"
                             data-student-name="{{ form.student.first_name }} {{ form.student.last_name }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 mr-1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round" class="size-3.5 mr-1.5">
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
                             Message Student
                           </button>
                         </div>
-                        <form class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200" method="POST" action="{% url 'adviser_dashboard' %}">
+                        <form
+                          class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200"
+                          method="POST" action="{% url 'adviser_dashboard' %}">
                           {% csrf_token %}
                           <input type="hidden" name="action" value="update_form">
                           <input type="hidden" name="form_id" value="{{ form.id }}">
                           <input type="hidden" name="status" value="approved">
-                          <textarea name="adviser_notes" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Type your response to the student..." rows="4"></textarea>
+                          <textarea name="adviser_notes"
+                            class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Type your response to the student..." rows="4"></textarea>
                           <div class="flex gap-2">
-                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                            <button type="submit"
+                              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="size-4 mr-2">
+                                <path d="m22 2-7 20-4-9-9-4Z" />
+                                <path d="M22 2 11 13" />
+                              </svg>
                               Send Response &amp; Mark Resolved
                             </button>
-                            <button type="button" class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-white h-10 px-4 py-2 text-black hover:bg-light-gray">Cancel</button>
+                            <button type="button"
+                              class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-white h-10 px-4 py-2 text-black hover:bg-light-gray">Cancel</button>
                           </div>
                         </form>
                       </div>
@@ -236,7 +355,8 @@
                 </thead>
                 <tbody class="[&_tr:last-child]:border-0">
                   {% for apt in pending_appointments %}
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
+                  <tr
+                    class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
                     <td class="p-4 align-middle">
                       <div>
                         <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
@@ -251,24 +371,30 @@
                       </div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-900">{{ apt.status }}</div>
+                      <div
+                        class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-900">
+                        {{ apt.status }}</div>
                     </td>
                     <td class="p-4 align-middle">
                       <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="update_appointment">
                         <input type="hidden" name="apt_id" value="{{ apt.id }}">
-                        <input type="text" name="adviser_notes" placeholder="Zoom link or details..." class="border rounded px-2 py-1 text-xs">
+                        <input type="text" name="adviser_notes" placeholder="Zoom link or details..."
+                          class="border rounded px-2 py-1 text-xs">
                         <div class="flex gap-2">
-                          <button name="status" value="confirmed" type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-8 px-2 bg-green-500 hover:bg-green-600 text-white">Approve / Reply</button>
+                          <button name="status" value="confirmed" type="submit"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-8 px-2 bg-green-500 hover:bg-green-600 text-white">Approve
+                            / Reply</button>
                         </div>
                       </form>
                     </td>
                   </tr>
                   {% endfor %}
-                  
+
                   {% for apt in confirmed_appointments %}
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
+                  <tr
+                    class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
                     <td class="p-4 align-middle">
                       <div>
                         <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
@@ -283,16 +409,20 @@
                       </div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-900">{{ apt.status }}</div>
+                      <div
+                        class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-900">
+                        {{ apt.status }}</div>
                     </td>
                     <td class="p-4 align-middle">
                       <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="update_appointment">
                         <input type="hidden" name="apt_id" value="{{ apt.id }}">
-                        <input type="text" name="adviser_notes" placeholder="Update details..." value="{{ apt.adviser_notes|default:'' }}" class="border rounded px-2 py-1 text-xs">
+                        <input type="text" name="adviser_notes" placeholder="Update details..."
+                          value="{{ apt.adviser_notes|default:'' }}" class="border rounded px-2 py-1 text-xs">
                         <div class="flex gap-2">
-                          <button name="status" value="completed" type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border h-8 px-2 bg-white hover:bg-light-gray">Complete</button>
+                          <button name="status" value="completed" type="submit"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border h-8 px-2 bg-white hover:bg-light-gray">Complete</button>
                         </div>
                       </form>
                     </td>
@@ -314,7 +444,11 @@
             <div class="w-72 border-r flex flex-col bg-gray-50 shrink-0">
               <div class="p-4 border-b bg-white">
                 <h3 class="font-semibold text-gray-900 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-light-blue"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-light-blue">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
                   Conversations
                 </h3>
                 <p class="text-xs text-gray-500 mt-0.5">Direct messages with students</p>
@@ -323,8 +457,14 @@
               <!-- Search -->
               <div class="p-3 border-b bg-white">
                 <div class="relative">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                  <input id="student-search" type="text" placeholder="Search students..." class="w-full pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue bg-gray-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
+                  <input id="student-search" type="text" placeholder="Search students..."
+                    class="w-full pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue bg-gray-50">
                 </div>
               </div>
 
@@ -336,25 +476,33 @@
                   <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Active Threads</p>
                 </div>
                 {% for thread in student_threads %}
-                <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
-                        data-student-id="{{ thread.profile.user.id }}"
-                        data-student-name="{{ thread.profile.user.first_name }} {{ thread.profile.user.last_name }}"
-                        data-student-initials="{{ thread.profile.user.first_name|make_list|first|upper }}{{ thread.profile.user.last_name|make_list|first|upper }}">
+                <button
+                  class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
+                  data-student-id="{{ thread.profile.user.id }}"
+                  data-student-name="{{ thread.profile.user.first_name }} {{ thread.profile.user.last_name }}"
+                  data-student-initials="{{ thread.profile.user.first_name|make_list|first|upper }}{{ thread.profile.user.last_name|make_list|first|upper }}">
                   <div class="relative shrink-0">
-                    <div class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
-                      {{ thread.profile.user.first_name|make_list|first|upper }}{{ thread.profile.user.last_name|make_list|first|upper }}
+                    <div
+                      class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
+                      {{ thread.profile.user.first_name|make_list|first|upper }}{{
+                      thread.profile.user.last_name|make_list|first|upper }}
                     </div>
                     {% if thread.unread > 0 %}
-                    <span class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ thread.unread }}</span>
+                    <span
+                      class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{
+                      thread.unread }}</span>
                     {% endif %}
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
-                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name }} {{ thread.profile.user.last_name }}</p>
-                      <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{ thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name }} {{
+                        thread.profile.user.last_name }}</p>
+                      <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{
+                        thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
                     </div>
                     <p class="text-xs text-gray-500 truncate mt-0.5">
-                      {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{ thread.last_msg.content|truncatechars:35 }}
+                      {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{
+                      thread.last_msg.content|truncatechars:35 }}
                     </p>
                   </div>
                 </button>
@@ -366,16 +514,21 @@
                   <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">All Students</p>
                 </div>
                 {% for student in my_students %}
-                <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3"
-                        data-student-id="{{ student.user.id }}"
-                        data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
-                        data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
-                  <div class="size-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold shrink-0">
-                    {{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}
+                <button
+                  class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3"
+                  data-student-id="{{ student.user.id }}"
+                  data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
+                  data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
+                  <div
+                    class="size-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold shrink-0">
+                    {{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper
+                    }}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name }} {{ student.user.last_name }}</p>
-                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ student.student_id|default:"—" }} · {{ student.program|default:"No program" }}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name }} {{
+                      student.user.last_name }}</p>
+                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ student.student_id|default:"—" }} · {{
+                      student.program|default:"No program" }}</p>
                   </div>
                 </button>
                 {% endfor %}
@@ -390,22 +543,32 @@
             <div class="flex-1 flex flex-col min-w-0" id="chat-panel">
 
               <!-- Empty state -->
-              <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+              <div id="chat-empty-state"
+                class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
                 <div class="size-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-gray-300">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
                 </div>
                 <h4 class="font-semibold text-gray-500 text-lg mb-1">Select a conversation</h4>
-                <p class="text-sm text-gray-400 max-w-xs">Choose a student from the left panel to view and reply to their messages.</p>
+                <p class="text-sm text-gray-400 max-w-xs">Choose a student from the left panel to view and reply to
+                  their messages.</p>
               </div>
 
               <!-- Chat header (hidden until student selected) -->
               <div id="chat-header" class="hidden border-b p-4 bg-white flex items-center gap-3 shrink-0">
-                <div id="chat-avatar" class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">??</div>
+                <div id="chat-avatar"
+                  class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">
+                  ??</div>
                 <div class="flex-1 min-w-0">
                   <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Student Name</p>
-                  <p class="text-xs text-green-500 flex items-center gap-1"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span>Active student</p>
+                  <p class="text-xs text-green-500 flex items-center gap-1"><span
+                      class="size-1.5 bg-green-500 rounded-full inline-block"></span>Active student</p>
                 </div>
-                <a id="chat-view-profile-link" href="#" class="text-xs text-light-blue hover:underline font-medium">View Profile</a>
+                <a id="chat-view-profile-link" href="#" class="text-xs text-light-blue hover:underline font-medium">View
+                  Profile</a>
               </div>
 
               <!-- Messages area -->
@@ -422,33 +585,38 @@
               </div>
 
               <!-- No messages yet -->
-              <div id="chat-no-messages" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-200 mb-3"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+              <div id="chat-no-messages"
+                class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-200 mb-3">
+                  <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+                </svg>
                 <p class="text-sm font-medium text-gray-500">No messages yet</p>
                 <p class="text-xs text-gray-400 mt-1">Start the conversation below!</p>
               </div>
 
               <!-- Input area -->
               <div id="chat-input-area" class="hidden border-t bg-white p-4 shrink-0">
-                <form id="adviser-msg-form" method="POST" action="{% url 'adviser_dashboard' %}" class="flex gap-3 items-end">
+                <form id="adviser-msg-form" method="POST" action="{% url 'adviser_dashboard' %}"
+                  class="flex gap-3 items-end">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="send_message">
                   <input type="hidden" name="student_id" id="msg-student-id" value="">
                   <div class="flex-1">
-                    <textarea
-                      id="msg-content"
-                      name="content"
-                      rows="1"
-                      required
+                    <textarea id="msg-content" name="content" rows="1" required
                       placeholder="Type your message to the student..."
                       class="w-full resize-none rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-light-blue focus:ring-1 focus:ring-light-blue transition-colors bg-gray-50 leading-relaxed"
-                      style="max-height: 120px;"
-                    ></textarea>
+                      style="max-height: 120px;"></textarea>
                   </div>
                   <button type="submit"
                     class="shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center hover:opacity-90 transition-all shadow-md active:scale-95"
                     title="Send message">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m22 2-7 20-4-9-9-4Z" />
+                      <path d="M22 2 11 13" />
+                    </svg>
                   </button>
                 </form>
               </div>
@@ -456,74 +624,208 @@
           </div>
         </div>
       </div>
-      <!-- ============================= END MESSAGES TAB ============================= -->
-
-
-      <!-- Students Tab -->
+      <!-- ============================= END MESSAGES TAB ============================= -->      <!-- My Students Tab -->
       <div class="tab-content hidden" id="tab-students">
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
-          <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">My Advisees</h3>
-            <p class="text-sm text-muted-foreground">Overview of students under your advisement</p>
+        <div class="rounded-lg border bg-white shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex justify-between items-center">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">My Assigned Students</h3>
+              <p class="text-sm text-gray-500">View and manage your roster of advisees</p>
+            </div>
+            <div class="flex items-center gap-2">
+               <span class="text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">{{ total_advisees }} Students</span>
+            </div>
           </div>
-          <div class="p-6 pt-0">
-            <div class="relative w-full overflow-auto">
-              <table class="w-full caption-bottom text-sm">
-                <thead class="[&_tr]:border-b">
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student ID</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Program</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Year Level</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="[&_tr:last-child]:border-0">
-                  {% for student in my_students %}
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
-                    <td class="p-4 align-middle font-medium">{{ student.student_id|default:"-" }}</td>
-                    <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
-                    <td class="p-4 align-middle">{{ student.program|default:"-" }}</td>
-                    <td class="p-4 align-middle">{{ student.year_level|default:"-" }}</td>
-                    <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent {% if student.enrollment_status == 'enrolled' %}bg-green-500{% else %}bg-yellow-500{% endif %} text-white">{{ student.enrollment_status }}</div>
-                    </td>
-                    <td class="p-4 align-middle flex gap-2">
-                      <button onclick="document.getElementById('student-modal-{{ student.id }}').classList.remove('hidden')" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-gray-100 h-9 px-3 bg-white">View Profile</button>
-                      <button class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
-                        data-student-id="{{ student.user.id }}"
-                        data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
-                        data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3 mr-1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Message
-                      </button>
-                    </td>
-                  </tr>
+          <div class="divide-y divide-gray-100">
+            {% for student in my_students %}
+            <div class="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="size-12 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-lg font-bold shadow-sm">
+                  {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900">{{ student.user.first_name }} {{ student.user.last_name }}</h4>
+                  <div class="flex gap-3 text-xs text-gray-500 mt-1">
+                    <span class="font-mono">{{ student.student_id|default:"BSIT-202X" }}</span>
+                    <span>&bull;</span>
+                    <span>{{ student.program|default:"BS Information Technology" }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="open-chat-btn px-4 py-2 text-xs font-bold border border-light-blue text-light-blue rounded-md hover:bg-blue-50 transition-all flex items-center gap-2"
+                        data-student-id="{{ student.user.id }}" data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Message
+                </button>
+                <button onclick="activateTab('curriculum'); loadStudentCurriculum({{ student.user.id }})" 
+                        class="px-4 py-2 text-xs font-bold bg-navy text-white rounded-md hover:opacity-90 transition-all flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>
+                  Curriculum
+                </button>
+              </div>
+            </div>
+            {% empty %}
+            <div class="p-12 text-center text-gray-400">
+              <p>You have no assigned students yet.</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
 
-                  <!-- Student Profile Modal -->
-                  <div id="student-modal-{{ student.id }}" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
-                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-                      <div class="p-6 border-b bg-light-gray">
-                        <h3 class="text-xl font-bold text-gray-900">Student Profile</h3>
-                        <p class="text-sm text-gray-500 mt-1">Details for {{ student.user.first_name }} {{ student.user.last_name }}</p>
-                      </div>
-                      <div class="p-6 space-y-4">
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                          <div><span class="text-gray-500 block">Student ID</span><span class="font-medium">{{ student.student_id }}</span></div>
-                          <div><span class="text-gray-500 block">Email</span><span class="font-medium">{{ student.user.email }}</span></div>
-                          <div><span class="text-gray-500 block">Program</span><span class="font-medium">{{ student.program }}</span></div>
-                          <div><span class="text-gray-500 block">Year Level</span><span class="font-medium">{{ student.year_level }}</span></div>
-                          <div><span class="text-gray-500 block">Institution</span><span class="font-medium">{{ student.institution }}</span></div>
-                          <div><span class="text-gray-500 block">Status</span><span class="font-medium capitalize">{{ student.enrollment_status }}</span></div>
-                        </div>
-                      </div>
-                      <div class="p-6 border-t bg-light-gray flex justify-end gap-3">
-                        <button type="button" onclick="document.getElementById('student-modal-{{ student.id }}').classList.add('hidden')" class="px-6 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:bg-navy shadow-md">Close</button>
-                      </div>
+      <!-- ============================= CURRICULUM & ENROLLMENT TAB ============================= -->
+      <div class="tab-content hidden" id="tab-curriculum">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- LEFT: Student Selector & Tools -->
+          <div class="lg:col-span-1 space-y-6">
+            <div class="rounded-lg border bg-white shadow-sm p-4">
+              <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Select Student
+              </h3>
+              <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {% for student in my_students %}
+                <button onclick="loadStudentCurriculum({{ student.user.id }})" 
+                        class="student-curr-btn w-full text-left p-3 rounded-md border border-transparent hover:border-light-blue hover:bg-blue-50 transition-all group flex items-center gap-3"
+                        data-student-id="{{ student.user.id }}">
+                  <div class="size-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 group-hover:bg-light-blue group-hover:text-white transition-colors">
+                    {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ student.user.first_name }} {{ student.user.last_name }}</p>
+                    <p class="text-[10px] text-gray-500">{{ student.student_id|default:"BSIT" }}</p>
+                  </div>
+                </button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="rounded-lg border bg-white shadow-sm p-4">
+              <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                Generate Code
+              </h3>
+              <div id="enrollment-tool-panel" class="opacity-40 pointer-events-none transition-opacity">
+                <p class="text-xs text-gray-500 mb-3">Select subjects from the checklist to generate a single-use code.</p>
+                <div class="space-y-3">
+                  <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Term Label</label>
+                    <input type="text" id="term-label-input" value="AY 2025-2026 1st Sem" 
+                           class="w-full mt-1 border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-light-blue outline-none">
+                  </div>
+                  <div class="p-3 bg-gray-50 rounded-md border border-dashed border-gray-300">
+                    <p class="text-xs font-semibold text-gray-600 mb-1">Selected: <span id="selected-count" class="text-light-blue">0</span> subjects</p>
+                    <div id="selected-subjects-list" class="text-[10px] text-gray-500 space-y-1 max-h-32 overflow-y-auto">
+                      <!-- List of codes populated by JS -->
+                      <p class="italic">None selected</p>
                     </div>
                   </div>
-                  {% endfor %}
+                  <button onclick="generateEnrollmentCode()" id="gen-code-btn" disabled
+                          class="w-full bg-gradient-to-r from-navy to-light-blue text-white py-2.5 rounded-md font-bold text-sm shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    Generate Enrollment Code
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Curriculum Checklist -->
+          <div class="lg:col-span-3 space-y-6">
+            <div class="rounded-lg border bg-white shadow-sm overflow-hidden min-h-[600px] flex flex-col">
+              <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
+                <div>
+                  <h3 id="curr-heading" class="font-bold text-gray-900">Curriculum Checklist</h3>
+                  <p id="curr-subheading" class="text-xs text-gray-500">Select a student to view their academic records</p>
+                </div>
+                <div id="curr-filters" class="hidden flex gap-2">
+                   <select id="year-filter" class="text-xs border rounded px-2 py-1 outline-none" onchange="filterChecklist()">
+                     <option value="all">All Years</option>
+                     <option value="1">1st Year</option>
+                     <option value="2">2nd Year</option>
+                     <option value="3">3rd Year</option>
+                     <option value="4">4th Year</option>
+                   </select>
+                </div>
+              </div>
+              
+              <div id="curr-loading" class="hidden flex-1 flex flex-col items-center justify-center p-12 text-gray-400">
+                <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-sm">Fetching student curriculum...</p>
+              </div>
+
+              <div id="curr-empty" class="flex-1 flex flex-col items-center justify-center p-12 text-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-50"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <p class="text-sm font-medium">No Student Selected</p>
+                <p class="text-xs">Click a student on the left to view their curriculum checklist.</p>
+              </div>
+
+              <div id="curr-table-wrapper" class="hidden flex-1 overflow-auto">
+                <table class="w-full text-sm">
+                  <thead class="sticky top-0 bg-white border-b z-10">
+                    <tr class="text-left text-gray-500">
+                      <th class="p-3 font-semibold uppercase text-[10px] w-10">Approve</th>
+                      <th class="p-3 font-semibold uppercase text-[10px] w-24">Code</th>
+                      <th class="p-3 font-semibold uppercase text-[10px]">Subject</th>
+                      <th class="p-3 font-semibold uppercase text-[10px] w-12 text-center">Units</th>
+                      <th class="p-3 font-semibold uppercase text-[10px] w-32">Status</th>
+                      <th class="p-3 font-semibold uppercase text-[10px] w-40">Update Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="curriculum-body" class="divide-y divide-gray-100">
+                    <!-- Rows injected by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- Recently Generated Codes Area -->
+            <div class="rounded-lg border bg-white shadow-sm p-4">
+               <h4 class="font-bold text-gray-800 text-sm mb-3">Recent Enrollment Codes</h4>
+               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                 {% for ec in generated_codes %}
+                 <div class="p-3 border rounded-md bg-gray-50 flex flex-col gap-1 relative overflow-hidden group">
+                   {% if ec.used %}
+                   <div class="absolute -top-1 -right-8 bg-green-500 text-white text-[8px] font-bold py-1 px-8 rotate-45 shadow-sm">USED</div>
+                   {% endif %}
+                   <p class="text-[10px] font-bold text-gray-400 leading-none">CODE</p>
+                   <p class="text-sm font-mono font-bold text-navy select-all">{{ ec.code }}</p>
+                   <p class="text-[11px] font-medium text-gray-700 truncate">For: {{ ec.student.first_name }} {{ ec.student.last_name }}</p>
+                   <p class="text-[10px] text-gray-400">{{ ec.term_label }} &bull; {{ ec.created_at|date:"M d, Y" }}</p>
+                 </div>
+                 {% empty %}
+                 <p class="col-span-full text-center py-4 text-xs text-gray-400 italic">No codes generated yet.</p>
+                 {% endfor %}
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generated Code Modal -->
+      <div id="code-success-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+           <div class="bg-gradient-to-br from-navy to-light-blue p-6 text-center text-white">
+             <div class="size-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+             </div>
+             <h3 class="text-xl font-bold">Code Generated!</h3>
+             <p class="text-sm opacity-80 mt-1">Single-use enrollment code for <span id="modal-student-name" class="font-bold"></span></p>
+           </div>
+           <div class="p-8 text-center">
+             <div class="bg-gray-100 rounded-lg p-5 mb-6 border-2 border-dashed border-navy/20 relative">
+               <p class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest text-left">Enrollment Code</p>
+               <h2 id="modal-gen-code" class="text-3xl font-mono font-black text-navy tracking-tighter cursor-pointer" onclick="copyToClipboard(this.innerText)">XXXX-XXXX-XXXX</h2>
+               <div class="absolute -bottom-3 right-4 bg-navy text-white text-[10px] py-1 px-3 rounded-full font-bold shadow-lg">CLICK TO COPY</div>
+             </div>
+             <p class="text-xs text-gray-500 mb-6">Give this code to the student. They will enter it in their dashboard to automatically enroll in the approved subjects.</p>
+             <button onclick="window.location.reload()" class="w-full py-3 bg-gray-900 text-white rounded-lg font-bold hover:bg-black transition-colors">Done, Close</button>
+           </div>
+        </div>
+      </div>
+
+
                 </tbody>
               </table>
             </div>
@@ -538,99 +840,258 @@
 
 {% block extra_scripts %}
 <script>
-    // All adviser+admin user IDs — messages from these are shown on the RIGHT (blue)
-    const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
-    let activeStudentId = null;
-    let pollTimer = null;
+  // All adviser+admin user IDs — messages from these are shown on the RIGHT (blue)
+  const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
+  let activeStudentId = null;
+  let pollTimer = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Copied to clipboard!');
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
+  }
 
-        // ─── Tab switching ─────────────────────────────────────────────────────
-        const triggers = document.querySelectorAll('.tab-trigger');
-        const contents = document.querySelectorAll('.tab-content');
+  document.addEventListener('DOMContentLoaded', () => {
+    // ─── Curriculum Logic ─────────────────────────────────────────────
+    let selectedStudentId = null;
+    let selectedSubjectIds = new Set();
 
-        function activateTab(tabName) {
-            triggers.forEach(t => {
-                t.dataset.state = 'inactive';
-                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
-            });
-            contents.forEach(c => c.classList.add('hidden'));
-            const trigger = document.querySelector(`.tab-trigger[data-tab="${tabName}"]`);
-            const content = document.getElementById(`tab-${tabName}`);
-            if (trigger) { trigger.dataset.state = 'active'; trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm'); }
-            if (content) content.classList.remove('hidden');
-            if (tabName === 'messages') startPolling(); else stopPolling();
-        }
+    window.loadStudentCurriculum = function(studentId) {
+      selectedStudentId = studentId;
+      selectedSubjectIds.clear();
+      updateEnrollmentToolState();
 
-        triggers.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
+      // UI state
+      document.getElementById('curr-empty').classList.add('hidden');
+      document.getElementById('curr-table-wrapper').classList.add('hidden');
+      document.getElementById('curr-loading').classList.remove('hidden');
+      document.getElementById('curr-filters').classList.add('hidden');
+      
+      // Update selected class on buttons
+      document.querySelectorAll('.student-curr-btn').forEach(b => {
+        b.classList.toggle('border-light-blue', b.dataset.studentId === String(studentId));
+        b.classList.toggle('bg-blue-50', b.dataset.studentId === String(studentId));
+      });
 
-        // Bell → Messages tab
-        document.getElementById('msg-bell-btn').addEventListener('click', () => activateTab('messages'));
+      fetch(`/api/curriculum/${studentId}/`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('curr-loading').classList.add('hidden');
+          document.getElementById('curr-table-wrapper').classList.remove('hidden');
+          document.getElementById('curr-filters').classList.remove('hidden');
+          document.getElementById('curr-heading').innerText = `Curriculum: ${data.student.name}`;
+          document.getElementById('curr-subheading').innerText = `${data.student.student_id} • ${data.student.program}`;
+          
+          const body = document.getElementById('curriculum-body');
+          body.innerHTML = '';
+          
+          data.curriculum.forEach(subj => {
+            const statusClass = {
+               'passed': 'bg-green-100 text-green-700 border-green-200',
+               'failed': 'bg-red-100 text-red-700 border-red-200',
+               'in_progress': 'bg-blue-100 text-blue-700 border-blue-200',
+               'not_taken': 'bg-gray-100 text-gray-500 border-gray-200'
+            }[subj.status] || 'bg-gray-100';
 
-        // ─── Inquiry respond/cancel ────────────────────────────────────────────
-        document.querySelectorAll('.inquiry-controls').forEach(control => {
-            const respondBtn = control.querySelector('.respond-btn');
-            const cancelBtn  = control.querySelector('.cancel-btn');
-            const defaultAct = control.querySelector('.default-actions');
-            const responseArea = control.querySelector('.response-area');
-            const textarea   = control.querySelector('textarea');
-            if (respondBtn) respondBtn.addEventListener('click', () => { defaultAct.classList.add('hidden'); responseArea.classList.remove('hidden'); });
-            if (cancelBtn)  cancelBtn.addEventListener('click',  () => { responseArea.classList.add('hidden'); defaultAct.classList.remove('hidden'); if (textarea) textarea.value = ''; });
+            const row = `
+              <tr class="curr-row hover:bg-gray-50" data-year="${subj.year_level}">
+                <td class="p-3">
+                  <input type="checkbox" class="subject-checkbox size-4 rounded border-gray-300 text-light-blue focus:ring-light-blue" 
+                         value="${subj.id}" data-code="${subj.code}" ${subj.status === 'passed' ? 'disabled' : ''} onchange="toggleSubjectSelection(this)">
+                </td>
+                <td class="p-3 font-mono text-xs font-bold text-navy">${subj.code}</td>
+                <td class="p-3">
+                  <p class="font-medium text-gray-900">${subj.title}</p>
+                  <p class="text-[10px] text-gray-400">Year ${subj.year_level}, Sem ${subj.semester}</p>
+                </td>
+                <td class="p-3 text-center font-medium">${subj.units}</td>
+                <td class="p-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${statusClass} capitalize">
+                    ${subj.status.replace('_', ' ')}
+                  </span>
+                </td>
+                <td class="p-3">
+                  <select onchange="updateSubjectStatus(${studentId}, ${subj.id}, this.value)" class="text-[11px] border rounded px-2 py-1 outline-none w-full bg-white">
+                    <option value="not_taken" ${subj.status === 'not_taken' ? 'selected' : ''}>Not Taken</option>
+                    <option value="passed" ${subj.status === 'passed' ? 'selected' : ''}>Passed</option>
+                    <option value="failed" ${subj.status === 'failed' ? 'selected' : ''}>Failed</option>
+                    <option value="in_progress" ${subj.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+                  </select>
+                </td>
+              </tr>
+            `;
+            body.insertAdjacentHTML('beforeend', row);
+          });
+          
+          document.getElementById('enrollment-tool-panel').classList.remove('opacity-40', 'pointer-events-none');
         });
+    };
 
-        // ─── Student search filter ─────────────────────────────────────────────
-        const searchInput = document.getElementById('student-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', () => {
-                const q = searchInput.value.toLowerCase();
-                document.querySelectorAll('.student-item').forEach(btn => {
-                    btn.style.display = btn.dataset.studentName.toLowerCase().includes(q) ? '' : 'none';
-                });
-            });
+    window.toggleSubjectSelection = function(cb) {
+       if (cb.checked) selectedSubjectIds.add(cb.value);
+       else selectedSubjectIds.delete(cb.value);
+       updateEnrollmentToolState();
+    };
+
+    function updateEnrollmentToolState() {
+       const count = selectedSubjectIds.size;
+       document.getElementById('selected-count').innerText = count;
+       document.getElementById('gen-code-btn').disabled = count === 0;
+       
+       const list = document.getElementById('selected-subjects-list');
+       list.innerHTML = '';
+       if (count === 0) {
+         list.innerHTML = '<p class="italic">None selected</p>';
+       } else {
+         document.querySelectorAll('.subject-checkbox:checked').forEach(cb => {
+            const code = cb.dataset.code;
+            list.insertAdjacentHTML('beforeend', `<div class="flex items-center gap-1"><span class="size-1.5 bg-light-blue rounded-full"></span> ${code}</div>`);
+         });
+       }
+    }
+
+    window.updateSubjectStatus = function(studentId, subjectId, status) {
+       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+       fetch('/api/curriculum/update-subject/', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+         body: JSON.stringify({ student_id: studentId, subject_id: subjectId, status: status })
+       })
+       .then(res => res.json())
+       .then(data => {
+         if (data.status === 'success') loadStudentCurriculum(studentId);
+         else alert('Failed to update: ' + data.error);
+       });
+    };
+
+    window.filterChecklist = function() {
+       const year = document.getElementById('year-filter').value;
+       document.querySelectorAll('.curr-row').forEach(row => {
+         if (year === 'all' || row.dataset.year === year) row.style.display = '';
+         else row.style.display = 'none';
+       });
+    };
+
+    window.generateEnrollmentCode = function() {
+      const term = document.getElementById('term-label-input').value.trim();
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      if (!term) { alert('Please enter a term label.'); return; }
+      
+      const btn = document.getElementById('gen-code-btn');
+      btn.disabled = true;
+      btn.innerText = 'Generating...';
+
+      fetch('/api/enrollment/generate-code/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+        body: JSON.stringify({ student_id: selectedStudentId, subject_ids: Array.from(selectedSubjectIds), term_label: term })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert('Code Generated: ' + data.code);
+          location.reload(); // Refresh to show in recent codes
+        } else {
+          alert('Error: ' + data.error);
         }
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = 'Generate Enrollment Code';
+      });
+    };
 
-        // ─── Chat state helpers ────────────────────────────────────────────────
-        function showChatState(state) {
-            ['chat-empty-state','chat-loading','chat-messages-area','chat-no-messages','chat-header','chat-input-area']
-                .forEach(id => document.getElementById(id).classList.add('hidden'));
-            if (state === 'empty')      document.getElementById('chat-empty-state').classList.remove('hidden');
-            if (state === 'loading')    { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-loading').classList.remove('hidden'); }
-            if (state === 'messages')   { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-messages-area').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
-            if (state === 'no-messages'){ document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-no-messages').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
-        }
 
-        function escapeHtml(str) {
-            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
-        }
+    // ─── Interaction Listeners (Tabs, Inquiries, Search) ──────────────────
 
-              function renderMessages(msgs, isPolling) {
-            const area = document.getElementById('chat-messages-area');
-            if (!msgs || msgs.length === 0) { showChatState('no-messages'); return; }
+    // ─── Tab switching ─────────────────────────────────────────────────────
+    const triggers = document.querySelectorAll('.tab-trigger');
+    const contents = document.querySelectorAll('.tab-content');
 
-            const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
-            showChatState('messages');
-            area.innerHTML = '';
+    function activateTab(tabName) {
+      triggers.forEach(t => {
+        t.dataset.state = 'inactive';
+        t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
+      });
+      contents.forEach(c => c.classList.add('hidden'));
+      const trigger = document.querySelector(`.tab-trigger[data-tab="${tabName}"]`);
+      const content = document.getElementById(`tab-${tabName}`);
+      if (trigger) { trigger.dataset.state = 'active'; trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm'); }
+      if (content) content.classList.remove('hidden');
+      if (tabName === 'messages') startPolling(); else stopPolling();
+    }
 
-            msgs.forEach((m, idx) => {
-                // Use the returned is_adviser flag instead of set checks
-                const isAdviser = m.is_adviser;
+    triggers.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
-                // Date separator
-                const currentDate = m.sent_at.split(',')[0] || m.sent_at.split(' ').slice(0,3).join(' ');
-                const prevDate = idx > 0 ? (msgs[idx-1].sent_at.split(',')[0] || msgs[idx-1].sent_at.split(' ').slice(0,3).join(' ')) : null;
+    // Bell → Messages tab
+    document.getElementById('msg-bell-btn').addEventListener('click', () => activateTab('messages'));
 
-                if (idx === 0 || currentDate !== prevDate) {
-                    area.insertAdjacentHTML('beforeend', `
+    // ─── Inquiry respond/cancel ────────────────────────────────────────────
+    document.querySelectorAll('.inquiry-controls').forEach(control => {
+      const respondBtn = control.querySelector('.respond-btn');
+      const cancelBtn = control.querySelector('.cancel-btn');
+      const defaultAct = control.querySelector('.default-actions');
+      const responseArea = control.querySelector('.response-area');
+      const textarea = control.querySelector('textarea');
+      if (respondBtn) respondBtn.addEventListener('click', () => { defaultAct.classList.add('hidden'); responseArea.classList.remove('hidden'); });
+      if (cancelBtn) cancelBtn.addEventListener('click', () => { responseArea.classList.add('hidden'); defaultAct.classList.remove('hidden'); if (textarea) textarea.value = ''; });
+    });
+
+    // ─── Student search filter ─────────────────────────────────────────────
+    const searchInput = document.getElementById('student-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.toLowerCase();
+        document.querySelectorAll('.student-item').forEach(btn => {
+          btn.style.display = btn.dataset.studentName.toLowerCase().includes(q) ? '' : 'none';
+        });
+      });
+    }
+
+    // ─── Chat state helpers ────────────────────────────────────────────────
+    function showChatState(state) {
+      ['chat-empty-state', 'chat-loading', 'chat-messages-area', 'chat-no-messages', 'chat-header', 'chat-input-area']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+      if (state === 'empty') document.getElementById('chat-empty-state').classList.remove('hidden');
+      if (state === 'loading') { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-loading').classList.remove('hidden'); }
+      if (state === 'messages') { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-messages-area').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
+      if (state === 'no-messages') { document.getElementById('chat-header').classList.remove('hidden'); document.getElementById('chat-no-messages').classList.remove('hidden'); document.getElementById('chat-input-area').classList.remove('hidden'); }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
+    }
+
+    function renderMessages(msgs, isPolling) {
+      const area = document.getElementById('chat-messages-area');
+      if (!msgs || msgs.length === 0) { showChatState('no-messages'); return; }
+
+      const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+      showChatState('messages');
+      area.innerHTML = '';
+
+      msgs.forEach((m, idx) => {
+        // Use the returned is_adviser flag instead of set checks
+        const isAdviser = m.is_adviser;
+
+        // Date separator
+        const currentDate = m.sent_at.split(',')[0] || m.sent_at.split(' ').slice(0, 3).join(' ');
+        const prevDate = idx > 0 ? (msgs[idx - 1].sent_at.split(',')[0] || msgs[idx - 1].sent_at.split(' ').slice(0, 3).join(' ')) : null;
+
+        if (idx === 0 || currentDate !== prevDate) {
+          area.insertAdjacentHTML('beforeend', `
                         <div class="flex items-center gap-3 my-2">
                             <div class="flex-1 h-px bg-gray-200"></div>
                             <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">${currentDate}</span>
                             <div class="flex-1 h-px bg-gray-200"></div>
                         </div>
                     `);
-                }
+        }
 
-                if (isAdviser) {
-                    area.insertAdjacentHTML('beforeend', `
+        if (isAdviser) {
+          area.insertAdjacentHTML('beforeend', `
                         <div class="flex gap-2 justify-end mb-4 group transform transition-all duration-300 hover:translate-x-0 origin-right">
                             <div class="max-w-[85%] relative">
                                 <p class="text-[10px] text-gray-400 mb-1 mr-1 text-right">${escapeHtml(m.sender_name)}</p>
@@ -639,9 +1100,9 @@
                             </div>
                         </div>
                     `);
-                } else {
-                    const avatarInitials = (m.sender_name || 'ST').substring(0, 2).toUpperCase();
-                    area.insertAdjacentHTML('beforeend', `
+        } else {
+          const avatarInitials = (m.sender_name || 'ST').substring(0, 2).toUpperCase();
+          area.insertAdjacentHTML('beforeend', `
                         <div class="flex gap-2 justify-start mb-4 group transform transition-all duration-300 hover:translate-x-0 origin-left">
                             <div class="shrink-0 size-8 rounded-full bg-white border border-gray-200 text-light-blue text-xs font-bold flex items-center justify-center shadow-sm mt-4">
                                 ${avatarInitials}
@@ -653,125 +1114,125 @@
                             </div>
                         </div>
                     `);
-                }
-            });
-
-            if (!isPolling || wasAtBottom) area.scrollTop = area.scrollHeight;
         }
+      });
 
-        function loadConversation(studentId, studentName, initials, isPolling) {
-            if (!isPolling) {
-                activeStudentId = studentId;
-                document.getElementById('chat-avatar').textContent = initials || '??';
-                document.getElementById('chat-student-name').textContent = studentName || 'Student';
-                document.getElementById('msg-student-id').value = studentId;
-                document.querySelectorAll('.student-item').forEach(b => {
-                    const active = b.dataset.studentId === String(studentId);
-                    b.classList.toggle('bg-blue-100', active);
-                });
-                showChatState('loading');
-            }
+      if (!isPolling || wasAtBottom) area.scrollTop = area.scrollHeight;
+    }
 
-            fetch(`/adviser/conversation/${studentId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-                .then(data => { renderMessages(data.messages, isPolling); })
-                .catch(err => { console.error('Conversation fetch error:', err); if (!isPolling) showChatState('no-messages'); });
-        }
-
-        // ─── Polling every 5 seconds for real-time sync ─────────────────────
-        function startPolling() {
-            stopPolling();
-            pollTimer = setInterval(() => {
-                if (activeStudentId) loadConversation(activeStudentId, null, null, true);
-            }, 5000);
-        }
-        function stopPolling() {
-            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-        }
-
-        // ─── Student click ─────────────────────────────────────────────────────
-        document.querySelectorAll('.student-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                activateTab('messages');
-                loadConversation(btn.dataset.studentId, btn.dataset.studentName, btn.dataset.studentInitials, false);
-            });
+    function loadConversation(studentId, studentName, initials, isPolling) {
+      if (!isPolling) {
+        activeStudentId = studentId;
+        document.getElementById('chat-avatar').textContent = initials || '??';
+        document.getElementById('chat-student-name').textContent = studentName || 'Student';
+        document.getElementById('msg-student-id').value = studentId;
+        document.querySelectorAll('.student-item').forEach(b => {
+          const active = b.dataset.studentId === String(studentId);
+          b.classList.toggle('bg-blue-100', active);
         });
+        showChatState('loading');
+      }
 
-        // ─── "Message Student" shortcuts from Inquiries / My Students ──────────
-        document.querySelectorAll('.open-chat-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'ST').substring(0,2).toUpperCase();
-                activateTab('messages');
-                setTimeout(() => loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false), 50);
-            });
-        });
+      fetch(`/adviser/conversation/${studentId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(data => { renderMessages(data.messages, isPolling); })
+        .catch(err => { console.error('Conversation fetch error:', err); if (!isPolling) showChatState('no-messages'); });
+    }
 
-        // ─── Send message form ─────────────────────────────────────────────
-        const msgForm = document.getElementById('adviser-msg-form');
-        const msgContent = document.getElementById('msg-content');
+    // ─── Polling every 5 seconds for real-time sync ─────────────────────
+    function startPolling() {
+      stopPolling();
+      pollTimer = setInterval(() => {
+        if (activeStudentId) loadConversation(activeStudentId, null, null, true);
+      }, 5000);
+    }
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
 
-        if (msgForm) {
-            msgForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+    // ─── Student click ─────────────────────────────────────────────────────
+    document.querySelectorAll('.student-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activateTab('messages');
+        loadConversation(btn.dataset.studentId, btn.dataset.studentName, btn.dataset.studentInitials, false);
+      });
+    });
 
-                const content = document.getElementById('msg-content').value.trim();
-                const studentId = document.getElementById('msg-student-id').value;
+    // ─── "Message Student" shortcuts from Inquiries / My Students ──────────
+    document.querySelectorAll('.open-chat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'ST').substring(0, 2).toUpperCase();
+        activateTab('messages');
+        setTimeout(() => loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false), 50);
+      });
+    });
 
-                if (!content) { alert('Please type a message.'); return; }
-                if (!studentId) { alert('Please select a student first.'); return; }
+    // ─── Send message form ─────────────────────────────────────────────
+    const msgForm = document.getElementById('adviser-msg-form');
+    const msgContent = document.getElementById('msg-content');
 
-                const submitBtn = msgForm.querySelector('button[type=submit]');
-                if (submitBtn) { submitBtn.disabled = true; }
+    if (msgForm) {
+      msgForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-                const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
-                const csrftoken = csrfInput ? csrfInput.value : '';
+        const content = document.getElementById('msg-content').value.trim();
+        const studentId = document.getElementById('msg-student-id').value;
 
-                const postData = new URLSearchParams();
-                postData.append('action', 'send_message');
-                postData.append('student_id', studentId);
-                postData.append('content', content);
-                postData.append('csrfmiddlewaretoken', csrftoken);
+        if (!content) { alert('Please type a message.'); return; }
+        if (!studentId) { alert('Please select a student first.'); return; }
 
-                fetch('{% url "adviser_dashboard" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: postData.toString()
-                })
-                .then(r => {
-                    if (!r.ok) throw new Error('Server error: ' + r.status);
-                    return r.json();
-                })
-                .then(data => {
-                    document.getElementById('msg-content').value = '';
-                    document.getElementById('msg-content').style.height = 'auto';
-                    if (activeStudentId) loadConversation(activeStudentId, null, null, true);
-                })
-                .catch(err => console.error('Send error:', err))
-                .finally(() => {
-                    if (submitBtn) { submitBtn.disabled = false; }
-                });
-            });
+        const submitBtn = msgForm.querySelector('button[type=submit]');
+        if (submitBtn) { submitBtn.disabled = true; }
+
+        const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
+        const csrftoken = csrfInput ? csrfInput.value : '';
+
+        const postData = new URLSearchParams();
+        postData.append('action', 'send_message');
+        postData.append('student_id', studentId);
+        postData.append('content', content);
+        postData.append('csrfmiddlewaretoken', csrftoken);
+
+        fetch('{% url "adviser_dashboard" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrftoken
+          },
+          body: postData.toString()
+        })
+          .then(r => {
+            if (!r.ok) throw new Error('Server error: ' + r.status);
+            return r.json();
+          })
+          .then(data => {
+            document.getElementById('msg-content').value = '';
+            document.getElementById('msg-content').style.height = 'auto';
+            if (activeStudentId) loadConversation(activeStudentId, null, null, true);
+          })
+          .catch(err => console.error('Send error:', err))
+          .finally(() => {
+            if (submitBtn) { submitBtn.disabled = false; }
+          });
+      });
+    }
+
+    // ─── Textarea: auto-resize + Enter to send ─────────────────────────────
+    if (msgContent && msgForm) {
+      msgContent.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+      msgContent.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (this.value.trim()) msgForm.dispatchEvent(new Event('submit'));
         }
+      });
+    }
 
-        // ─── Textarea: auto-resize + Enter to send ─────────────────────────────
-        if (msgContent && msgForm) {
-            msgContent.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            });
-            msgContent.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { 
-                    e.preventDefault(); 
-                    if (this.value.trim()) msgForm.dispatchEvent(new Event('submit')); 
-                }
-            });
-        }
-
-    }); // end DOMContentLoaded
+  }); // end DOMContentLoaded
 </script>
 {% endblock %}

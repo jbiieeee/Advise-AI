@@ -104,7 +104,10 @@ def logout_user(request):
 def about_page(request):
     return render(request, 'core/about.html')
 
-from .models import UserProfile, Course, Enrollment, FormSubmission, Appointment, Message
+from .models import (
+    UserProfile, Course, Enrollment, FormSubmission, Appointment, Message,
+    CurriculumSubject, StudentCurriculum, EnrollmentCode, TermEnrollment,
+)
 
 @login_required(login_url='login')
 def student_dashboard(request):
@@ -114,15 +117,35 @@ def student_dashboard(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'enroll_verification':
-            code = request.POST.get('curriculum_code')
-            if code:
-                profile.curriculum_code = code
-                profile.enrollment_status = 'pending'
-                profile.save()
-                messages.success(request, 'Enrollment code submitted! Waiting for adviser approval.')
+        if action == 'redeem_code':
+            code_str = request.POST.get('enrollment_code', '').strip().upper()
+            if not code_str:
+                messages.error(request, 'Please enter a valid Enrollment Code.')
             else:
-                messages.error(request, 'Please enter a valid code.')
+                from django.utils import timezone
+                try:
+                    enc = EnrollmentCode.objects.get(code=code_str, student=user, used=False)
+                    # Create TermEnrollment records for each approved subject
+                    for subj in enc.approved_subjects.all():
+                        TermEnrollment.objects.get_or_create(
+                            student=user, subject=subj, term_label=enc.term_label,
+                            defaults={'enrollment_code': enc}
+                        )
+                        # Mark as in_progress in student curriculum
+                        StudentCurriculum.objects.update_or_create(
+                            student=user, subject=subj,
+                            defaults={'status': 'in_progress', 'term_taken': enc.term_label}
+                        )
+                    enc.used = True
+                    enc.used_at = timezone.now()
+                    enc.save()
+                    profile.enrollment_status = 'enrolled'
+                    profile.curriculum_code = code_str
+                    profile.save()
+                    messages.success(request, f'Enrollment successful! You are now enrolled for {enc.term_label}.')
+                except EnrollmentCode.DoesNotExist:
+                    messages.error(request, 'Invalid or already-used Enrollment Code. Please contact your adviser.')
+
         
         elif action == 'submit_form':
             title = request.POST.get('form_title')
@@ -200,6 +223,10 @@ def student_dashboard(request):
     enrollment_status = profile.enrollment_status
     courses = Enrollment.objects.filter(student=user) if enrollment_status == 'enrolled' else []
     
+    # New: Term enrollments from code redemption
+    term_enrollments = TermEnrollment.objects.filter(student=user).select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
+    active_term_label = term_enrollments.values_list('term_label', flat=True).first() if term_enrollments.exists() else None
+
     student_forms = FormSubmission.objects.filter(student=user).order_by('-submitted_at')
     student_appointments = Appointment.objects.filter(student=user).order_by('-date_time')
     
@@ -216,7 +243,6 @@ def student_dashboard(request):
     else:
         advisers_list = User.objects.filter(id__in=all_staff_ids).order_by('first_name', 'last_name')
     
-    # We will pass a JSON array with all staff IDs to help the student UI align message bubbles properly
     import json
     all_staff_ids_json = json.dumps(all_staff_ids)
 
@@ -224,12 +250,15 @@ def student_dashboard(request):
         'profile': profile,
         'enrollment_status': enrollment_status,
         'courses': courses,
+        'term_enrollments': term_enrollments,
+        'active_term_label': active_term_label,
         'pending_approvals': pending_approvals,
         'appointments_count': appointments_count,
         'student_forms': student_forms,
         'student_appointments': student_appointments,
         'advisers_list': advisers_list,
         'all_staff_ids_json': all_staff_ids_json,
+
     }
     return render(request, 'core/student.html', context)
 
@@ -416,6 +445,10 @@ def adviser_dashboard(request):
         is_read=False
     ).count()
 
+    # Curriculum data for adviser
+    all_subjects = CurriculumSubject.objects.all()
+    generated_codes = EnrollmentCode.objects.filter(adviser=user).select_related('student').prefetch_related('approved_subjects').order_by('-created_at')[:30]
+
     context = {
         'forms': pending_forms,
         'pending_appointments': pending_appointments,
@@ -428,6 +461,8 @@ def adviser_dashboard(request):
         'total_unread': total_unread,
         'adviser_user': user,
         'all_adviser_ids_json': all_adviser_ids,
+        'all_subjects': all_subjects,
+        'generated_codes': generated_codes,
     }
     return render(request, 'core/adviser.html', context)
 
@@ -717,3 +752,191 @@ def get_latest_notifications(request):
             })
             
     return JsonResponse({'notifications': notifications})
+
+
+# ─────────────────────────────────────────────────────────────
+#  CURRICULUM & ENROLLMENT CODE API VIEWS
+# ─────────────────────────────────────────────────────────────
+
+@login_required(login_url='login')
+def get_all_curriculum(request):
+    """Returns the full BSIT curriculum as JSON (for adviser subject picker)."""
+    subjects = CurriculumSubject.objects.all().values(
+        'id', 'code', 'title', 'units', 'year_level', 'semester', 'prerequisite_codes', 'track', 'subject_type'
+    )
+    return JsonResponse({'subjects': list(subjects)})
+
+
+@login_required(login_url='login')
+def get_student_curriculum(request, student_id):
+    """
+    Returns a student's curriculum checklist.
+    Accessible by advisers/admins for any student.
+    Students can only access their own via get_my_curriculum.
+    """
+    try:
+        profile = request.user.userprofile
+        if profile.role not in ('adviser',) and not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+    except UserProfile.DoesNotExist:
+        if not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        student = User.objects.get(id=student_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
+
+    all_subjects = CurriculumSubject.objects.all()
+    records = {r.subject_id: r for r in StudentCurriculum.objects.filter(student=student)}
+
+    data = []
+    for subj in all_subjects:
+        rec = records.get(subj.id)
+        data.append({
+            'id': subj.id,
+            'code': subj.code,
+            'title': subj.title,
+            'units': subj.units,
+            'year_level': subj.year_level,
+            'semester': subj.semester,
+            'prerequisite_codes': subj.prerequisite_codes,
+            'track': subj.track,
+            'subject_type': subj.subject_type,
+            'status': rec.status if rec else 'not_taken',
+            'grade': rec.grade if rec else '',
+            'term_taken': rec.term_taken if rec else '',
+        })
+    return JsonResponse({
+        'curriculum': data,
+        'student': {
+            'name': f"{student.first_name} {student.last_name}".strip() or student.username,
+            'student_id': getattr(student.userprofile, 'student_id', 'N/A') if hasattr(student, 'userprofile') else 'N/A',
+            'program': getattr(student.userprofile, 'program', 'N/A') if hasattr(student, 'userprofile') else 'N/A',
+        }
+    })
+
+
+@login_required(login_url='login')
+def get_my_curriculum(request):
+    """Student's own curriculum checklist view."""
+    user = request.user
+    all_subjects = CurriculumSubject.objects.all()
+    records = {r.subject_id: r for r in StudentCurriculum.objects.filter(student=user)}
+
+    data = []
+    for subj in all_subjects:
+        rec = records.get(subj.id)
+        data.append({
+            'id': subj.id,
+            'code': subj.code,
+            'title': subj.title,
+            'units': subj.units,
+            'year_level': subj.year_level,
+            'semester': subj.semester,
+            'prerequisite_codes': subj.prerequisite_codes,
+            'track': subj.track,
+            'subject_type': subj.subject_type,
+            'status': rec.status if rec else 'not_taken',
+            'grade': rec.grade if rec else '',
+            'term_taken': rec.term_taken if rec else '',
+        })
+    return JsonResponse({'curriculum': data})
+
+
+@login_required(login_url='login')
+def update_student_subject(request):
+    """
+    Adviser updates a student's subject status (passed/failed/not_taken).
+    POST: student_id, subject_id, status, grade (optional)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        profile = request.user.userprofile
+        if profile.role not in ('adviser',) and not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+    except UserProfile.DoesNotExist:
+        if not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    import json as _json
+    try:
+        body = _json.loads(request.body)
+    except Exception:
+        body = request.POST
+
+    student_id = body.get('student_id')
+    subject_id = body.get('subject_id')
+    status = body.get('status', 'not_taken')
+    grade = body.get('grade', '')
+    term_taken = body.get('term_taken', '')
+
+    try:
+        student = User.objects.get(id=student_id)
+        subject = CurriculumSubject.objects.get(id=subject_id)
+    except (User.DoesNotExist, CurriculumSubject.DoesNotExist):
+        return JsonResponse({'error': 'Invalid student or subject'}, status=404)
+
+    rec, _ = StudentCurriculum.objects.update_or_create(
+        student=student, subject=subject,
+        defaults={'status': status, 'grade': grade, 'term_taken': term_taken}
+    )
+    return JsonResponse({'status': 'ok', 'record_status': rec.status})
+
+
+@login_required(login_url='login')
+def generate_enrollment_code(request):
+    """
+    Adviser generates a single-use Enrollment Code for a specific student.
+    POST JSON: { student_id, subject_ids: [...], term_label }
+    Returns: { code, term_label, subjects: [...] }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        profile = request.user.userprofile
+        if profile.role not in ('adviser',) and not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+    except UserProfile.DoesNotExist:
+        if not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    import json as _json
+    try:
+        body = _json.loads(request.body)
+    except Exception:
+        body = request.POST
+
+    student_id = body.get('student_id')
+    subject_ids = body.get('subject_ids', [])
+    term_label = body.get('term_label', '').strip()
+
+    if not student_id or not subject_ids or not term_label:
+        return JsonResponse({'error': 'student_id, subject_ids, and term_label are required'}, status=400)
+
+    try:
+        student = User.objects.get(id=student_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
+
+    subjects = CurriculumSubject.objects.filter(id__in=subject_ids)
+    if not subjects.exists():
+        return JsonResponse({'error': 'No valid subjects selected'}, status=400)
+
+    enc = EnrollmentCode.objects.create(
+        student=student,
+        adviser=request.user,
+        term_label=term_label,
+    )
+    enc.approved_subjects.set(subjects)
+
+    return JsonResponse({
+        'status': 'ok',
+        'code': enc.code,
+        'term_label': enc.term_label,
+        'student_name': f"{student.first_name} {student.last_name}".strip() or student.username,
+        'subjects': [{'id': s.id, 'code': s.code, 'title': s.title, 'units': s.units} for s in subjects],
+    })
+

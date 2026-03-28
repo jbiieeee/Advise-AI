@@ -239,44 +239,63 @@
           <!-- Courses Tab -->
           <div class="tab-content" id="tab-courses">
             <div class="space-y-4">
-              {% if enrollment_status != 'enrolled' %}
-                <div class="p-8 text-center bg-white rounded-lg border text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-12 mx-auto mb-4 opacity-50"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                  <h3 class="text-lg font-semibold text-gray-700">No Courses Yet</h3>
-                  <p class="text-sm">Your courses will appear here once your enrollment is verified.</p>
+              {% if term_enrollments %}
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-between mb-4">
+                   <div class="flex items-center gap-3">
+                      <div class="size-10 bg-white rounded-full flex items-center justify-center text-light-blue shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-bold text-navy">Current Enrollment: {{ term_enrollments.0.term_label }}</p>
+                        <p class="text-[10px] text-gray-500">Official subjects registered via enrollment code</p>
+                      </div>
+                   </div>
+                   <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-full uppercase">Officially Enrolled</span>
                 </div>
-              {% elif courses %}
-                {% for enrollment in courses %}
-                  <!-- Dynamic Course Listing -->
-                  <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue bg-white">
-                    <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                      <div class="flex justify-between items-start">
-                        <div>
-                          <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                            {{ enrollment.course.title }}
-                            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">{{ enrollment.course.code }}</div>
-                          </h3>
-                          <div class="text-sm text-muted-foreground mt-2">
-                            <div class="flex flex-col gap-1 text-gray-500">
-                              <span class="flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                {{ enrollment.course.schedule }}
-                              </span>
-                              <span class="flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                {{ enrollment.course.instructor }}
-                              </span>
-                            </div>
-                          </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {% for enrollment in term_enrollments %}
+                  <div class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-light-blue p-5">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-[10px] font-bold text-gray-400 font-mono uppercase tracking-wider">{{ enrollment.subject.code }}</span>
                         </div>
+                        <h4 class="font-bold text-gray-900 text-lg leading-tight">{{ enrollment.subject.title }}</h4>
+                        <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
+                          <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            {{ enrollment.subject.units }} Units
+                          </span>
+                          <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            BSIT Curriculum
+                          </span>
+                        </div>
+                      </div>
+                      <div class="p-2 bg-gray-50 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-light-blue opacity-50"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                       </div>
                     </div>
                   </div>
-                {% endfor %}
+                  {% endfor %}
+                </div>
+              {% elif enrollment_status != 'enrolled' %}
+                <div class="p-12 text-center bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+                  <div class="size-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  </div>
+                  <h3 class="text-xl font-bold text-gray-700 mb-2">Registration Pending</h3>
+                  <p class="text-sm max-w-xs mx-auto mb-6">You haven't officially enrolled in any subjects for this term. Get your enrollment code from your advisor.</p>
+                  <button onclick="document.getElementById('enrollment-modal').classList.remove('hidden')" 
+                          class="px-8 py-3 bg-navy text-white rounded-lg font-bold shadow-lg hover:bg-black transition-all">
+                    Redeem Enrollment Code
+                  </button>
+                </div>
               {% else %}
-                <!-- Placeholder for enrolled but empty -->
-                <div class="p-8 text-center bg-white rounded-lg border text-gray-500">
-                  <p class="text-sm">You are enrolled, but you have no course records yet.</p>
+                <div class="p-12 text-center bg-white rounded-xl border text-gray-500">
+                  <h3 class="text-lg font-semibold text-gray-700">No Course Records Found</h3>
+                  <p class="text-sm">Your enrollment is verified, but subject records are not yet synchronized.</p>
                 </div>
               {% endif %}
             </div>
@@ -319,77 +338,100 @@
 
           <!-- Progress Tab -->
           <div class="tab-content hidden" id="tab-progress">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
-                <div class="flex flex-col space-y-1.5 p-6">
-                  <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
-                    Academic Standing
-                  </h3>
-                </div>
-                <div class="p-6 pt-0">
-                  <div class="space-y-4">
-                    <div>
-                      <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">GPA</span>
-                        <span class="text-2xl font-bold text-light-blue">3.75</span>
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
+                  <div class="flex flex-col space-y-1.5 p-6">
+                    <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
+                      Academic Standing
+                    </h3>
+                  </div>
+                  <div class="p-6 pt-0">
+                    <div class="space-y-4">
+                      <div>
+                        <div class="flex justify-between mb-2">
+                          <span class="text-gray-600">Overall Progress</span>
+                          <span class="text-2xl font-bold text-light-blue" id="standing-percentage">0%</span>
+                        </div>
+                        <div class="relative w-full overflow-hidden rounded-full bg-gray-200 h-2">
+                          <div id="standing-progress-bar" class="h-full bg-light-blue transition-all" style="width: 0%"></div>
+                        </div>
                       </div>
-                      <div class="relative w-full overflow-hidden rounded-full bg-secondary bg-gray-200 h-2">
-                        <div class="h-full bg-primary transition-all bg-light-blue" style="transform: translateX(-6.25%)"></div>
-                      </div>
-                    </div>
-                    
-                    <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200"></div>
-                    
-                    <div class="space-y-2">
-                      <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Units Completed</span>
-                        <span class="font-semibold">45 / 120</span>
-                      </div>
-                      <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Academic Year</span>
-                        <span class="font-semibold">2nd Year</span>
+                      
+                      <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200"></div>
+                      
+                      <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Subjects Passed</span>
+                          <span class="font-semibold" id="passed-count-label">0 / 80</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Major</span>
+                          <span class="font-semibold">BS Information Technology</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
-                <div class="flex flex-col space-y-1.5 p-6">
-                  <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    Recent Grades
-                  </h3>
-                </div>
-                <div class="p-6 pt-0">
-                  <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <p class="font-medium">CS-101</p>
-                        <p class="text-sm text-gray-600">Programming</p>
-                      </div>
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-green-500 text-white">
-                        1.50
-                      </div>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
+                  <div class="flex flex-col space-y-1.5 p-6">
+                    <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/></svg>
+                      Curriculum Summary
+                    </h3>
+                  </div>
+                  <div class="p-6 pt-0">
+                    <div class="grid grid-cols-2 gap-4">
+                       <div class="p-3 bg-gray-50 rounded-lg text-center">
+                          <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Units</p>
+                          <p class="text-xl font-black text-navy">158</p>
+                       </div>
+                       <div class="p-3 bg-gray-50 rounded-lg text-center">
+                          <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
+                          <p class="text-xs font-bold text-green-600">ACTIVE</p>
+                       </div>
                     </div>
-                    
-                    <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200"></div>
-                    
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <p class="font-medium">MATH-201</p>
-                        <p class="text-sm text-gray-600">Calculus II</p>
-                      </div>
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-green-500 text-white">
-                        1.75
-                      </div>
-                    </div>
+                    <p class="text-[10px] text-gray-400 mt-4 leading-relaxed">Your curriculum is synchronized with your advisor. Any updates made by the advisor will reflect here immediately.</p>
                   </div>
                 </div>
+
               </div>
 
+              <!-- Detailed Curriculum Checklist -->
+              <div class="rounded-lg border bg-white shadow-md overflow-hidden">
+                <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+                  <h4 class="font-bold text-gray-800">My Curriculum Checklist</h4>
+                  <div class="flex gap-2">
+                    <select id="student-year-filter" class="text-xs border rounded px-2 py-1 outline-none" onchange="filterStudentChecklist()">
+                      <option value="all">All Years</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar">
+                  <table class="w-full text-sm">
+                    <thead class="sticky top-0 bg-white border-b z-10">
+                      <tr class="text-left text-gray-500">
+                        <th class="p-3 font-semibold uppercase text-[10px] w-24">Code</th>
+                        <th class="p-3 font-semibold uppercase text-[10px]">Subject Title</th>
+                        <th class="p-3 font-semibold uppercase text-[10px] w-12 text-center">Units</th>
+                        <th class="p-3 font-semibold uppercase text-[10px] w-32">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="student-curriculum-body" class="divide-y divide-gray-100">
+                      <tr>
+                        <td colspan="4" class="p-8 text-center text-gray-400">Loading curriculum data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -673,25 +715,28 @@
     </div>
   </div>
 
-  <!-- Enrollment Verification Modal -->
+  <!-- Enrollment Code Redemption Modal -->
   <div id="enrollment-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-      <div class="p-6 border-b">
-        <h3 class="text-xl font-bold text-gray-900">Verify Enrollment</h3>
-        <p class="text-sm text-gray-500 mt-1">Enter your curriculum or registration code to verify your enrollment status.</p>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-6 border-b bg-gradient-to-r from-navy to-light-blue text-white">
+        <h3 class="text-xl font-bold">Redeem Enrollment Code</h3>
+        <p class="text-sm opacity-80 mt-1">Enter the code provided by your advisor to automatically enroll in approved subjects.</p>
       </div>
       <form method="POST" action="{% url 'student_dashboard' %}">
         {% csrf_token %}
-        <input type="hidden" name="action" value="enroll_verification">
-        <div class="p-6 space-y-4">
+        <input type="hidden" name="action" value="redeem_code">
+        <div class="p-8 space-y-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Curriculum Code *</label>
-            <input name="curriculum_code" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. BSCS-2026-A">
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Enrollment Code</label>
+            <input name="enrollment_code" type="text" required 
+                   class="flex h-14 w-full rounded-lg border-2 border-gray-100 text-2xl font-mono font-bold px-4 py-2 text-center focus:border-light-blue focus:ring-0 outline-none transition-all" 
+                   placeholder="XXXX-XXXX-XXXX">
+            <p class="text-[10px] text-gray-400 text-center italic">Example: 8fac-4b12-98ed</p>
           </div>
         </div>
-        <div class="p-6 border-t bg-light-gray flex justify-end gap-3">
-          <button type="button" onclick="document.getElementById('enrollment-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:opacity-90 shadow-md">Submit Verification</button>
+        <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+          <button type="button" onclick="document.getElementById('enrollment-modal').classList.add('hidden')" class="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700">Cancel</button>
+          <button type="submit" class="px-8 py-2.5 text-sm font-bold text-white bg-navy rounded-lg hover:bg-black shadow-lg transition-all active:scale-95">Redeem & Enroll</button>
         </div>
       </form>
     </div>
@@ -1100,19 +1145,76 @@
             });
         }
 
-        if (msgContent && msgForm) {
-            msgContent.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            });
-            msgContent.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { 
-                    e.preventDefault(); 
-                    if (this.value.trim()) msgForm.dispatchEvent(new Event('submit')); 
-                }
-            });
-        }
+        // ─── My Curriculum Logic ─────────────────────────────────────────────
+        window.loadMyCurriculum = function() {
+            const body = document.getElementById('student-curriculum-body');
+            if (!body) return;
 
+            fetch('/api/curriculum/my/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">${data.error}</td></tr>`;
+                        return;
+                    }
+
+                    body.innerHTML = '';
+                    let passedCount = 0;
+                    const totalSubjects = data.curriculum.length;
+
+                    data.curriculum.forEach(subj => {
+                        if (subj.status === 'passed') passedCount++;
+
+                        const statusClass = {
+                            'passed': 'bg-green-100 text-green-700 border-green-200',
+                            'failed': 'bg-red-100 text-red-700 border-red-200',
+                            'in_progress': 'bg-blue-100 text-blue-700 border-blue-200',
+                            'not_taken': 'bg-gray-100 text-gray-500 border-gray-200'
+                        }[subj.status] || 'bg-gray-100';
+
+                        const row = `
+                            <tr class="student-curr-row hover:bg-gray-50 transition-colors" data-year="${subj.year_level}">
+                                <td class="p-3 font-mono text-xs font-bold text-navy">${subj.code}</td>
+                                <td class="p-3">
+                                    <p class="font-medium text-gray-900">${subj.title}</p>
+                                    <p class="text-[10px] text-gray-400">Prereq: ${subj.prerequisite_codes || 'None'}</p>
+                                </td>
+                                <td class="p-3 text-center font-medium">${subj.units}</td>
+                                <td class="p-3">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${statusClass} capitalize">
+                                        ${subj.status.replace('_', ' ')}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                        body.insertAdjacentHTML('beforeend', row);
+                    });
+
+                    // Update metrics
+                    const percent = totalSubjects > 0 ? Math.round((passedCount / totalSubjects) * 100) : 0;
+                    const standingPerc = document.getElementById('standing-percentage');
+                    const standingBar = document.getElementById('standing-progress-bar');
+                    const passedLabel = document.getElementById('passed-count-label');
+                    
+                    if (standingPerc) standingPerc.innerText = `${percent}%`;
+                    if (standingBar) standingBar.style.width = `${percent}%`;
+                    if (passedLabel) passedLabel.innerText = `${passedCount} / ${totalSubjects}`;
+                })
+                .catch(err => {
+                    body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">Failed to load curriculum.</td></tr>`;
+                });
+        };
+
+        window.filterStudentChecklist = function() {
+            const year = document.getElementById('student-year-filter').value;
+            document.querySelectorAll('.student-curr-row').forEach(row => {
+                if (year === 'all' || row.dataset.year === year) row.style.display = '';
+                else row.style.display = 'none';
+            });
+        };
+
+        // Load curriculum on start
+        loadMyCurriculum();
 
     });
 </script>
