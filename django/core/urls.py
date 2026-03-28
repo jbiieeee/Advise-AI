@@ -25,4 +25,6 @@ urlpatterns = [
     path('api/curriculum/mine/', views.get_my_curriculum, name='get_my_curriculum'),
     path('api/curriculum/update-subject/', views.update_student_subject, name='update_student_subject'),
     path('api/enrollment/generate-code/', views.generate_enrollment_code, name='generate_enrollment_code'),
+    path('api/enrollment/request-subject/', views.request_subject_enrollment, name='request_subject_enrollment'),
+    path('api/enrollment/process/', views.process_enrollment_request, name='process_enrollment_request'),
 ]

@@ -90,6 +90,15 @@
               <p class="text-xs text-gray-600">Total Appointments</p>
             </div>
           </div>
+          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow">
+            <div class="p-2 bg-yellow-500 rounded-lg text-white shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900">{{ total_pending }}</p>
+              <p class="text-xs text-gray-600">Pending Enrollments</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -192,29 +201,67 @@
             <div class="mb-4 relative">
               <input class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm w-full" placeholder="Search enrollments...">
             </div>
-            <div class="relative w-full overflow-auto">
+            <div class="relative w-full overflow-auto max-h-[500px] custom-scrollbar">
               <table class="w-full caption-bottom text-sm">
-                <thead class="[&_tr]:border-b">
+                <thead class="sticky top-0 bg-white border-b z-20">
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th class="h-12 px-4 text-left font-medium text-muted-foreground">Request ID</th>
-                    <th class="h-12 px-4 text-left font-medium text-muted-foreground">Student</th>
-                    <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
-                    <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
+                    <th class="h-12 px-4 text-left font-semibold text-gray-900 uppercase text-[11px] tracking-wider">Student</th>
+                    <th class="h-12 px-4 text-left font-semibold text-gray-900 uppercase text-[11px] tracking-wider">Subject</th>
+                    <th class="h-12 px-4 text-left font-semibold text-gray-900 uppercase text-[11px] tracking-wider">Code / Term</th>
+                    <th class="h-12 px-4 text-center font-semibold text-gray-900 uppercase text-[11px] tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody class="[&_tr:last-child]:border-0">
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
-                    <td class="p-4 align-middle font-medium">ENR-001</td>
+                <tbody class="divide-y divide-gray-100">
+                  {% for req in pending_requests %}
+                  <tr class="transition-colors hover:bg-blue-50/30 group">
                     <td class="p-4 align-middle">
-                      <div><p class="font-medium">Maria Santos</p></div>
+                      <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-full bg-navy/10 text-navy flex items-center justify-center text-xs font-bold">
+                           {{ req.student.first_name|first }}{{ req.student.last_name|first }}
+                        </div>
+                        <div>
+                          <p class="font-bold text-gray-900">{{ req.student.first_name }} {{ req.student.last_name }}</p>
+                          <p class="text-[10px] text-gray-500 font-mono">{{ req.student.userprofile.student_id|default:"ID MISSING" }}</p>
+                        </div>
+                      </div>
                     </td>
                     <td class="p-4 align-middle">
-                      <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-900">pending</div>
+                      <p class="font-bold text-navy text-xs">{{ req.subject.code }}</p>
+                      <p class="text-[11px] text-gray-600 leading-tight">{{ req.subject.title }}</p>
                     </td>
                     <td class="p-4 align-middle">
-                       <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 bg-gradient-to-r from-navy to-light-blue text-white">Approve</button>
+                      <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-light-blue">{{ req.enrollment_code.code|default:"MANUAL" }}</span>
+                        <span class="text-[10px] text-gray-400 font-medium">{{ req.term_label }}</span>
+                      </div>
+                    </td>
+                    <td class="p-4 align-middle text-center">
+                       <div class="flex items-center justify-center gap-2">
+                         <form method="POST" action="{% url 'admin_dashboard' %}">
+                           {% csrf_token %}
+                           <input type="hidden" name="action" value="admin_approve_enrollment">
+                           <input type="hidden" name="request_id" value="{{ req.id }}">
+                           <button type="submit" class="h-8 px-3 rounded bg-green-500 text-white text-[10px] font-bold hover:bg-green-600 shadow-sm transition-all">Approve</button>
+                         </form>
+                         <form method="POST" action="{% url 'admin_dashboard' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="admin_decline_enrollment">
+                            <input type="hidden" name="request_id" value="{{ req.id }}">
+                            <button type="submit" class="h-8 px-3 rounded border border-red-200 text-red-500 text-[10px] font-bold hover:bg-red-50 transition-all">Decline</button>
+                         </form>
+                       </div>
                     </td>
                   </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="p-12 text-center">
+                       <div class="flex flex-col items-center gap-2 text-gray-400">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-30"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                         <p class="text-sm font-medium">No pending enrollment requests</p>
+                       </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>

@@ -158,8 +158,12 @@ class EnrollmentCode(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.code:
-            # Generate a clean 12-char alphanumeric code
-            raw = uuid.uuid4().hex.upper()
+            import random
+            import string
+            length = 12
+            chars = string.ascii_uppercase + string.digits
+            # Generate a truly random 12-char alphanumeric code: XXXX-XXXX-XXXX
+            raw = ''.join(random.choice(chars) for _ in range(length))
             self.code = f"{raw[:4]}-{raw[4:8]}-{raw[8:12]}"
         super().save(*args, **kwargs)
 
@@ -169,11 +173,17 @@ class EnrollmentCode(models.Model):
 
 class TermEnrollment(models.Model):
     """Subjects a student is enrolled in for a specific term, created upon code redemption."""
+    STATUS_CHOICES = (
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('declined', 'Declined'),
+    )
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='term_enrollments')
     subject = models.ForeignKey(CurriculumSubject, on_delete=models.CASCADE, related_name='term_enrollments')
     enrollment_code = models.ForeignKey(EnrollmentCode, on_delete=models.SET_NULL, null=True, related_name='term_enrollments')
     term_label = models.CharField(max_length=100)
     enrolled_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     class Meta:
         unique_together = ('student', 'subject', 'term_label')

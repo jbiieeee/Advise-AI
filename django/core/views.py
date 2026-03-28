@@ -1,10 +1,16 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import UserProfile
+from django.db.models import Q
+from .models import (
+    UserProfile, CurriculumSubject, 
+    TermEnrollment, StudentCurriculum, EnrollmentCode,
+    FormSubmission, Appointment, Message
+)
 
 def landing_page(request):
     return render(request, 'core/landing.html')
@@ -109,6 +115,24 @@ from .models import (
     CurriculumSubject, StudentCurriculum, EnrollmentCode, TermEnrollment,
 )
 
+def get_recommended_subjects(user):
+    from .models import CurriculumSubject, StudentCurriculum
+    all_subjects = CurriculumSubject.objects.all().order_by('year_level', 'semester')
+    passed_subjects = set(StudentCurriculum.objects.filter(student=user, status='passed').values_list('subject__code', flat=True))
+    in_progress = set(StudentCurriculum.objects.filter(student=user, status='in_progress').values_list('subject__code', flat=True))
+    
+    recommended = []
+    for subj in all_subjects:
+        if subj.code in passed_subjects or subj.code in in_progress:
+            continue
+            
+        prereqs = [p.strip() for p in (subj.prerequisite_codes or '').split(',') if p.strip()]
+        if all(p in passed_subjects for p in prereqs):
+            recommended.append(subj)
+            if len(recommended) >= 5: # Limit to 5
+                break
+    return recommended
+
 @login_required(login_url='login')
 def student_dashboard(request):
     user = request.user
@@ -125,24 +149,18 @@ def student_dashboard(request):
                 from django.utils import timezone
                 try:
                     enc = EnrollmentCode.objects.get(code=code_str, student=user, used=False)
-                    # Create TermEnrollment records for each approved subject
+                    # Create TermEnrollment records for each approved subject with 'pending' status
                     for subj in enc.approved_subjects.all():
                         TermEnrollment.objects.get_or_create(
                             student=user, subject=subj, term_label=enc.term_label,
-                            defaults={'enrollment_code': enc}
-                        )
-                        # Mark as in_progress in student curriculum
-                        StudentCurriculum.objects.update_or_create(
-                            student=user, subject=subj,
-                            defaults={'status': 'in_progress', 'term_taken': enc.term_label}
+                            defaults={'enrollment_code': enc, 'status': 'pending'}
                         )
                     enc.used = True
                     enc.used_at = timezone.now()
                     enc.save()
-                    profile.enrollment_status = 'enrolled'
-                    profile.curriculum_code = code_str
+                    profile.enrollment_status = 'pending'
                     profile.save()
-                    messages.success(request, f'Enrollment successful! You are now enrolled for {enc.term_label}.')
+                    messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
                 except EnrollmentCode.DoesNotExist:
                     messages.error(request, 'Invalid or already-used Enrollment Code. Please contact your adviser.')
 
@@ -221,11 +239,18 @@ def student_dashboard(request):
 
     # Fetch data for dashboard
     enrollment_status = profile.enrollment_status
-    courses = Enrollment.objects.filter(student=user) if enrollment_status == 'enrolled' else []
+    # Get term enrollments grouped by status
+    approved_enrollments = profile.user.term_enrollments.filter(status='approved').select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
+    pending_enrollments = profile.user.term_enrollments.filter(status='pending').select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
     
-    # New: Term enrollments from code redemption
-    term_enrollments = TermEnrollment.objects.filter(student=user).select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
-    active_term_label = term_enrollments.values_list('term_label', flat=True).first() if term_enrollments.exists() else None
+    active_term_label = approved_enrollments.values_list('term_label', flat=True).first() or pending_enrollments.values_list('term_label', flat=True).first()
+
+    # Get curriculum status for tags
+    curriculum_records = StudentCurriculum.objects.filter(student=user)
+    curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
+    
+    # Recommendations
+    recommended_subjects = get_recommended_subjects(profile)
 
     student_forms = FormSubmission.objects.filter(student=user).order_by('-submitted_at')
     student_appointments = Appointment.objects.filter(student=user).order_by('-date_time')
@@ -249,16 +274,17 @@ def student_dashboard(request):
     context = {
         'profile': profile,
         'enrollment_status': enrollment_status,
-        'courses': courses,
-        'term_enrollments': term_enrollments,
+        'term_enrollments': approved_enrollments,
+        'pending_enrollments': pending_enrollments,
         'active_term_label': active_term_label,
+        'curriculum_status_map': curriculum_status_map,
+        'recommended_subjects': recommended_subjects,
         'pending_approvals': pending_approvals,
         'appointments_count': appointments_count,
         'student_forms': student_forms,
         'student_appointments': student_appointments,
         'advisers_list': advisers_list,
         'all_staff_ids_json': all_staff_ids_json,
-
     }
     return render(request, 'core/student.html', context)
 
@@ -521,7 +547,49 @@ def admin_dashboard(request):
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action == 'add_staff':
+        if action == 'admin_approve_enrollment':
+            req_id = request.POST.get('request_id')
+            from .models import TermEnrollment, StudentCurriculum
+            try:
+                enr = TermEnrollment.objects.get(id=req_id)
+                enr.status = 'approved'
+                enr.save()
+                
+                # Also update StudentCurriculum to 'in_progress'
+                StudentCurriculum.objects.update_or_create(
+                    student=enr.student, subject=enr.subject,
+                    defaults={'status': 'in_progress', 'term_taken': enr.term_label}
+                )
+                
+                # Check if all pending for this student are done to update profile status
+                if not TermEnrollment.objects.filter(student=enr.student, status='pending').exists():
+                    p = enr.student.userprofile
+                    p.enrollment_status = 'enrolled'
+                    p.save()
+                    
+                messages.success(request, f"Approved enrollment for {enr.student.first_name} - {enr.subject.code}")
+            except TermEnrollment.DoesNotExist:
+                messages.error(request, "Enrollment request not found.")
+                
+        elif action == 'admin_decline_enrollment':
+            req_id = request.POST.get('request_id')
+            from .models import TermEnrollment
+            try:
+                enr = TermEnrollment.objects.get(id=req_id)
+                enr.status = 'declined'
+                enr.save()
+                
+                # If no more pending, update profile
+                if not TermEnrollment.objects.filter(student=enr.student, status='pending').exists():
+                    p = enr.student.userprofile
+                    p.enrollment_status = 'not_enrolled' # or keep as it was
+                    p.save()
+                    
+                messages.warning(request, f"Declined enrollment for {enr.student.first_name} - {enr.subject.code}")
+            except TermEnrollment.DoesNotExist:
+                messages.error(request, "Enrollment request not found.")
+
+        elif action == 'add_staff':
             name = request.POST.get('name')
             email = request.POST.get('email')
             password = request.POST.get('password')
@@ -611,19 +679,21 @@ def admin_dashboard(request):
     advisers = staff_users.filter(role='adviser')
     admins = staff_users.filter(role='admin')
     students = UserProfile.objects.filter(role='student')
-    pending_enrollments = UserProfile.objects.filter(role='student', enrollment_status='pending')
+    from .models import TermEnrollment
+    pending_requests = TermEnrollment.objects.filter(status='pending').select_related('student', 'subject', 'enrollment_code')
     
     context = {
         'staff_users': staff_users,
         'advisers': advisers,
         'admins': admins,
         'students': students,
-        'pending_enrollments': pending_enrollments,
+        'pending_requests': pending_requests,
         'total_students': students.count(),
         'total_staff': staff_users.count(),
         'online_users': User.objects.filter(is_active=True).count(),
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
+        'total_pending': pending_requests.count(),
         'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours"
     }
     return render(request, 'core/admin.html', context)
@@ -933,10 +1003,124 @@ def generate_enrollment_code(request):
     enc.approved_subjects.set(subjects)
 
     return JsonResponse({
-        'status': 'ok',
+        'status': 'success',
         'code': enc.code,
         'term_label': enc.term_label,
         'student_name': f"{student.first_name} {student.last_name}".strip() or student.username,
         'subjects': [{'id': s.id, 'code': s.code, 'title': s.title, 'units': s.units} for s in subjects],
     })
+
+@login_required
+def request_subject_enrollment(request):
+    """
+    Endpoint for students to manually request enrollment in a specific subject.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            subject_id = data.get('subject_id')
+            term_label = data.get('term_label', 'Manual Request')
+            
+            user_profile = request.user.userprofile
+            subject = CurriculumSubject.objects.get(id=subject_id)
+            
+            # Create or update TermEnrollment with 'pending' status
+            enrollment, created = TermEnrollment.objects.get_or_create(
+                student=request.user,
+                subject=subject,
+                defaults={'term_label': term_label, 'status': 'pending'}
+            )
+            
+            if not created:
+                enrollment.status = 'pending'
+                enrollment.save()
+            
+            # Update student status to 'pending' if not already enrolled
+            if user_profile.enrollment_status != 'enrolled':
+                user_profile.enrollment_status = 'pending'
+                user_profile.save()
+            
+            return JsonResponse({'status': 'success', 'message': f'Request for {subject.code} submitted.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)})
+    return JsonResponse({'status': 'error', 'error': 'Invalid request method.'})
+
+@login_required
+def process_enrollment_request(request):
+    """
+    Endpoint for Admins to approve or decline enrollment requests.
+    """
+    if not request.user.is_superuser:
+        return JsonResponse({'status': 'error', 'error': 'Unauthorized.'})
+        
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            enrollment_ids = data.get('enrollment_ids', [])
+            action = data.get('action') # 'approve' or 'decline'
+            
+            if action not in ['approve', 'decline']:
+                return JsonResponse({'status': 'error', 'error': 'Invalid action.'})
+            
+            enrollments = TermEnrollment.objects.filter(id__in=enrollment_ids)
+            
+            for enrollment in enrollments:
+                if action == 'approve':
+                    enrollment.status = 'approved'
+                else:
+                    enrollment.status = 'declined'
+                enrollment.save()
+                
+                # Check if student has any more pending requests
+                student_user = enrollment.student
+                if not TermEnrollment.objects.filter(student=student_user, status='pending').exists():
+                    p = student_user.userprofile
+                    if TermEnrollment.objects.filter(student=student_user, status='approved').exists():
+                        p.enrollment_status = 'enrolled'
+                    else:
+                        p.enrollment_status = 'not_enrolled'
+                    p.save()
+
+            return JsonResponse({'status': 'success', 'message': f'Successfully {action}ed {len(enrollment_ids)} requests.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)})
+    return JsonResponse({'status': 'error', 'error': 'Invalid request method.'})
+
+def get_recommended_subjects(student_profile):
+    """
+    Helper function to suggest subjects based on curriculum and prerequisites.
+    """
+    curriculum = CurriculumSubject.objects.all().order_by('year_level', 'semester')
+    passed_subjects = set(TermEnrollment.objects.filter(
+        student=student_profile.user, 
+        status='approved'
+    ).values_list('subject__code', flat=True))
+    
+    in_progress = set(TermEnrollment.objects.filter(
+        student=student_profile.user, 
+        status='pending'
+    ).values_list('subject__code', flat=True))
+    
+    recommendations = []
+    
+    for subject in curriculum:
+        # Don't recommend if already passed or pending
+        if subject.code in passed_subjects or subject.code in in_progress:
+            continue
+            
+        # Check prerequisites
+        prereqs = [p.strip() for p in subject.prerequisite_codes.split(',') if p.strip() and p.strip().lower() != 'none']
+        
+        all_met = True
+        for p in prereqs:
+            if p not in passed_subjects:
+                all_met = False
+                break
+        
+        if all_met:
+            recommendations.append(subject)
+            if len(recommendations) >= 5: # Limit to 5 suggestions
+                break
+                
+    return recommendations
 
