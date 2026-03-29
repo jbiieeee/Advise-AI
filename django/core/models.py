@@ -82,9 +82,25 @@ class Message(models.Model):
     content = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    is_staff_only = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"From {self.sender.username} to {self.receiver.username} at {self.sent_at}"
+        return f"From {self.sender.username} to {self.receiver.username} at {self.sent_at} ({'Staff' if self.is_staff_only else 'General'})"
+
+class Notification(models.Model):
+    EVENT_TYPES = (
+        ('new_student', 'New Student Account'),
+        ('enrollment_code_redeemed', 'Enrollment Code Redeemed'),
+        ('enrollment_approved', 'Enrollment Approved'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.event_type} for {self.user.username} at {self.created_at}"
 
 
 # ─────────────────────────────────────────────────────────────

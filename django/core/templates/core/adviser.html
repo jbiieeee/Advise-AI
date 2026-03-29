@@ -164,22 +164,49 @@
 
     <!-- Dashboard Tabs Container -->
     <div class="space-y-6" id="dashboard-tabs">
-      <div
-        class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto flex shadow-sm bg-gray-100">
+      <div class="inline-flex h-12 items-center justify-start rounded-xl bg-gray-100 p-1.5 text-muted-foreground w-full sm:w-auto shadow-inner border border-gray-200 overflow-x-auto no-scrollbar">
+        <!-- Inquiry Tab -->
         <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
           data-tab="inquiries" data-state="active">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
             <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
           </svg>
           Student Inquiries
         </button>
+        
+        <!-- Staff Messaging (Staff Management) - MOVED HIGHER -->
         <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-navy data-[state=active]:text-white data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
+          data-tab="staff-messaging" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Staff Messaging
+        </button>
+
+        <!-- Messages Tab -->
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
+          data-tab="messages" data-state="inactive" id="messages-tab-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          Messages
+          {% if total_unread > 0 %}
+          <span class="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none shadow-sm">{{ total_unread }}</span>
+          {% endif %}
+        </button>
+
+        <!-- Appointments Tab -->
+        <button
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
           data-tab="appointments" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
             <line x1="16" x2="16" y1="2" y2="6" />
             <line x1="8" x2="8" y1="2" y2="6" />
@@ -187,24 +214,13 @@
           </svg>
           Appointments
         </button>
+
+        <!-- Students Tab -->
         <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-          data-tab="messages" data-state="inactive" id="messages-tab-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          Messages
-          {% if total_unread > 0 %}
-          <span class="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">{{
-            total_unread }}</span>
-          {% endif %}
-        </button>
-        <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
           data-tab="students" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -212,15 +228,17 @@
           </svg>
           My Students
         </button>
+
+        <!-- Curriculum Tab -->
         <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
           data-tab="curriculum" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
             <path d="M6 2v20"/><path d="M10 7h7"/><path d="M10 11h7"/><path d="M10 15h7"/>
           </svg>
-          Curriculum & Enrollment
+          Curriculum
         </button>
       </div>
 
@@ -331,6 +349,85 @@
 
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Staff Messaging Tab (DMs) - MOVED HIGHER -->
+      <div class="tab-content hidden" id="tab-staff-messaging">
+        <!-- Main container: Responsive flex layout -->
+        <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-lg border overflow-hidden relative" style="height: 600px;">
+           
+           <!-- Contacts Sidebar -->
+           <div id="staff-contacts-sidebar" class="w-full lg:w-80 border-r bg-gray-50 flex flex-col transition-all duration-300">
+              <div class="p-5 border-b bg-white flex items-center justify-between">
+                 <div>
+                    <h3 class="font-bold text-navy flex items-center gap-2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                       Staff Directory
+                    </h3>
+                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-black">Admins & Co-Admins</p>
+                 </div>
+              </div>
+              <div id="staff-contacts-list" class="flex-1 overflow-y-auto divide-y divide-gray-100 custom-scrollbar">
+                  <!-- JS Injected Contacts -->
+                  <div class="p-8 text-center text-gray-400">
+                    <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                    <p class="text-xs">Loading directory...</p>
+                  </div>
+              </div>
+           </div>
+
+           <!-- Chat Area -->
+           <div id="staff-chat-window" class="hidden lg:flex flex-1 flex-col bg-white transition-all duration-300">
+              <!-- Header -->
+              <div id="staff-chat-header-div" class="p-4 border-b flex items-center justify-between bg-white shadow-sm z-10 shrink-0">
+                 <div class="flex items-center gap-3">
+                    <!-- Mobile Back Button -->
+                    <button id="staff-chat-back-btn" class="lg:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <!-- Avatar -->
+                    <div id="staff-chat-contact-avatar" class="size-10 bg-gradient-to-br from-navy to-light-blue rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md hidden animate-in zoom-in duration-300">?</div>
+                    <div>
+                       <h3 id="staff-chat-contact-name" class="font-bold text-gray-800 leading-tight">Select an Admin</h3>
+                       <p id="staff-chat-contact-role" class="text-[10px] font-bold text-light-blue uppercase tracking-tighter mt-0.5"></p>
+                    </div>
+                 </div>
+              </div>
+              
+              <!-- Messages -->
+              <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/20 custom-scrollbar scroll-smooth">
+                 <!-- JS Injected Messages -->
+                 <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-4 px-6 text-center">
+                    <div class="size-16 rounded-full bg-navy/5 flex items-center justify-center mb-2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8L3 21"/><path d="M12 8h.01"/><path d="M12 12h.01"/><path d="M12 16h.01"/></svg>
+                    </div>
+                    <div>
+                       <p class="text-sm font-bold text-gray-500">Coordinate with Admins</p>
+                       <p class="text-xs mt-1">Select a system administrator to start a secure internal message.</p>
+                    </div>
+                 </div>
+              </div>
+
+              <!-- Input Area -->
+              <div class="p-4 border-t bg-white shrink-0">
+                 <form id="staff-chat-form" class="flex gap-2 items-end">
+                    <input type="hidden" id="staff-receiver-id" value="">
+                    <div class="flex-1 relative">
+                       <textarea id="staff-chat-input" 
+                                 class="w-full flex min-h-[44px] max-h-32 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-light-blue focus:border-transparent outline-none text-sm transition-all resize-none bg-gray-50 whitespace-pre-wrap" 
+                                 placeholder="Write a message..." 
+                                 rows="1" 
+                                 disabled></textarea>
+                    </div>
+                    <button type="submit" 
+                            class="bg-navy text-white size-11 flex items-center justify-center rounded-xl font-bold hover:bg-navy/90 transition-all shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale shrink-0" 
+                            disabled>
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                 </form>
+              </div>
+           </div>
         </div>
       </div>
 
@@ -676,118 +773,156 @@
 
       <!-- ============================= CURRICULUM & ENROLLMENT TAB ============================= -->
       <div class="tab-content hidden" id="tab-curriculum">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="space-y-6">
           
-          <!-- LEFT: Student Selector & Tools -->
-          <div class="lg:col-span-1 space-y-6">
-            <div class="rounded-lg border bg-white shadow-sm p-4">
-              <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Select Student
-              </h3>
-              <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {% for student in my_students %}
-                <button onclick="loadStudentCurriculum({{ student.user.id }})" 
-                        class="student-curr-btn w-full text-left p-3 rounded-md border border-transparent hover:border-light-blue hover:bg-blue-50 transition-all group flex items-center gap-3"
-                        data-student-id="{{ student.user.id }}">
-                  <div class="size-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 group-hover:bg-light-blue group-hover:text-white transition-colors">
-                    {{ student.user.first_name|first }}{{ student.user.last_name|first }}
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-800">{{ student.user.first_name }} {{ student.user.last_name }}</p>
-                    <p class="text-[10px] text-gray-500">{{ student.student_id|default:"BSIT" }}</p>
-                  </div>
-                </button>
-                {% endfor %}
+          <!-- TOP BAR: Student Selector & Enrollment Tools -->
+          <div class="bg-white rounded-lg border shadow-sm p-4 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+            <div class="flex-1 w-full md:w-auto">
+              <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Select Student to View Curriculum</label>
+              <div class="relative group">
+                <select onchange="loadStudentCurriculum(this.value)" id="student-selector-top"
+                        class="w-full md:w-80 border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-light-blue outline-none bg-gray-50 hover:bg-white transition-all appearance-none cursor-pointer">
+                  <option value="" disabled selected>Choose a student...</option>
+                  {% for student in my_students %}
+                  <option value="{{ student.user.id }}" data-name="{{ student.user.first_name }} {{ student.user.last_name }}">
+                    {{ student.user.first_name }} {{ student.user.last_name }} ({{ student.student_id|default:"IT" }})
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
               </div>
             </div>
 
-            <div class="rounded-lg border bg-white shadow-sm p-4">
-              <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-                Generate Code
-              </h3>
-              <div id="enrollment-tool-panel" class="opacity-40 pointer-events-none transition-opacity">
-                <p class="text-xs text-gray-500 mb-3">Select subjects from the checklist to generate a single-use code.</p>
-                <div class="space-y-3">
-                  <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Term Label</label>
+            <div id="enrollment-tool-panel" class="opacity-40 pointer-events-none transition-opacity bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Term Label</label>
                     <input type="text" id="term-label-input" value="AY 2025-2026 1st Sem" 
-                           class="w-full mt-1 border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-light-blue outline-none">
-                  </div>
-                  <div class="p-3 bg-gray-50 rounded-md border border-dashed border-gray-300">
-                    <p class="text-xs font-semibold text-gray-600 mb-1">Selected: <span id="selected-count" class="text-light-blue">0</span> subjects</p>
-                    <div id="selected-subjects-list" class="text-[10px] text-gray-500 space-y-1 max-h-32 overflow-y-auto">
-                      <!-- List of codes populated by JS -->
-                      <p class="italic">None selected</p>
-                    </div>
-                  </div>
-                  <button onclick="generateEnrollmentCode()" id="gen-code-btn" disabled
-                          class="w-full bg-gradient-to-r from-navy to-light-blue text-white py-2.5 rounded-md font-bold text-sm shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                    Generate Enrollment Code
-                  </button>
+                           class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-light-blue outline-none bg-white">
                 </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Selected</p>
+                        <p class="text-sm font-bold text-light-blue"><span id="selected-count">0</span> Subjects</p>
+                    </div>
+                    <button onclick="generateEnrollmentCode()" id="gen-code-btn" disabled
+                            class="bg-gradient-to-r from-navy to-light-blue text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                        Generate Code
+                    </button>
+                </div>
+            </div>
+          </div>
+
+          <!-- NEW: Active & Recommended Sections -->
+          <div id="student-academic-summary" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+            <!-- Active Subjects -->
+            <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden flex flex-col">
+              <div class="p-4 bg-blue-50/50 border-b border-blue-100 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-blue-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20"/><path d="m4.93 4.93 14.14 14.14"/><path d="M2 12h20"/><path d="m4.93 19.07 14.14-14.14"/></svg>
+                  <h4 class="font-bold text-sm uppercase tracking-tight">Currently Taking (In Progress)</h4>
+                </div>
+                <span id="active-count-badge" class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+              </div>
+              <div id="active-subjects-list" class="p-4 space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar flex-1 bg-white">
+                <!-- Injected by JS -->
+                <div class="py-10 text-center text-gray-400 italic text-xs">No subjects currently in progress.</div>
+              </div>
+            </div>
+
+            <!-- Recommended Subjects -->
+            <div class="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden flex flex-col">
+              <div class="p-4 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-emerald-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                  <h4 class="font-bold text-sm uppercase tracking-tight">Recommended Must-Take Courses</h4>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md uppercase">Next Best</span>
+              </div>
+              <div id="recommended-subjects-list" class="p-4 space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar flex-1 bg-white">
+                <!-- Injected by JS -->
+                <div class="py-10 text-center text-gray-400 italic text-xs">Complete prerequisites to see recommendations.</div>
               </div>
             </div>
           </div>
 
-          <!-- RIGHT: Curriculum Checklist -->
-          <div class="lg:col-span-3 space-y-6">
-            <div class="rounded-lg border bg-white shadow-sm overflow-hidden min-h-[600px] flex flex-col">
-              <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
+          <!-- MAIN: Wide Curriculum Checklist -->
+          <div class="rounded-lg border bg-white shadow-sm overflow-hidden flex flex-col transition-all duration-300" id="curr-main-container">
+            <div class="p-5 border-b bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="size-12 rounded-full bg-light-blue/10 flex items-center justify-center text-light-blue" id="curr-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>
+                </div>
                 <div>
-                  <h3 id="curr-heading" class="font-bold text-gray-900">Curriculum Checklist</h3>
-                  <p id="curr-subheading" class="text-xs text-gray-500">Select a student to view their academic records</p>
-                </div>
-                <div id="curr-filters" class="hidden flex gap-2">
-                   <select id="year-filter" class="text-xs border rounded px-2 py-1 outline-none" onchange="filterChecklist()">
-                     <option value="all">All Years</option>
-                     <option value="1">1st Year</option>
-                     <option value="2">2nd Year</option>
-                     <option value="3">3rd Year</option>
-                     <option value="4">4th Year</option>
-                   </select>
+                  <h3 id="curr-heading" class="text-lg font-bold text-gray-900">Curriculum Checklist</h3>
+                  <p id="curr-subheading" class="text-sm text-gray-500 italic">Please select a student above to begin</p>
                 </div>
               </div>
-              
-              <div id="curr-loading" class="hidden flex-1 flex flex-col items-center justify-center p-12 text-gray-400">
-                <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-sm">Fetching student curriculum...</p>
-              </div>
-
-              <div id="curr-empty" class="flex-1 flex flex-col items-center justify-center p-12 text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-50"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <p class="text-sm font-medium">No Student Selected</p>
-                <p class="text-xs">Click a student on the left to view their curriculum checklist.</p>
-              </div>
-
-              <div id="curr-table-wrapper" class="hidden flex-1 overflow-y-auto max-h-[600px] bg-gray-50/30">
-                <div id="curriculum-accordion" class="divide-y divide-gray-200">
-                  <!-- Accordion sections injected by JS -->
-                </div>
+              <div id="curr-filters" class="hidden flex items-center gap-3">
+                 <span class="text-[10px] font-bold text-gray-400 uppercase">Filter</span>
+                 <select id="year-filter" class="text-sm border rounded-lg px-3 py-1.5 outline-none bg-white focus:ring-2 focus:ring-light-blue" onchange="filterChecklist()">
+                   <option value="all">All Year Levels</option>
+                   <option value="1">1st Year</option>
+                   <option value="2">2nd Year</option>
+                   <option value="3">3rd Year</option>
+                   <option value="4">4th Year</option>
+                 </select>
               </div>
             </div>
             
-            <!-- Recently Generated Codes Area -->
-            <div class="rounded-lg border bg-white shadow-sm p-4">
-               <h4 class="font-bold text-gray-800 text-sm mb-3">Recent Enrollment Codes</h4>
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                 {% for ec in generated_codes %}
-                 <div class="p-3 border rounded-md bg-gray-50 flex flex-col gap-1 relative overflow-hidden group">
-                   {% if ec.used %}
-                   <div class="absolute -top-1 -right-8 bg-green-500 text-white text-[8px] font-bold py-1 px-8 rotate-45 shadow-sm">USED</div>
-                   {% endif %}
-                   <p class="text-[10px] font-bold text-gray-400 leading-none">CODE</p>
-                   <p class="text-sm font-mono font-bold text-navy select-all">{{ ec.code }}</p>
-                   <p class="text-[11px] font-medium text-gray-700 truncate">For: {{ ec.student.first_name }} {{ ec.student.last_name }}</p>
-                   <p class="text-[10px] text-gray-400">{{ ec.term_label }} &bull; {{ ec.created_at|date:"M d, Y" }}</p>
-                 </div>
-                 {% empty %}
-                 <p class="col-span-full text-center py-4 text-xs text-gray-400 italic">No codes generated yet.</p>
-                 {% endfor %}
-               </div>
+            <div id="curr-loading" class="hidden p-20 flex flex-col items-center justify-center text-gray-400">
+              <div class="size-10 border-4 border-light-blue border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p class="font-medium">Fetching academic records...</p>
+            </div>
+
+            <div id="curr-empty" class="p-24 flex flex-col items-center justify-center text-center text-gray-300">
+              <div class="size-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-30"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <p class="text-xl font-bold text-gray-400 mb-2">No Student Selected</p>
+              <p class="text-sm max-w-xs mx-auto">Use the dropdown above to choose a student and manage their course curriculum and enrollment requests.</p>
+            </div>
+
+            <div id="curr-table-wrapper" class="hidden flex-1 overflow-y-auto max-h-[65vh] bg-white scroll-smooth custom-scrollbar">
+              <div id="curriculum-accordion" class="divide-y divide-gray-100">
+                <!-- Accordion sections injected by JS -->
+              </div>
             </div>
           </div>
+          </div>
+          
+          <!-- RECENT CODES: Wide Grid -->
+          <div class="rounded-lg border bg-white shadow-sm p-5">
+             <div class="flex items-center justify-between mb-4">
+                <h4 class="font-bold text-gray-900 border-l-4 border-light-blue pl-3">Recent Enrollment Codes</h4>
+             </div>
+             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+               {% for ec in generated_codes %}
+               <div class="p-4 border rounded-xl bg-gray-50/50 hover:bg-white hover:shadow-md transition-all relative overflow-hidden group border-gray-100">
+                 {% if ec.used %}
+                 <div class="absolute -top-1 -right-8 bg-green-500 text-white text-[8px] font-bold py-1 px-8 rotate-45 shadow-sm">USED</div>
+                 {% endif %}
+                 <div class="flex justify-between items-start mb-2">
+                    <span class="text-[9px] font-black text-light-blue/40 tracking-widest uppercase">ENROLL_CODE</span>
+                 </div>
+                 <p class="text-lg font-mono font-bold text-navy select-all tracking-wider mb-1">{{ ec.code }}</p>
+                 <p class="text-xs font-bold text-gray-800 truncate mb-2">{{ ec.student.first_name }} {{ ec.student.last_name }}</p>
+                 <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[9px] text-gray-400">
+                    <span>{{ ec.term_label|truncatechars:15 }}</span>
+                    <span>{{ ec.created_at|date:"M d" }}</span>
+                 </div>
+               </div>
+               {% empty %}
+               <div class="col-span-full py-12 text-center">
+                 <p class="text-sm text-gray-400 italic">No enrollment codes have been generated recently.</p>
+               </div>
+               {% endfor %}
+             </div>
+          </div>
+        </div>
+      </div>
         </div>
       </div>
 
@@ -821,6 +956,7 @@
         </div>
       </div>
 
+
     </div>
   </div>
 </div>
@@ -843,6 +979,8 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // ─── Curriculum Logic ─────────────────────────────────────────────
+    const triggers = document.querySelectorAll('.tab-trigger');
+    const contents = document.querySelectorAll('.tab-content');
     let selectedStudentId = null;
     let selectedSubjectIds = new Set();
 
@@ -851,17 +989,20 @@
       selectedSubjectIds.clear();
       updateEnrollmentToolState();
 
+      // Update selector value if called programmatically
+      const selector = document.getElementById('student-selector-top');
+      if (selector) selector.value = studentId;
+
       // UI state
-      document.getElementById('curr-empty').classList.add('hidden');
-      document.getElementById('curr-table-wrapper').classList.add('hidden');
-      document.getElementById('curr-loading').classList.remove('hidden');
-      document.getElementById('curr-filters').classList.add('hidden');
+      const empty = document.getElementById('curr-empty');
+      const wrapper = document.getElementById('curr-table-wrapper');
+      const loading = document.getElementById('curr-loading');
+      const filters = document.getElementById('curr-filters');
       
-      // Update selected class on buttons
-      document.querySelectorAll('.student-curr-btn').forEach(b => {
-        b.classList.toggle('border-light-blue', b.dataset.studentId === String(studentId));
-        b.classList.toggle('bg-blue-50', b.dataset.studentId === String(studentId));
-      });
+      if (empty) empty.classList.add('hidden');
+      if (wrapper) wrapper.classList.add('hidden');
+      if (loading) loading.classList.remove('hidden');
+      if (filters) filters.classList.add('hidden');
 
       fetch(`/api/curriculum/${studentId}/`)
         .then(res => res.json())
@@ -909,23 +1050,20 @@
                               <input type="checkbox" class="subject-checkbox size-4 rounded border-gray-300 text-light-blue focus:ring-light-blue" 
                                      value="${subj.id}" data-code="${subj.code}" ${subj.status === 'passed' ? 'disabled' : ''} onchange="toggleSubjectSelection(this)">
                             </td>
-                            <td class="p-3 font-mono text-[10px] font-bold text-navy w-24">${subj.code}</td>
+                            <td class="p-3 font-mono text-[10px] font-bold text-navy w-20">${subj.code}</td>
                             <td class="p-3">
                               <p class="font-medium text-gray-900 leading-tight">${subj.title}</p>
                               <p class="text-[9px] text-gray-400 mt-0.5">${subj.units} Units · Year ${subj.year_level}, Sem ${subj.semester}</p>
                             </td>
-                            <td class="p-3 w-24 text-center">
-                              <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold border ${statusClass} capitalize whitespace-nowrap">
+                            <td class="p-3 w-20 text-center">
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border ${statusClass} capitalize whitespace-nowrap">
                                 ${subj.status.replace('_', ' ')}
                               </span>
                             </td>
-                            <td class="p-3 w-32">
-                              <select onchange="updateSubjectStatus(${selectedStudentId}, ${subj.id}, this.value)" class="text-[10px] border rounded px-1 py-1 outline-none w-full bg-white font-medium text-gray-600">
-                                <option value="not_taken" ${subj.status === 'not_taken' ? 'selected' : ''}>Not Taken</option>
-                                <option value="passed" ${subj.status === 'passed' ? 'selected' : ''}>Passed</option>
-                                <option value="failed" ${subj.status === 'failed' ? 'selected' : ''}>Failed</option>
-                                <option value="in_progress" ${subj.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-                              </select>
+                            <td class="p-3 w-28 text-right">
+                              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                                ${subj.status.replace('_', ' ')}
+                              </span>
                             </td>
                           </tr>
                         `;
@@ -938,8 +1076,85 @@
           });
           
           document.getElementById('enrollment-tool-panel').classList.remove('opacity-40', 'pointer-events-none');
+          
+          // Fetch Academic Details (Active & Recommended)
+          fetch(`/api/curriculum/details/${studentId}/`)
+            .then(res => res.json())
+            .then(details => {
+              if (details.status === 'success') {
+                renderStudentAcademicDetails(details);
+              }
+            });
         });
     };
+
+    function renderStudentAcademicDetails(details) {
+      const activeList = document.getElementById('active-subjects-list');
+      const recList = document.getElementById('recommended-subjects-list');
+      const activeBadge = document.getElementById('active-count-badge');
+      const summaryContainer = document.getElementById('student-academic-summary');
+
+      if (summaryContainer) summaryContainer.classList.remove('hidden');
+
+      // Update Active Subjects
+      activeBadge.innerText = details.active_subjects.length;
+      if (details.active_subjects.length === 0) {
+        activeList.innerHTML = `<div class="py-10 text-center text-gray-400 italic text-xs">No subjects currently in progress.</div>`;
+      } else {
+        activeList.innerHTML = details.active_subjects.map(subj => `
+          <div class="p-3 rounded-lg border border-blue-50 bg-blue-50/30 flex justify-between items-center group hover:border-blue-200 transition-all">
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-navy text-xs mb-0.5">${subj.code} &bull; ${subj.units} Units</p>
+              <p class="text-[11px] text-gray-600 truncate">${subj.title}</p>
+            </div>
+            <div class="text-right shrink-0 ml-3">
+              <span class="text-[9px] font-black text-blue-500 uppercase tracking-tighter">${subj.term || 'Enrolled'}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Update Recommended Subjects
+      if (details.recommendations.length === 0) {
+        recList.innerHTML = `<div class="py-10 text-center text-gray-400 italic text-xs">No recommendations available. Check prerequisites.</div>`;
+      } else {
+        recList.innerHTML = details.recommendations.map(subj => `
+          <div class="p-3 rounded-lg border border-emerald-50 bg-emerald-50/30 flex justify-between items-center group hover:border-emerald-200 transition-all">
+            <div class="flex-1 min-w-0">
+               <p class="font-bold text-emerald-800 text-xs mb-0.5">${subj.code} &bull; ${subj.units} Units</p>
+               <p class="text-[11px] text-gray-600 truncate">${subj.title}</p>
+            </div>
+            <div class="text-right shrink-0 ml-3">
+               <button onclick="addRecommendedToEnrollment('${subj.id}')" 
+                       class="opacity-0 group-hover:opacity-100 bg-emerald-600 text-white px-3 py-1 rounded text-[9px] font-bold transition-all shadow-sm hover:bg-emerald-700">
+                 + Add
+               </button>
+               <p class="text-[8px] font-bold text-emerald-400 uppercase tracking-tighter group-hover:hidden">Y${subj.year} S${subj.sem}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    window.addRecommendedToEnrollment = function(subjId) {
+        // Find the checkbox in the checklist and click it if not checked
+        const cb = document.querySelector(`.subject-checkbox[value="${subjId}"]`);
+        if (cb) {
+            if (!cb.checked) {
+                cb.checked = true;
+                selectedSubjectIds.add(String(subjId));
+                updateEnrollmentToolState();
+            }
+            // Optional: scroll to the item
+            cb.closest('.curr-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Flash effect
+            const row = cb.closest('.curr-row');
+            row.classList.add('bg-emerald-50');
+            setTimeout(() => row.classList.remove('bg-emerald-50'), 1000);
+        } else {
+            alert("Subject found in recommendations but not in the main checklist. It might be filtered out.");
+        }
+    }
 
     window.toggleSubjectSelection = function(cb) {
        if (cb.checked) selectedSubjectIds.add(cb.value);
@@ -949,19 +1164,10 @@
 
     function updateEnrollmentToolState() {
        const count = selectedSubjectIds.size;
-       document.getElementById('selected-count').innerText = count;
-       document.getElementById('gen-code-btn').disabled = count === 0;
-       
-       const list = document.getElementById('selected-subjects-list');
-       list.innerHTML = '';
-       if (count === 0) {
-         list.innerHTML = '<p class="italic">None selected</p>';
-       } else {
-         document.querySelectorAll('.subject-checkbox:checked').forEach(cb => {
-            const code = cb.dataset.code;
-            list.insertAdjacentHTML('beforeend', `<div class="flex items-center gap-1"><span class="size-1.5 bg-light-blue rounded-full"></span> ${code}</div>`);
-         });
-       }
+       const countEl = document.getElementById('selected-count');
+       const btn = document.getElementById('gen-code-btn');
+       if (countEl) countEl.innerText = count;
+       if (btn) btn.disabled = count === 0;
     }
 
     window.updateSubjectStatus = function(studentId, subjectId, status) {
@@ -1018,10 +1224,6 @@
 
     // ─── Interaction Listeners (Tabs, Inquiries, Search) ──────────────────
 
-    // ─── Tab switching ─────────────────────────────────────────────────────
-    const triggers = document.querySelectorAll('.tab-trigger');
-    const contents = document.querySelectorAll('.tab-content');
-
     window.activateTab = function(tabName) {
       triggers.forEach(t => {
         t.dataset.state = 'inactive';
@@ -1033,12 +1235,67 @@
       if (trigger) { trigger.dataset.state = 'active'; trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm'); }
       if (content) content.classList.remove('hidden');
       if (tabName === 'messages') startPolling(); else stopPolling();
+      if (tabName === 'staff-messaging') loadStaffContacts();
     }
 
     triggers.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
-    // Bell → Messages tab
-    document.getElementById('msg-bell-btn').addEventListener('click', () => activateTab('messages'));
+    // ─── Notifications Logic (System Alerts) ───────────────────────────
+    const msgBellBtn = document.getElementById('msg-bell-btn');
+    const notifDropdown = document.getElementById('notifications-dropdown');
+    const notifList = document.getElementById('notifications-list');
+    const msgBellBadge = document.getElementById('msg-bell-badge');
+
+    function updateNotifications() {
+        fetch('/api/notifications/system/')
+            .then(res => res.json())
+            .then(data => {
+                notifList.innerHTML = '';
+                let unreadCount = 0;
+                
+                if (data.notifications.length === 0) {
+                    notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent alerts</div>';
+                } else {
+                    data.notifications.forEach(n => {
+                        if (!n.is_read) unreadCount++;
+                        const item = document.createElement('div');
+                        item.className = `p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}`;
+                        item.innerHTML = `
+                            <p class="text-[10px] font-black text-navy uppercase tracking-tighter">${n.type.replace(/_/g, ' ')}</p>
+                            <p class="text-xs text-gray-700 mt-1 leading-tight">${n.message}</p>
+                            <p class="text-[9px] text-gray-400 mt-1">${n.created_at}</p>
+                        `;
+                        notifList.appendChild(item);
+                    });
+                }
+
+                if (unreadCount > 0) {
+                    msgBellBadge.innerText = unreadCount;
+                    msgBellBadge.classList.remove('hidden');
+                } else {
+                    msgBellBadge.classList.add('hidden');
+                }
+            });
+    }
+
+    if (msgBellBtn) {
+        msgBellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('hidden');
+            if (!notifDropdown.classList.contains('hidden')) {
+                fetch('/api/notifications/mark-read/')
+                    .then(() => updateNotifications());
+            }
+        });
+    }
+
+    document.addEventListener('click', () => {
+         if (notifDropdown) notifDropdown.classList.add('hidden');
+    });
+
+    setInterval(updateNotifications, 10000); 
+    updateNotifications();
+
 
     // ─── Inquiry respond/cancel ────────────────────────────────────────────
     document.querySelectorAll('.inquiry-controls').forEach(control => {
@@ -1099,10 +1356,7 @@
       area.innerHTML = '';
 
       msgs.forEach((m, idx) => {
-        // Use the returned is_adviser flag instead of set checks
         const isAdviser = m.is_adviser;
-
-        // Date separator
         const currentDate = m.sent_at.split(',')[0] || m.sent_at.split(' ').slice(0, 3).join(' ');
         const prevDate = idx > 0 ? (msgs[idx - 1].sent_at.split(',')[0] || msgs[idx - 1].sent_at.split(' ').slice(0, 3).join(' ')) : null;
 
@@ -1142,7 +1396,6 @@
                     `);
         }
       });
-
       if (!isPolling || wasAtBottom) area.scrollTop = area.scrollHeight;
     }
 
@@ -1152,25 +1405,21 @@
         const avatar = document.getElementById('chat-avatar');
         const nameDisplay = document.getElementById('chat-student-name');
         const studentIdInput = document.getElementById('msg-student-id');
-        
         if (avatar) avatar.textContent = initials || '??';
         if (nameDisplay) nameDisplay.textContent = studentName || 'Student';
         if (studentIdInput) studentIdInput.value = studentId;
-        
         document.querySelectorAll('.student-item').forEach(b => {
           const active = b.dataset.studentId === String(studentId);
           b.classList.toggle('bg-blue-100', active);
         });
         showChatState('loading');
       }
-
       fetch(`/adviser/conversation/${studentId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(r => r.json())
         .then(data => { renderMessages(data.messages, isPolling); })
-        .catch(err => { console.error('Conversation fetch error:', err); if (!isPolling) showChatState('no-messages'); });
+        .catch(err => { if (!isPolling) showChatState('no-messages'); });
     }
 
-    // ─── Polling every 5 seconds for real-time sync ─────────────────────
     window.startPolling = function() {
       stopPolling();
       pollTimer = setInterval(() => {
@@ -1181,7 +1430,6 @@
       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     }
 
-    // ─── Student click ─────────────────────────────────────────────────────
     document.querySelectorAll('.student-item').forEach(btn => {
       btn.addEventListener('click', () => {
         activateTab('messages');
@@ -1189,7 +1437,6 @@
       });
     });
 
-    // ─── "Message Student" shortcuts from Inquiries / My Students ──────────
     document.querySelectorAll('.open-chat-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'ST').substring(0, 2).toUpperCase();
@@ -1198,27 +1445,20 @@
       });
     });
 
-    // ─── Send message form ─────────────────────────────────────────────
     const msgForm = document.getElementById('adviser-msg-form');
     const msgContent = document.getElementById('msg-content');
 
     if (msgForm) {
       msgForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        e.stopPropagation();
-
-        const content = document.getElementById('msg-content').value.trim();
+        const content = msgContent.value.trim();
         const studentId = document.getElementById('msg-student-id').value;
-
-        if (!content) { alert('Please type a message.'); return; }
-        if (!studentId) { alert('Please select a student first.'); return; }
-
+        if (!content || !studentId) return;
+        
         const submitBtn = msgForm.querySelector('button[type=submit]');
-        if (submitBtn) { submitBtn.disabled = true; }
-
-        const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
-        const csrftoken = csrfInput ? csrfInput.value : '';
-
+        if (submitBtn) submitBtn.disabled = true;
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const postData = new URLSearchParams();
         postData.append('action', 'send_message');
         postData.append('student_id', studentId);
@@ -1227,30 +1467,226 @@
 
         fetch('{% url "adviser_dashboard" %}', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken
+          headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded', 
+            'X-Requested-With': 'XMLHttpRequest', 
+            'X-CSRFToken': csrftoken 
           },
           body: postData.toString()
         })
-          .then(r => {
-            if (!r.ok) throw new Error('Server error: ' + r.status);
-            return r.json();
-          })
-          .then(data => {
-            document.getElementById('msg-content').value = '';
-            document.getElementById('msg-content').style.height = 'auto';
-            if (activeStudentId) loadConversation(activeStudentId, null, null, true);
-          })
-          .catch(err => console.error('Send error:', err))
-          .finally(() => {
-            if (submitBtn) { submitBtn.disabled = false; }
-          });
+        .then(r => r.json())
+        .then(data => {
+            if (submitBtn) submitBtn.disabled = false;
+            if (data.status === 'success') {
+                msgContent.value = '';
+                msgContent.style.height = 'auto'; // Reset height
+                loadConversation(studentId, null, null, true);
+            } else {
+                alert('Error: ' + (data.error || 'Could not send message'));
+            }
+        })
+        .catch(err => {
+            if (submitBtn) submitBtn.disabled = false;
+            console.error('Send failed:', err);
+        });
+      });
+      
+      // Support Enter to send
+      msgContent.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          msgForm.dispatchEvent(new Event('submit'));
+        }
       });
     }
 
-    // ─── Textarea: auto-resize + Enter to send ─────────────────────────────
+    // ─── Staff Messaging Logic (DMs) ───────────────────────────────────
+    const staffContactsList = document.getElementById('staff-contacts-list');
+    const staffChatMessages = document.getElementById('staff-chat-messages');
+    const staffChatForm = document.getElementById('staff-chat-form');
+    const staffChatInput = document.getElementById('staff-chat-input');
+    const staffReceiverIdInput = document.getElementById('staff-receiver-id');
+    const staffChatContactName = document.getElementById('staff-chat-contact-name');
+    const staffChatContactRole = document.getElementById('staff-chat-contact-role');
+    const staffChatContactAvatar = document.getElementById('staff-chat-contact-avatar');
+    const staffChatWindow = document.getElementById('staff-chat-window');
+    const staffSidebar = document.getElementById('staff-contacts-sidebar');
+    const staffChatBackBtn = document.getElementById('staff-chat-back-btn');
+
+    let currentStaffMessagesJson = "";
+
+    function loadStaffContacts() {
+        fetch('/api/staff/contacts/')
+            .then(res => res.json())
+            .then(data => {
+                staffContactsList.innerHTML = '';
+                if (data.contacts.length === 0) {
+                    staffContactsList.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No admins found in directory.</div>';
+                    return;
+                }
+                data.contacts.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'p-4 hover:bg-white cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-navy group active:bg-gray-100';
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3">
+                           <div class="size-10 rounded-full bg-navy/5 text-navy flex items-center justify-center font-bold text-sm group-hover:bg-navy group-hover:text-white transition-all shadow-sm">
+                              ${c.name.charAt(0)}
+                           </div>
+                           <div class="flex-1 min-w-0">
+                              <p class="font-bold text-gray-800 truncate text-sm">${c.name}</p>
+                              <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black opacity-60">${c.role}</p>
+                           </div>
+                        </div>
+                    `;
+                    item.onclick = () => selectStaffContact(c);
+                    staffContactsList.appendChild(item);
+                });
+            });
+    }
+
+    function selectStaffContact(contact) {
+        staffReceiverIdInput.value = contact.id;
+        staffChatContactName.innerText = contact.name;
+        staffChatContactRole.innerText = contact.role.toUpperCase();
+        staffChatContactAvatar.innerText = contact.name.charAt(0);
+        staffChatContactAvatar.classList.remove('hidden');
+        staffChatInput.disabled = false;
+        staffChatForm.querySelector('button').disabled = false;
+        staffChatInput.placeholder = `Message ${contact.name}...`;
+
+        if (window.innerWidth < 1024) {
+            staffSidebar.classList.add('hidden');
+            staffChatWindow.classList.remove('hidden');
+            staffChatWindow.classList.add('flex');
+        }
+
+        loadStaffConversation(contact.id, true);
+        if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+        window.staffChatInterval = setInterval(() => loadStaffConversation(contact.id), 3000);
+    }
+
+    if (staffChatBackBtn) {
+        staffChatBackBtn.onclick = () => {
+            staffSidebar.classList.remove('hidden');
+            staffChatWindow.classList.add('hidden');
+            staffChatWindow.classList.remove('flex');
+            if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+        };
+    }
+
+    function loadStaffConversation(contactId, forceScroll = false) {
+        fetch(`/api/staff/conversation/${contactId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const messagesJson = JSON.stringify(data.messages);
+                if (messagesJson === currentStaffMessagesJson) return;
+                currentStaffMessagesJson = messagesJson;
+
+                if (data.messages) {
+                    const isAtBottom = staffChatMessages.scrollHeight - staffChatMessages.scrollTop <= staffChatMessages.clientHeight + 100;
+                    staffChatMessages.innerHTML = '';
+                    
+                    if (data.messages.length === 0) {
+                        staffChatMessages.innerHTML = `
+                            <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 py-10">
+                               <div class="size-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-30"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                               </div>
+                               <p class="text-xs font-bold">No messages yet. Send a greeting!</p>
+                            </div>`;
+                    }
+
+                    data.messages.forEach(m => {
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = `flex group ${m.is_me ? 'justify-end' : 'justify-start'} animate-in slide-in-from-${m.is_me ? 'right' : 'left'}-2 duration-300`;
+                        msgDiv.innerHTML = `
+                            <div class="max-w-[85%] sm:max-w-[70%]">
+                               <div class="rounded-2xl px-4 py-2.5 shadow-sm ${m.is_me ? 'bg-gradient-to-br from-navy to-light-blue text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'}">
+                                  <p class="text-sm leading-relaxed">${m.content}</p>
+                               </div>
+                               <p class="text-[9px] mt-1.5 opacity-60 font-bold ${m.is_me ? 'text-right' : 'text-left'}">${m.sent_at}</p>
+                            </div>
+                        `;
+                        staffChatMessages.appendChild(msgDiv);
+                    });
+                    if (forceScroll || isAtBottom) {
+                        staffChatMessages.scrollTo({ top: staffChatMessages.scrollHeight, behavior: forceScroll ? 'auto' : 'smooth' });
+                    }
+                }
+            });
+    }
+
+    staffChatInput.oninput = function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    };
+
+    // Support Enter to send for Staff Messaging
+    staffChatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        staffChatForm.dispatchEvent(new Event('submit'));
+        // Fallback if dispatchEvent doesn't trigger the onsubmit handler directly
+        if (typeof staffChatForm.onsubmit === 'function') {
+           staffChatForm.onsubmit(new Event('submit'));
+        }
+      }
+    });
+
+    staffChatForm.onsubmit = (e) => {
+        e.preventDefault();
+        const content = staffChatInput.value.trim();
+        const receiverId = staffReceiverIdInput.value;
+        if (!content || !receiverId) return;
+
+        const submitBtn = staffChatForm.querySelector('button[type=submit]');
+        if (submitBtn) submitBtn.disabled = true;
+
+        const tempId = 'temp-staff-' + Date.now();
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'flex justify-end opacity-70 scale-95 transition-all';
+        msgDiv.id = tempId;
+        msgDiv.innerHTML = `
+            <div class="max-w-[85%] sm:max-w-[70%]">
+               <div class="bg-gradient-to-br from-navy to-light-blue text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-sm">
+                  <p class="text-sm">${content}</p>
+               </div>
+               <p class="text-[9px] mt-1.5 text-right font-bold italic">Sending...</p>
+            </div>
+        `;
+        staffChatMessages.appendChild(msgDiv);
+        staffChatMessages.scrollTo({ top: staffChatMessages.scrollHeight, behavior: 'smooth' });
+
+        const formData = new FormData();
+        formData.append('receiver_id', receiverId);
+        formData.append('content', content);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        staffChatInput.value = '';
+        staffChatInput.style.height = 'auto';
+
+        fetch('/api/staff/send/', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (submitBtn) submitBtn.disabled = false;
+            if (data.status === 'success') {
+                loadStaffConversation(receiverId);
+            } else {
+                const el = document.getElementById(tempId);
+                if (el) {
+                    el.classList.replace('opacity-70', 'opacity-100');
+                    el.classList.add('text-red-500');
+                    el.querySelector('p:last-child').innerText = 'Failed: ' + (data.error || 'Server error');
+                    el.querySelector('p:last-child').classList.replace('text-white', 'text-red-500');
+                }
+            }
+        })
+        .catch(err => {
+            if (submitBtn) submitBtn.disabled = false;
+            console.error('Staff send failed:', err);
+        });
+    };
+
     if (msgContent && msgForm) {
       msgContent.addEventListener('input', function () {
         this.style.height = 'auto';

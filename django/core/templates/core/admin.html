@@ -67,7 +67,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900">{{ online_users }}</p>
+              <p id="stat-online-users" class="text-2xl font-bold text-gray-900">{{ online_users }}</p>
               <p class="text-xs text-gray-600">Current Online Users</p>
             </div>
           </div>
@@ -77,7 +77,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900">{{ total_forms }}</p>
+              <p id="stat-total-forms" class="text-2xl font-bold text-gray-900">{{ total_forms }}</p>
               <p class="text-xs text-gray-600">Total Forms</p>
             </div>
           </div>
@@ -86,7 +86,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900">{{ total_appointments }}</p>
+              <p id="stat-total-appointments" class="text-2xl font-bold text-gray-900">{{ total_appointments }}</p>
               <p class="text-xs text-gray-600">Total Appointments</p>
             </div>
           </div>
@@ -95,7 +95,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900">{{ total_pending }}</p>
+              <p id="stat-total-pending" class="text-2xl font-bold text-gray-900">{{ total_pending }}</p>
               <p class="text-xs text-gray-600">Pending Enrollments</p>
             </div>
           </div>
@@ -113,7 +113,7 @@
             </div>
             <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-700">+12%</div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_students }}</h3>
+          <h3 id="stat-total-students-l" class="text-3xl font-bold text-gray-900 mb-1">{{ total_students }}</h3>
           <p class="text-sm text-gray-600">Total Students</p>
         </div>
       </div>
@@ -135,14 +135,14 @@
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
           Manage Students
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="workload" data-state="inactive">
-          Staff Workload
-        </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage" data-state="inactive">
           Manage Advisers
         </button>
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage-admins" data-state="inactive">
           Manage Admins
+        </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="staff-messaging" data-state="inactive">
+          Staff Messaging
         </button>
       </div>
 
@@ -158,7 +158,7 @@
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <!-- Example insight card -->
                 <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div class="text-3xl font-bold text-blue-600 mb-1">{{ total_students }}</div>
+                  <div id="stat-total-students-s" class="text-3xl font-bold text-blue-600 mb-1">{{ total_students }}</div>
                   <div class="text-sm text-gray-600">Active Student-Adviser Pairs</div>
                 </div>
               </div>
@@ -167,25 +167,63 @@
         </div>
       </div>
 
-      <!-- Analytics Tab -->
       <div class="tab-content hidden" id="tab-analytics">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-light-blue bg-white">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <h3 class="font-semibold leading-none tracking-tight text-xl">System Performance Metrics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Enrollment Status Distribution -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-navy bg-white p-6">
+            <h3 class="font-bold text-lg mb-4 text-navy">Enrollment Status</h3>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <span class="text-sm font-medium text-green-700">Enrolled</span>
+                <span id="ana-enrolled-count" class="text-xl font-bold text-green-700">{{ enrolled_count }}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                <span class="text-sm font-medium text-yellow-700">Pending Approval</span>
+                <span id="ana-pending-enrollment-count" class="text-xl font-bold text-yellow-700">{{ pending_enrollment_count }}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                <span class="text-sm font-medium text-red-700">Not Enrolled</span>
+                <span id="ana-not-enrolled-count" class="text-xl font-bold text-red-700">{{ not_enrolled_count }}</span>
+              </div>
             </div>
-            <div class="p-6 pt-0">
-              <div class="space-y-4">
+          </div>
+
+          <!-- Appointments Breakdown -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-light-blue bg-white p-6">
+            <h3 class="font-bold text-lg mb-4 text-light-blue">Appointments Overview</h3>
+            <div class="space-y-4">
+               <div class="flex justify-between items-center border-b pb-2">
+                 <span class="text-sm text-gray-600">Pending</span>
+                 <span id="ana-apt-pending" class="font-bold">{{ apt_pending }}</span>
+               </div>
+               <div class="flex justify-between items-center border-b pb-2">
+                 <span class="text-sm text-gray-600">Confirmed</span>
+                 <span id="ana-apt-confirmed" class="font-bold">{{ apt_confirmed }}</span>
+               </div>
+               <div class="flex justify-between items-center">
+                 <span class="text-sm text-gray-600">Completed</span>
+                 <span id="ana-apt-completed" class="font-bold text-green-600">{{ apt_completed }}</span>
+               </div>
+            </div>
+          </div>
+
+          <!-- System Performance Wrapper -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-green-500 bg-white p-6">
+            <h3 class="font-bold text-lg mb-4 text-green-600">Response Efficiency</h3>
+            <div class="space-y-4">
                 <div>
                   <div class="flex justify-between text-sm mb-2">
-                    <span class="font-medium">Average Response Time</span>
-                    <span class="text-green-600 font-semibold">{{ avg_response_time|default:"1.2 hours" }}</span>
+                    <span class="font-medium">Avg Advisor Response</span>
+                    <span id="ana-avg-response-time" class="text-green-600 font-semibold">{{ avg_response_time }}</span>
                   </div>
                   <div class="relative w-full overflow-hidden rounded-full bg-secondary h-2 bg-gray-200">
-                    <div class="h-full bg-primary transition-all bg-green-500" style="width: 85%;"></div>
+                    <div class="h-full bg-green-500 transition-all" style="width: 85%;"></div>
                   </div>
                 </div>
-              </div>
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-sm text-gray-600">Pending Forms</span>
+                    <span id="ana-form-pending" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">{{ form_pending }}</span>
+                </div>
             </div>
           </div>
         </div>
@@ -201,7 +239,7 @@
             <div class="mb-4 relative">
               <input class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm w-full" placeholder="Search enrollments...">
             </div>
-            <div class="relative w-full overflow-auto max-h-[500px] custom-scrollbar">
+            <div class="relative w-full overflow-auto max-h-[60vh] custom-scrollbar border rounded-lg">
               <table class="w-full caption-bottom text-sm">
                 <thead class="sticky top-0 bg-white border-b z-20">
                   <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
@@ -329,7 +367,7 @@
 
 
           <div class="p-6 pt-0">
-             <div class="relative w-full overflow-auto">
+             <div class="relative w-full overflow-auto max-h-[60vh] custom-scrollbar border rounded-lg">
                 <table class="w-full caption-bottom text-sm">
                   <thead class="[&_tr]:border-b">
                     <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
@@ -354,6 +392,10 @@
                       </td>
                       <td class="p-4 align-middle">
                           <div class="flex gap-2">
+                            <button onclick="viewStudentCurriculum('{{ student.user.id }}', '{{ student.user.first_name }} {{ student.user.last_name }}')" 
+                                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-navy/20 hover:bg-navy/5 h-9 px-3 bg-white text-navy" title="View Curriculum & Set Grades">
+                                Curriculum
+                            </button>
                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
                               {% csrf_token %}
                               <input type="hidden" name="action" value="toggle_user_status">
@@ -381,39 +423,82 @@
         </div>
       </div>
 
-       <!-- Staff Workload Tab -->
-       <div class="tab-content hidden" id="tab-workload">
-        <div class="rounded-lg border bg-card text-card-foreground bg-white shadow-md border-t-4 border-t-light-blue">
-          <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Staff Workload Management</h3>
-          </div>
-          <div class="p-6 pt-0">
-            <div class="space-y-4">
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-l-4 border-l-light-blue bg-white">
-                <div class="p-6 pt-4">
-                  <div class="flex justify-between items-start mb-3">
-                    <div>
-                      <h4 class="font-semibold text-lg">Dr. Maria Santos</h4>
-                      <p class="text-sm text-gray-600">Computer Science</p>
-                    </div>
-                    <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-500 text-white">available</div>
-                  </div>
-                  <div class="mb-3">
-                    <p class="text-sm text-gray-600">Active Students: <span class="font-semibold">45</span></p>
-                  </div>
-                  <div>
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="text-gray-600">Capacity</span>
-                      <span class="font-semibold">75%</span>
-                    </div>
-                    <div class="relative w-full overflow-hidden rounded-full bg-secondary h-2 bg-gray-200">
-                      <div class="h-full bg-primary transition-all bg-green-500" style="width: 75%;"></div>
-                    </div>
-                  </div>
-                </div>
+      <!-- Staff Messaging Tab (DMs) -->
+      <div class="tab-content hidden" id="tab-staff-messaging">
+        <!-- Main container: Responsive flex layout -->
+        <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-lg border overflow-hidden relative" style="height: 600px;">
+           
+           <!-- Contacts Sidebar: Full width on mobile, fixed width on desktop -->
+           <div id="staff-contacts-sidebar" class="w-full lg:w-80 border-r bg-gray-50 flex flex-col transition-all duration-300">
+              <div class="p-5 border-b bg-white flex items-center justify-between">
+                 <div>
+                    <h3 class="font-bold text-navy flex items-center gap-2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                       Staff Directory
+                    </h3>
+                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-black">Advisors & Admins</p>
+                 </div>
               </div>
-            </div>
-          </div>
+              <div id="staff-contacts-list" class="flex-1 overflow-y-auto divide-y divide-gray-100 custom-scrollbar">
+                  <!-- JS Injected Contacts -->
+                  <div class="p-8 text-center text-gray-400">
+                    <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                    <p class="text-xs">Loading directory...</p>
+                  </div>
+              </div>
+           </div>
+
+           <!-- Chat Area: Hidden on mobile until contact selected, full width on mobile, flex-1 on desktop -->
+           <div id="staff-chat-window" class="hidden lg:flex flex-1 flex-col bg-white transition-all duration-300">
+              <!-- Header -->
+              <div id="chat-header" class="p-4 border-b flex items-center justify-between bg-white shadow-sm z-10 shrink-0">
+                 <div class="flex items-center gap-3">
+                    <!-- Mobile Back Button -->
+                    <button id="chat-back-btn" class="lg:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <!-- Avatar -->
+                    <div id="chat-contact-avatar" class="size-10 bg-gradient-to-br from-navy to-light-blue rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md hidden animate-in zoom-in duration-300">?</div>
+                    <div>
+                       <h3 id="chat-contact-name" class="font-bold text-gray-800 leading-tight">Select a contact</h3>
+                       <p id="chat-contact-role" class="text-[10px] font-bold text-light-blue uppercase tracking-tighter mt-0.5"></p>
+                    </div>
+                 </div>
+              </div>
+              
+              <!-- Messages -->
+              <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/20 custom-scrollbar scroll-smooth">
+                 <!-- JS Injected Messages -->
+                 <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-4 px-6 text-center">
+                    <div class="size-16 rounded-full bg-navy/5 flex items-center justify-center mb-2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8L3 21"/><path d="M12 8h.01"/><path d="M12 12h.01"/><path d="M12 16h.01"/></svg>
+                    </div>
+                    <div>
+                       <p class="text-sm font-bold text-gray-500">Pick a conversation</p>
+                       <p class="text-xs mt-1">Select an advisor or admin to start a secure internal message.</p>
+                    </div>
+                 </div>
+              </div>
+
+              <!-- Input Area -->
+              <div class="p-4 border-t bg-white shrink-0">
+                 <form id="staff-chat-form" class="flex gap-2 items-end">
+                    <input type="hidden" id="staff-receiver-id" value="">
+                    <div class="flex-1 relative">
+                       <textarea id="staff-chat-input" 
+                                 class="w-full flex min-h-[44px] max-h-32 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-light-blue focus:border-transparent outline-none text-sm transition-all resize-none bg-gray-50 whitespace-pre-wrap" 
+                                 placeholder="Write a message..." 
+                                 rows="1" 
+                                 disabled></textarea>
+                    </div>
+                    <button type="submit" 
+                            class="bg-navy text-white size-11 flex items-center justify-center rounded-xl font-bold hover:bg-navy/90 transition-all shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale shrink-0" 
+                            disabled>
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                 </form>
+              </div>
+           </div>
         </div>
       </div>
 
@@ -634,6 +719,38 @@
 
     </div>
   </div>
+
+  <!-- Student Curriculum & Grading Modal -->
+  <div id="admin-curriculum-modal" class="fixed inset-0 bg-navy/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200" style="max-height: 85vh;">
+       <div class="bg-gradient-to-br from-navy to-light-blue p-6 text-white flex justify-between items-center shrink-0">
+         <div>
+           <h3 class="text-xl font-bold" id="admin-modal-student-name">Student Curriculum</h3>
+           <p class="text-xs opacity-80" id="admin-modal-student-info">Academic Records & Grading</p>
+         </div>
+         <button onclick="document.getElementById('admin-curriculum-modal').classList.add('hidden')" class="hover:bg-white/20 p-2 rounded-lg transition-colors">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+         </button>
+       </div>
+       
+       <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-gray-50/30 min-h-0" style="max-height: 100%;">
+          <div id="admin-curr-loading" class="py-20 flex flex-col items-center justify-center text-gray-400">
+            <div class="size-10 border-4 border-light-blue border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="font-medium">Loading student records...</p>
+          </div>
+
+          <div id="admin-curriculum-accordion" class="divide-y divide-gray-200 bg-white rounded-xl border hidden relative">
+            <!-- Accordion sections injected by JS -->
+          </div>
+       </div>
+
+       <div class="p-4 border-t bg-gray-50 flex justify-end shrink-0">
+          <button onclick="document.getElementById('admin-curriculum-modal').classList.add('hidden')" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold text-sm transition-colors">
+            Close
+          </button>
+       </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -707,11 +824,388 @@
             });
         }
 
-        if(cancelAddStudentBtn && addStudentModal) {
+        if (cancelAddStudentBtn && addStudentModal) {
             cancelAddStudentBtn.addEventListener('click', () => {
                 addStudentModal.classList.add('hidden');
             });
         }
+
+        // ── Notifications Logic ───────────────────────────────────────────
+        const msgBellBtn = document.getElementById('msg-bell-btn');
+        const notifDropdown = document.getElementById('notifications-dropdown');
+        const notifList = document.getElementById('notifications-list');
+        const msgBellBadge = document.getElementById('msg-bell-badge');
+
+        function updateNotifications() {
+            fetch('/api/notifications/system/')
+                .then(res => res.json())
+                .then(data => {
+                    notifList.innerHTML = '';
+                    let unreadCount = 0;
+                    
+                    if (data.notifications.length === 0) {
+                        notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent notifications</div>';
+                    } else {
+                        data.notifications.forEach(n => {
+                            if (!n.is_read) unreadCount++;
+                            const item = document.createElement('div');
+                            item.className = `p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}`;
+                            item.innerHTML = `
+                                <p class="text-[11px] font-bold text-navy uppercase">${n.type.replace(/_/g, ' ')}</p>
+                                <p class="text-sm text-gray-700 mt-0.5">${n.message}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">${n.created_at}</p>
+                            `;
+                            notifList.appendChild(item);
+                        });
+                    }
+
+                    if (unreadCount > 0) {
+                        msgBellBadge.innerText = unreadCount;
+                        msgBellBadge.classList.remove('hidden');
+                    } else {
+                        msgBellBadge.classList.add('hidden');
+                    }
+                });
+        }
+
+        if (msgBellBtn) {
+            msgBellBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('hidden');
+                if (!notifDropdown.classList.contains('hidden')) {
+                    fetch('/api/notifications/mark-read/')
+                        .then(() => updateNotifications());
+                }
+            });
+        }
+
+        document.addEventListener('click', () => {
+             if (notifDropdown) notifDropdown.classList.add('hidden');
+        });
+
+        setInterval(updateNotifications, 10000); // Update every 10s
+        updateNotifications();
+
+        // ── Analytics Sync Logic ──────────────────────────────────────────
+        function updateAnalytics() {
+            fetch('/api/analytics/sync/')
+                .then(res => res.json())
+                .then(data => {
+                    // Main Stats
+                    if(document.getElementById('stat-online-users')) 
+                        document.getElementById('stat-online-users').innerText = data.online_users;
+                    if(document.getElementById('stat-total-forms')) 
+                        document.getElementById('stat-total-forms').innerText = data.total_forms;
+                    if(document.getElementById('stat-total-appointments')) 
+                        document.getElementById('stat-total-appointments').innerText = data.total_appointments;
+                    if(document.getElementById('stat-total-pending')) 
+                        document.getElementById('stat-total-pending').innerText = data.total_pending;
+                    if(document.getElementById('stat-total-students-l')) 
+                        document.getElementById('stat-total-students-l').innerText = data.total_students;
+                    if(document.getElementById('stat-total-students-s')) 
+                        document.getElementById('stat-total-students-s').innerText = data.total_students;
+
+                    // Analytics Tab
+                    if(document.getElementById('ana-enrolled-count')) 
+                        document.getElementById('ana-enrolled-count').innerText = data.enrolled_count;
+                    if(document.getElementById('ana-pending-enrollment-count')) 
+                        document.getElementById('ana-pending-enrollment-count').innerText = data.pending_enrollment_count;
+                    if(document.getElementById('ana-not-enrolled-count')) 
+                        document.getElementById('ana-not-enrolled-count').innerText = data.not_enrolled_count;
+                    if(document.getElementById('ana-apt-pending')) 
+                        document.getElementById('ana-apt-pending').innerText = data.apt_pending;
+                    if(document.getElementById('ana-apt-confirmed')) 
+                        document.getElementById('ana-apt-confirmed').innerText = data.apt_confirmed;
+                    if(document.getElementById('ana-apt-completed')) 
+                        document.getElementById('ana-apt-completed').innerText = data.apt_completed;
+                    if(document.getElementById('ana-avg-response-time')) 
+                        document.getElementById('ana-avg-response-time').innerText = data.avg_response_time;
+                    if(document.getElementById('ana-form-pending')) 
+                        document.getElementById('ana-form-pending').innerText = data.form_pending;
+                });
+        }
+
+        setInterval(updateAnalytics, 30000); // Update every 30s
+        updateAnalytics();
+
+
+        // ── Staff Messaging Logic ──────────────────────────────────────────
+        const contactsList = document.getElementById('staff-contacts-list');
+        const chatMessages = document.getElementById('staff-chat-messages');
+        const chatForm = document.getElementById('staff-chat-form');
+        const chatInput = document.getElementById('staff-chat-input');
+        const receiverIdInput = document.getElementById('staff-receiver-id');
+        const chatContactName = document.getElementById('staff-chat-contact-name');
+        const chatContactRole = document.getElementById('staff-chat-contact-role');
+        const chatContactAvatar = document.getElementById('staff-chat-contact-avatar');
+        const chatWindow = document.getElementById('staff-chat-window');
+        const sidebar = document.getElementById('staff-contacts-sidebar');
+        const chatBackBtn = document.getElementById('staff-chat-back-btn');
+
+        let currentStaffMessagesJson = ""; // To prevent unnecessary re-renders
+
+        function loadStaffContacts() {
+            fetch('/api/staff/contacts/')
+                .then(res => res.json())
+                .then(data => {
+                    contactsList.innerHTML = '';
+                    if (data.contacts.length === 0) {
+                        contactsList.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No other staff members found.</div>';
+                        return;
+                    }
+                    data.contacts.forEach(c => {
+                        const item = document.createElement('div');
+                        item.className = 'p-4 hover:bg-white cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-light-blue group active:bg-gray-100';
+                        item.innerHTML = `
+                            <div class="flex items-center gap-3">
+                               <div class="size-10 rounded-full bg-navy/5 text-navy flex items-center justify-center font-bold text-sm group-hover:bg-light-blue group-hover:text-white transition-all shadow-sm">
+                                  ${c.name.charAt(0)}
+                               </div>
+                               <div class="flex-1 min-w-0">
+                                  <p class="font-bold text-gray-800 truncate text-sm">${c.name}</p>
+                                  <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black opacity-60">${c.role}</p>
+                               </div>
+                            </div>
+                        `;
+                        item.onclick = () => selectStaffContact(c);
+                        contactsList.appendChild(item);
+                    });
+                });
+        }
+
+        function selectStaffContact(contact) {
+            receiverIdInput.value = contact.id;
+            chatContactName.innerText = contact.name;
+            chatContactRole.innerText = contact.role.toUpperCase();
+            chatContactAvatar.innerText = contact.name.charAt(0);
+            chatContactAvatar.classList.remove('hidden');
+            chatInput.disabled = false;
+            chatForm.querySelector('button').disabled = false;
+            chatInput.placeholder = `Message ${contact.name}...`;
+
+            // Responsive: Toggle views on mobile
+            if (window.innerWidth < 1024) {
+                sidebar.classList.add('hidden');
+                chatWindow.classList.remove('hidden');
+                chatWindow.classList.add('flex');
+            }
+            
+            loadStaffConversation(contact.id, true);
+            
+            // Polling: Refresh every 3s
+            if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+            window.staffChatInterval = setInterval(() => loadStaffConversation(contact.id), 3000);
+        }
+
+        if (chatBackBtn) {
+            chatBackBtn.onclick = () => {
+                sidebar.classList.remove('hidden');
+                chatWindow.classList.add('hidden');
+                chatWindow.classList.remove('flex');
+                if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+            };
+        }
+
+        function loadStaffConversation(contactId, forceScroll = false) {
+            fetch(`/api/staff/conversation/${contactId}/`)
+                .then(res => res.json())
+                .then(data => {
+                    const messagesJson = JSON.stringify(data.messages);
+                    if (messagesJson === currentStaffMessagesJson) return; // Skip if no new data
+                    currentStaffMessagesJson = messagesJson;
+
+                    if (data.messages) {
+                        const isAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + 100;
+                        chatMessages.innerHTML = '';
+                        
+                        if (data.messages.length === 0) {
+                            chatMessages.innerHTML = `
+                                <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 py-10">
+                                   <div class="size-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-30"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                   </div>
+                                   <p class="text-xs font-bold">No messages yet. Send a greeting!</p>
+                                </div>`;
+                        }
+
+                        data.messages.forEach(m => {
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = `flex group ${m.is_me ? 'justify-end' : 'justify-start'} animate-in slide-in-from-${m.is_me ? 'right' : 'left'}-2 duration-300`;
+                            msgDiv.innerHTML = `
+                                <div class="max-w-[85%] sm:max-w-[70%]">
+                                   <div class="rounded-2xl px-4 py-2.5 shadow-sm ${m.is_me ? 'bg-gradient-to-br from-navy to-light-blue text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'}">
+                                      <p class="text-sm leading-relaxed">${m.content}</p>
+                                   </div>
+                                   <p class="text-[9px] mt-1.5 opacity-60 font-bold ${m.is_me ? 'text-right' : 'text-left'}">${m.sent_at}</p>
+                                </div>
+                            `;
+                            chatMessages.appendChild(msgDiv);
+                        });
+
+                        if (forceScroll || isAtBottom) {
+                            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: forceScroll ? 'auto' : 'smooth' });
+                        }
+                    }
+                });
+        }
+
+        // Auto-expanding textarea
+        chatInput.oninput = function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        };
+
+        chatForm.onsubmit = (e) => {
+            e.preventDefault();
+            const content = chatInput.value.trim();
+            const receiverId = receiverIdInput.value;
+            if (!content || !receiverId) return;
+
+            // Instant UI Append (Optimistic UI)
+            const tempId = 'temp-' + Date.now();
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex justify-end opacity-70 scale-95 transition-all';
+            msgDiv.id = tempId;
+            msgDiv.innerHTML = `
+                <div class="max-w-[85%] sm:max-w-[70%]">
+                   <div class="bg-gradient-to-br from-navy to-light-blue text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-sm">
+                      <p class="text-sm">${content}</p>
+                   </div>
+                   <p class="text-[9px] mt-1.5 text-right font-bold italic">Sending...</p>
+                </div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+
+            const formData = new FormData();
+            formData.append('receiver_id', receiverId);
+            formData.append('content', content);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            fetch('/api/staff/send/', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        loadStaffConversation(receiverId);
+                    } else {
+                        document.getElementById(tempId).classList.add('text-red-500');
+                        document.getElementById(tempId).querySelector('p:last-child').innerText = 'Failed to send';
+                    }
+                });
+        };
+
+        // Initialize contacts when tab is clicked
+        const staffMsgTab = document.querySelector('[data-tab="staff-messaging"]');
+        if (staffMsgTab) {
+            staffMsgTab.addEventListener('click', () => {
+                loadStaffContacts();
+            });
+            // If already active on load, load contacts
+            if (staffMsgTab.dataset.state === 'active') {
+                loadStaffContacts();
+            }
+        }
     });
+
+    // ─── Admin Curriculum & Grading Logic ────────────────────────────────
+    let currentModalStudentId = null;
+
+    window.viewStudentCurriculum = function(studentId, studentName) {
+        currentModalStudentId = studentId;
+        const modal = document.getElementById('admin-curriculum-modal');
+        const accordion = document.getElementById('admin-curriculum-accordion');
+        const loading = document.getElementById('admin-curr-loading');
+        
+        document.getElementById('admin-modal-student-name').innerText = studentName;
+        modal.classList.remove('hidden');
+        accordion.classList.add('hidden');
+        loading.classList.remove('hidden');
+
+        fetch(`/api/curriculum/${studentId}/`)
+            .then(res => res.json())
+            .then(data => {
+                loading.classList.add('hidden');
+                accordion.classList.remove('hidden');
+                document.getElementById('admin-modal-student-info').innerText = `${data.student.student_id} • ${data.student.program}`;
+                
+                accordion.innerHTML = '';
+                const groups = {};
+                data.curriculum.forEach(subj => {
+                    const key = `Year ${subj.year_level}, Semester ${subj.semester}`;
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(subj);
+                });
+
+                Object.entries(groups).forEach(([groupName, subjects], idx) => {
+                    const sectionId = `admin-curr-section-${idx}`;
+                    accordion.insertAdjacentHTML('beforeend', `
+                        <div class="border-b last:border-b-0">
+                            <button onclick="document.getElementById('${sectionId}').classList.toggle('hidden')" 
+                                    class="w-full px-5 py-4 bg-gray-50/50 hover:bg-gray-100 flex items-center justify-between transition-colors sticky top-0 z-10 border-b">
+                                <span class="font-bold text-gray-700 text-xs uppercase tracking-widest">${groupName}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div id="${sectionId}" class="bg-white overflow-hidden">
+                                <table class="w-full text-sm">
+                                    <tbody class="divide-y divide-gray-50">
+                                        ${subjects.map(subj => {
+                                            const statusColors = {
+                                                'passed': 'text-green-600 bg-green-50 border-green-100',
+                                                'failed': 'text-red-600 bg-red-50 border-red-100',
+                                                'in_progress': 'text-blue-600 bg-blue-50 border-blue-100',
+                                                'not_taken': 'text-gray-400 bg-gray-50 border-gray-100'
+                                            }[subj.status] || 'text-gray-400 bg-gray-50';
+
+                                            return `
+                                                <tr class="hover:bg-blue-50/30 transition-colors">
+                                                    <td class="p-4 w-24 font-mono text-[10px] font-bold text-navy">${subj.code}</td>
+                                                    <td class="p-4">
+                                                        <p class="font-bold text-gray-900 leading-tight">${subj.title}</p>
+                                                        <p class="text-[10px] text-gray-400 mt-1">${subj.units} Units</p>
+                                                    </td>
+                                                    <td class="p-4 w-40">
+                                                        <select onchange="adminUpdateStatus('${studentId}', '${subj.id}', this.value)" 
+                                                                class="w-full text-[11px] font-bold border rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-light-blue cursor-pointer bg-white">
+                                                            <option value="not_taken" ${subj.status === 'not_taken' ? 'selected' : ''}>NOT TAKEN</option>
+                                                            <option value="in_progress" ${subj.status === 'in_progress' ? 'selected' : ''}>IN PROGRESS</option>
+                                                            <option value="passed" ${subj.status === 'passed' ? 'selected' : ''}>PASSED</option>
+                                                            <option value="failed" ${subj.status === 'failed' ? 'selected' : ''}>FAILED</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `);
+                });
+            })
+            .catch(err => {
+                accordion.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Failed to load curriculum.</div>`;
+            });
+    }
+
+    window.adminUpdateStatus = function(studentId, subjectId, status) {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch('/api/curriculum/update-subject/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ student_id: studentId, subject_id: subjectId, status: status })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Background update silently or could refresh
+                console.log('Status updated successfully');
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        });
+    }
 </script>
 {% endblock %}

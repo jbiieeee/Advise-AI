@@ -98,6 +98,17 @@ def register_page(request):
         )
         
         messages.success(request, 'Account created successfully. You can now log in.')
+        
+        # New: Notify all Admins about new student registration
+        from core.models import Notification
+        admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                event_type='new_student',
+                message=f'New student account created: {name} ({email})'
+            )
+        
         return redirect('login')
         
     return render(request, 'core/register.html')
@@ -149,17 +160,43 @@ def student_dashboard(request):
                 from django.utils import timezone
                 try:
                     enc = EnrollmentCode.objects.get(code=code_str, student=user, used=False)
-                    # Create TermEnrollment records for each approved subject with 'pending' status
+                    # Filter out subjects already passed or in-progress
+                    valid_subjects = []
                     for subj in enc.approved_subjects.all():
-                        TermEnrollment.objects.get_or_create(
-                            student=user, subject=subj, term_label=enc.term_label,
-                            defaults={'enrollment_code': enc, 'status': 'pending'}
-                        )
-                    enc.used = True
-                    enc.used_at = timezone.now()
-                    enc.save()
-                    profile.enrollment_status = 'pending'
-                    profile.save()
+                        status = curriculum_status_map.get(subj.id, 'not_taken')
+                        if status in ['passed', 'in_progress']:
+                            continue
+                        
+                        # Also check if already in a pending TermEnrollment for this term
+                        if not TermEnrollment.objects.filter(student=user, subject=subj, status='pending').exists():
+                            valid_subjects.append(subj)
+
+                    if not valid_subjects:
+                        messages.warning(request, 'All subjects in this code have already been passed or enrolled.')
+                    else:
+                        for subj in valid_subjects:
+                            TermEnrollment.objects.get_or_create(
+                                student=user, subject=subj, term_label=enc.term_label,
+                                defaults={'enrollment_code': enc, 'status': 'pending'}
+                            )
+                        
+                        enc.used = True
+                        enc.used_at = timezone.now()
+                        enc.save()
+                        profile.enrollment_status = 'pending'
+                        profile.save()
+                        
+                        # New: Notify all Admins about enrollment code redemption
+                        from core.models import Notification
+                        admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
+                        for admin in admins:
+                            Notification.objects.create(
+                                user=admin,
+                                event_type='enrollment_code_redeemed',
+                                message=f'Student {user.get_full_name() or user.username} redeemed enrollment code {enc.code} for {enc.term_label}. Approval required.'
+                            )
+
+                        messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
                     messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
                 except EnrollmentCode.DoesNotExist:
                     messages.error(request, 'Invalid or already-used Enrollment Code. Please contact your adviser.')
@@ -567,6 +604,15 @@ def admin_dashboard(request):
                     p.enrollment_status = 'enrolled'
                     p.save()
                     
+                    # New: Notify Adviser that enrollment is approved
+                    if p.assigned_adviser:
+                        from core.models import Notification
+                        Notification.objects.create(
+                            user=p.assigned_adviser,
+                            event_type='enrollment_approved',
+                            message=f'Enrollment approved for your advisee: {enr.student.get_full_name() or enr.student.username} ({enr.subject.code})'
+                        )
+                    
                 messages.success(request, f"Approved enrollment for {enr.student.first_name} - {enr.subject.code}")
             except TermEnrollment.DoesNotExist:
                 messages.error(request, "Enrollment request not found.")
@@ -694,9 +740,50 @@ def admin_dashboard(request):
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
         'total_pending': pending_requests.count(),
-        'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours"
+        'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours",
+        
+        # New Analytics Data
+        'enrolled_count': students.filter(enrollment_status='enrolled').count(),
+        'not_enrolled_count': students.filter(enrollment_status='not_enrolled').count(),
+        'pending_enrollment_count': students.filter(enrollment_status='pending').count(),
+        'apt_pending': Appointment.objects.filter(status='pending').count(),
+        'apt_confirmed': Appointment.objects.filter(status='confirmed').count(),
+        'apt_completed': Appointment.objects.filter(status='completed').count(),
+        'form_pending': FormSubmission.objects.filter(status='pending').count(),
+        'form_approved': FormSubmission.objects.filter(status='approved').count(),
     }
     return render(request, 'core/admin.html', context)
+
+@login_required(login_url='login')
+def api_analytics_sync(request):
+    """API endpoint to return latest system analytics for Admin."""
+    if not request.user.is_superuser and getattr(request.user, 'userprofile', None).role != 'admin':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    advisers = UserProfile.objects.filter(role='adviser')
+    students = UserProfile.objects.filter(role='student')
+    pending_enrollments = TermEnrollment.objects.filter(status='pending')
+    
+    data = {
+        'total_students': students.count(),
+        'online_users': User.objects.filter(is_active=True).count(),
+        'total_forms': FormSubmission.objects.count(),
+        'total_appointments': Appointment.objects.count(),
+        'total_pending': pending_enrollments.count(),
+        'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours",
+        
+        # Analytics Tab Stats
+        'enrolled_count': students.filter(enrollment_status='enrolled').count(),
+        'not_enrolled_count': students.filter(enrollment_status='not_enrolled').count(),
+        'pending_enrollment_count': students.filter(enrollment_status='pending').count(),
+        'apt_pending': Appointment.objects.filter(status='pending').count(),
+        'apt_confirmed': Appointment.objects.filter(status='confirmed').count(),
+        'apt_completed': Appointment.objects.filter(status='completed').count(),
+        'form_pending': FormSubmission.objects.filter(status='pending').count(),
+        'form_approved': FormSubmission.objects.filter(status='approved').count(),
+    }
+    return JsonResponse(data)
+
 
 def forms_portal(request):
     return render(request, 'core/forms.html')
@@ -770,17 +857,170 @@ def get_notification_count(request):
         count = Message.objects.filter(receiver=user, sender__in=all_staff_ids, is_read=False).count()
         
     elif role in ['adviser', 'admin']:
-        from core.models import UserProfile, Message
+        from core.models import UserProfile, Message, Notification
         adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
         admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
         all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
-        count = Message.objects.filter(
+        
+        # Count unread messages from students to staff
+        msg_count = Message.objects.filter(
             sender__userprofile__role='student',
             receiver__in=all_staff_ids,
             is_read=False
         ).count()
         
+        # For staff, we now also count system notifications
+        notif_count = Notification.objects.filter(user=user, is_read=False).count()
+        
+        # And unread staff-to-staff shared inbox messages (if you want to notify about these too)
+        staff_msgs_count = Message.objects.filter(
+            receiver=user,
+            is_staff_only=True,
+            is_read=False
+        ).count()
+        
+        count = msg_count + notif_count + staff_msgs_count
+        
     return JsonResponse({'count': count})
+
+
+@login_required(login_url='login')
+def staff_get_contacts(request):
+    """Returns list of other staff members (Admins/Advisers) for DMs."""
+    if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    current_role = 'admin' if (request.user.is_superuser or request.user.userprofile.role == 'admin') else 'adviser'
+    
+    # User wants DM between Admin and Adviser. 
+    # If I am Admin, show Advisers. If I am Adviser, show Admins.
+    if current_role == 'admin':
+        # Admins can see all other staff (Advisers and other Admins)
+        contacts = UserProfile.objects.filter(role__in=['admin', 'adviser']).select_related('user')
+    else:
+        # Advisers can see all staff members (Admins and other Advisers)
+        contacts = UserProfile.objects.filter(role__in=['admin', 'adviser']).select_related('user')
+    
+    data = []
+    for c in contacts:
+        if c.user == request.user: continue
+        data.append({
+            'id': c.user.id,
+            'name': f"{c.user.first_name} {c.user.last_name}".strip() or c.user.username,
+            'role': c.role,
+            'email': c.user.email
+        })
+    return JsonResponse({'contacts': data})
+
+@login_required(login_url='login')
+def staff_get_conversation(request, contact_id):
+    """Returns conversation between current staff and another staff member."""
+    if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    user = request.user
+    try:
+        contact = User.objects.get(id=contact_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Contact not found'}, status=404)
+    
+    # Mark messages as read
+    Message.objects.filter(sender=contact, receiver=user, is_staff_only=True, is_read=False).update(is_read=True)
+    
+    msgs = Message.objects.filter(
+        (Q(sender=user, receiver=contact) | Q(sender=contact, receiver=user)),
+        is_staff_only=True
+    ).order_by('sent_at')
+    
+    data = []
+    for m in msgs:
+        data.append({
+            'id': m.id,
+            'content': m.content,
+            'sender_id': m.sender.id,
+            'sender_name': 'You' if m.sender == user else (f"{m.sender.first_name} {m.sender.last_name}".strip() or m.sender.username),
+            'sent_at': m.sent_at.strftime('%b %d, %I:%M %p'),
+            'is_me': m.sender == user
+        })
+    return JsonResponse({'messages': data})
+
+@login_required(login_url='login')
+def staff_send_message(request):
+    """Sends a staff-only message."""
+    if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    if request.method == 'POST':
+        receiver_id = request.POST.get('receiver_id')
+        content = request.POST.get('content', '').strip()
+        
+        if not receiver_id or not content:
+            return JsonResponse({'error': 'Missing fields'}, status=400)
+        
+        try:
+            receiver = User.objects.get(id=receiver_id)
+            # Ensure receiver is also staff
+            is_staff = receiver.is_superuser or (hasattr(receiver, 'userprofile') and receiver.userprofile.role in ['admin', 'adviser'])
+            if not is_staff:
+                return JsonResponse({'error': 'Cannot send staff messages to students'}, status=400)
+                
+            msg = Message.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                content=content,
+                is_staff_only=True
+            )
+            return JsonResponse({
+                'status': 'success',
+                'message': {
+                    'id': msg.id,
+                    'content': msg.content,
+                    'sent_at': msg.sent_at.strftime('%b %d, %I:%M %p')
+                }
+            })
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Receiver not found'}, status=404)
+            
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+@login_required(login_url='login')
+def api_get_notifications(request):
+    """Returns recent system notifications for the user."""
+    from core.models import Notification
+    from django.utils.timezone import localtime
+    
+    user = request.user
+    role = getattr(user, 'userprofile', None)
+    role_str = role.role if role else ('admin' if user.is_superuser else None)
+    
+    notifs_query = Notification.objects.filter(user=user)
+    
+    # Filter for Admin: only new student and enrollment code usage
+    if role_str == 'admin':
+        notifs_query = notifs_query.filter(event_type__in=['new_student', 'enrollment_code_redeemed'])
+        
+    notifs = notifs_query.order_by('-created_at')[:20]
+    
+    data = []
+    for n in notifs:
+        data.append({
+            'id': n.id,
+            'type': n.event_type,
+            'message': n.message,
+            'is_read': n.is_read,
+            'created_at': localtime(n.created_at).strftime('%b %d, %Y %I:%M %p')
+        })
+    
+    # Mark all as read when fetched? Or keep as is. User mentioned "latest notifications".
+    # Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    
+    return JsonResponse({'notifications': data})
+
+@login_required(login_url='login')
+def api_mark_notifications_read(request):
+    from core.models import Notification
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({'status': 'success'})
 
 
 @login_required(login_url='login')
@@ -924,8 +1164,8 @@ def update_student_subject(request):
         return JsonResponse({'error': 'POST required'}, status=405)
     try:
         profile = request.user.userprofile
-        if profile.role not in ('adviser',) and not request.user.is_superuser:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        if profile.role != 'admin' and not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized: Only Admins can set grades.'}, status=403)
     except UserProfile.DoesNotExist:
         if not request.user.is_superuser:
             return JsonResponse({'error': 'Unauthorized'}, status=403)
@@ -995,20 +1235,42 @@ def generate_enrollment_code(request):
     if not subjects.exists():
         return JsonResponse({'error': 'No valid subjects selected'}, status=400)
 
+    # Validation: Filter out subjects the student has already passed or is currently taking
+    from core.models import StudentCurriculum
+    existing_records = StudentCurriculum.objects.filter(student=student, subject__in=subjects)
+    status_map = {r.subject_id: r.status for r in existing_records}
+    
+    filtered_subjects = []
+    blocked_subjects = []
+
+    for s in subjects:
+        status = status_map.get(s.id, 'not_taken')
+        if status in ['passed', 'in_progress']:
+            blocked_subjects.append(f"{s.code} ({status.replace('_', ' ')})")
+        else:
+            filtered_subjects.append(s)
+
+    if not filtered_subjects:
+        return JsonResponse({'error': f'All selected subjects are already: {", ".join(blocked_subjects)}'}, status=400)
+
     enc = EnrollmentCode.objects.create(
         student=student,
         adviser=request.user,
         term_label=term_label,
     )
-    enc.approved_subjects.set(subjects)
+    enc.approved_subjects.set(filtered_subjects)
 
-    return JsonResponse({
+    resp = {
         'status': 'success',
         'code': enc.code,
         'term_label': enc.term_label,
         'student_name': f"{student.first_name} {student.last_name}".strip() or student.username,
-        'subjects': [{'id': s.id, 'code': s.code, 'title': s.title, 'units': s.units} for s in subjects],
-    })
+        'subjects': [{'id': s.id, 'code': s.code, 'title': s.title, 'units': s.units} for s in filtered_subjects],
+    }
+    if blocked_subjects:
+        resp['warning'] = f'Some subjects were excluded: {", ".join(blocked_subjects)}'
+        
+    return JsonResponse(resp)
 
 @login_required
 def request_subject_enrollment(request):
@@ -1024,6 +1286,19 @@ def request_subject_enrollment(request):
             user_profile = request.user.userprofile
             subject = CurriculumSubject.objects.get(id=subject_id)
             
+            # Validation: Check StudentCurriculum status
+            from core.models import StudentCurriculum
+            status_rec = StudentCurriculum.objects.filter(student=request.user, subject=subject).first()
+            if status_rec:
+                if status_rec.status == 'passed':
+                    return JsonResponse({'status': 'error', 'error': f'You have already passed {subject.code}.'})
+                if status_rec.status == 'in_progress':
+                    return JsonResponse({'status': 'error', 'error': f'You are already enrolled in {subject.code}.'})
+
+            # Check if there is already a pending TermEnrollment
+            if TermEnrollment.objects.filter(student=request.user, subject=subject, status='pending').exists():
+                return JsonResponse({'status': 'error', 'error': f'A request for {subject.code} is already pending.'})
+
             # Create or update TermEnrollment with 'pending' status
             enrollment, created = TermEnrollment.objects.get_or_create(
                 student=request.user,
@@ -1089,38 +1364,93 @@ def process_enrollment_request(request):
 def get_recommended_subjects(student_profile):
     """
     Helper function to suggest subjects based on curriculum and prerequisites.
+    Uses StudentCurriculum for accurate tracking.
     """
+    from core.models import CurriculumSubject, StudentCurriculum
+    
     curriculum = CurriculumSubject.objects.all().order_by('year_level', 'semester')
-    passed_subjects = set(TermEnrollment.objects.filter(
+    
+    # Get subjects already passed
+    passed_subjects = set(StudentCurriculum.objects.filter(
         student=student_profile.user, 
-        status='approved'
+        status='passed'
     ).values_list('subject__code', flat=True))
     
-    in_progress = set(TermEnrollment.objects.filter(
+    # Get subjects currently in_progress or pending
+    in_progress = set(StudentCurriculum.objects.filter(
         student=student_profile.user, 
+        status='in_progress'
+    ).values_list('subject__code', flat=True))
+    
+    pending = set(TermEnrollment.objects.filter(
+        student=student_profile.user,
         status='pending'
     ).values_list('subject__code', flat=True))
     
     recommendations = []
     
     for subject in curriculum:
-        # Don't recommend if already passed or pending
-        if subject.code in passed_subjects or subject.code in in_progress:
+        # Don't recommend if already passed, in_progress, or pending
+        if subject.code in passed_subjects or subject.code in in_progress or subject.code in pending:
             continue
             
         # Check prerequisites
-        prereqs = [p.strip() for p in subject.prerequisite_codes.split(',') if p.strip() and p.strip().lower() != 'none']
-        
-        all_met = True
-        for p in prereqs:
-            if p not in passed_subjects:
-                all_met = False
-                break
-        
-        if all_met:
+        if not subject.prerequisite_codes or subject.prerequisite_codes.lower() == 'none':
             recommendations.append(subject)
-            if len(recommendations) >= 5: # Limit to 5 suggestions
-                break
+        else:
+            prereqs = [p.strip() for p in subject.prerequisite_codes.split(',') if p.strip()]
+            all_met = True
+            for p in prereqs:
+                if p not in passed_subjects:
+                    all_met = False
+                    break
+            if all_met:
+                recommendations.append(subject)
+        
+        if len(recommendations) >= 8: # Increased limit for Adviser view
+            break
                 
     return recommendations
+
+@login_required
+def get_adviser_student_details(request, student_id):
+    """
+    API for Adviser to get localized student info: active subjects and recommendations.
+    """
+    try:
+        if request.user.userprofile.role not in ['adviser', 'admin'] and not request.user.is_superuser:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            
+        student = User.objects.get(id=student_id)
+        profile = student.userprofile
+        
+        # Active Subjects (In Progress)
+        active_recs = StudentCurriculum.objects.filter(student=student, status='in_progress').select_related('subject')
+        active_list = [{
+            'id': r.subject.id,
+            'code': r.subject.code,
+            'title': r.subject.title,
+            'units': r.subject.units,
+            'term': r.term_taken
+        } for r in active_recs]
+        
+        # Recommendations
+        recs = get_recommended_subjects(profile)
+        rec_list = [{
+            'id': s.id,
+            'code': s.code,
+            'title': s.title,
+            'units': s.units,
+            'year': s.year_level,
+            'sem': s.semester
+        } for s in recs]
+        
+        return JsonResponse({
+            'status': 'success',
+            'student_id': student.id,
+            'active_subjects': active_list,
+            'recommendations': rec_list
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
 

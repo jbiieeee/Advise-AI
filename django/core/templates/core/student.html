@@ -6,38 +6,53 @@
 
 {% block content %}
 <div class="min-h-screen bg-light-gray">
-  
+
   <header class="bg-gradient-to-r from-navy to-light-blue border-b sticky top-0 z-50 shadow-lg">
     <div class="px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
           <div class="bg-white p-2 rounded-lg shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-light-blue"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-light-blue">
+              <path
+                d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z" />
+              <path d="M12 12h.01" />
+            </svg>
           </div>
           <div>
             <h1 class="font-bold text-xl text-white">Central Advising Hub</h1>
             <p class="text-sm text-white/90">Single Point of Entry for All Advising Tasks</p>
           </div>
         </div>
-        
+
 
         <div class="flex items-center gap-3 relative">
-          <button id="msg-bell-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span id="msg-bell-badge" class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{ unread_notifications_count }}</span>
+          <button id="msg-bell-btn"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 w-10 text-white relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            <span id="msg-bell-badge"
+              class="absolute top-0 right-0 size-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse {% if unread_notifications_count <= 0 %}hidden{% endif %}">{{
+              unread_notifications_count }}</span>
           </button>
-          
+
           <!-- Dropdown -->
-          <div id="notifications-dropdown" class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right">
+          <div id="notifications-dropdown"
+            class="hidden absolute top-14 left-auto right-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 text-left overflow-hidden origin-top-right">
             <div class="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
-                <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
+              <h3 class="font-bold text-sm text-gray-800">Latest Notifications</h3>
             </div>
             <div id="notifications-list" class="max-h-64 overflow-y-auto divide-y divide-gray-100">
             </div>
           </div>
-          
+
           <div class="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
-            <div class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
+            <div
+              class="size-8 bg-white rounded-full flex items-center justify-center text-light-blue font-semibold shadow">
               {{ user.first_name|default:user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
@@ -45,14 +60,26 @@
               <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }}</p>
             </div>
           </div>
-          
-          <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white" title="Manage Profile">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+
+          <a href="{% url 'profile' %}"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white"
+            title="Manage Profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+              <circle cx="12" cy="8" r="5" />
+              <path d="M20 21a8 8 0 0 0-16 0" />
+            </svg>
             Profile
           </a>
-          
-          <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+
+          <a href="{% url 'logout' %}"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 h-10 px-4 py-2 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
             Logout
           </a>
         </div>
@@ -62,12 +89,25 @@
 
   <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
     <div class="inline-flex h-10 items-center justify-center rounded-md p-1 w-auto flex shadow-sm bg-gray-200">
-      <button id="nav-overview" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 shadow-sm bg-white text-gray-900" onclick="switchTopView('overview')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      <button id="nav-overview"
+        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 shadow-sm bg-white text-gray-900"
+        onclick="switchTopView('overview')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+          <line x1="16" x2="16" y1="2" y2="6" />
+          <line x1="8" x2="8" y1="2" y2="6" />
+          <line x1="3" x2="21" y1="10" y2="10" />
+        </svg>
         Dashboard
       </button>
-      <button id="nav-messages" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 text-gray-600 hover:text-gray-900" onclick="switchTopView('messages')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <button id="nav-messages"
+        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 text-gray-600 hover:text-gray-900"
+        onclick="switchTopView('messages')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
         Messages
       </button>
     </div>
@@ -75,37 +115,63 @@
 
   <div class="px-4 sm:px-6 lg:px-8 pb-8" id="view-overview">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
+
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
-        
+
         {% if messages %}
         <div class="space-y-2">
-            {% for message in messages %}
-            <div class="p-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-600 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-600 border border-green-200{% else %}bg-blue-100 text-blue-600 border border-blue-200{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
+          {% for message in messages %}
+          <div
+            class="p-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-600 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-600 border border-green-200{% else %}bg-blue-100 text-blue-600 border border-blue-200{% endif %}">
+            {{ message }}
+          </div>
+          {% endfor %}
         </div>
         {% endif %}
 
         <!-- Welcome Header -->
-        <div class="rounded-lg border bg-card text-card-foreground shadow-xl border-0 bg-gradient-to-br from-navy to-light-blue text-white relative overflow-hidden">
-          <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-xl border-0 bg-gradient-to-br from-navy to-light-blue text-white relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20">
+          </div>
           <div class="p-6 pt-6 relative z-10">
             <div>
-              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}! 👋</h2>
+              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back{% if user.first_name %}, {{ user.first_name
+                }}{% endif %}! 👋</h2>
               <p class="text-white/95 mb-6 drop-shadow-sm text-lg">
-                Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant AI support.
+                Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant
+                AI support.
               </p>
-              
+
               <div class="flex gap-3">
-                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 bg-white text-secondary-foreground hover:bg-white/80 shadow-lg font-semibold text-light-blue" onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+                <button
+                  class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 bg-white text-secondary-foreground hover:bg-white/80 shadow-lg font-semibold text-light-blue"
+                  onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-5 mr-2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                    <path d="m9 16 2 2 4-4" />
+                  </svg>
                   Schedule New Advising
                 </button>
-                <button class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 border-2 border-white text-white hover:bg-white/20 shadow-lg font-semibold" onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                <button
+                  class="inline-flex items-center justify-center rounded-md text-sm transition-colors h-11 px-8 border-2 border-white text-white hover:bg-white/20 shadow-lg font-semibold"
+                  onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-5 mr-2">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" x2="8" y1="13" y2="13" />
+                    <line x1="16" x2="8" y1="17" y2="17" />
+                    <line x1="10" x2="8" y1="9" y2="9" />
+                  </svg>
                   Submit Forms
                 </button>
               </div>
@@ -115,7 +181,8 @@
 
         <!-- Status Cards - Quick View -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 {% if enrollment_status == 'enrolled' %}border-l-green-500{% elif enrollment_status == 'pending' %}border-l-yellow-500{% else %}border-l-red-500{% endif %} bg-white">
+          <div
+            class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 {% if enrollment_status == 'enrolled' %}border-l-green-500{% elif enrollment_status == 'pending' %}border-l-yellow-500{% else %}border-l-red-500{% endif %} bg-white">
             <div class="p-6 pt-6">
               <div class="flex items-start justify-between mb-2">
                 <div>
@@ -126,27 +193,46 @@
                     {% else %}Not Enrolled{% endif %}
                   </p>
                 </div>
-                <div class="p-2 rounded-lg {% if enrollment_status == 'enrolled' %}bg-green-100{% elif enrollment_status == 'pending' %}bg-yellow-100{% else %}bg-red-100{% endif %}">
+                <div
+                  class="p-2 rounded-lg {% if enrollment_status == 'enrolled' %}bg-green-100{% elif enrollment_status == 'pending' %}bg-yellow-100{% else %}bg-red-100{% endif %}">
                   {% if enrollment_status == 'enrolled' %}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-green-600"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6 text-green-600">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
                   {% elif enrollment_status == 'pending' %}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-yellow-600"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6 text-yellow-600">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
                   {% else %}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-red-600"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6 text-red-600">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
                   {% endif %}
                 </div>
               </div>
               {% if enrollment_status == 'not_enrolled' %}
-                <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')" class="text-xs text-light-blue hover:underline font-semibold mt-1">Verify Enrollment &rarr;</button>
+              <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
+                class="text-xs text-light-blue hover:underline font-semibold mt-1">Verify Enrollment &rarr;</button>
               {% elif enrollment_status == 'pending' %}
-                <p class="text-xs text-gray-500 mt-1">Waiting for adviser review</p>
+              <p class="text-xs text-gray-500 mt-1">Waiting for adviser review</p>
               {% else %}
-                <p class="text-xs text-gray-500 mt-1">2nd Semester, AY 2025-2026</p>
+              <p class="text-xs text-gray-500 mt-1">2nd Semester, AY 2025-2026</p>
               {% endif %}
             </div>
           </div>
 
-          <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500 bg-white">
+          <div
+            class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500 bg-white">
             <div class="p-6 pt-6">
               <div class="flex items-start justify-between mb-2">
                 <div>
@@ -154,14 +240,20 @@
                   <p class="text-2xl font-bold text-gray-900">{{ pending_approvals }}</p>
                 </div>
                 <div class="p-2 bg-yellow-100 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-yellow-600"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6 text-yellow-600">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
                 </div>
               </div>
               <p class="text-xs text-gray-500 mt-1">Forms under review</p>
             </div>
           </div>
 
-          <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 bg-white">
+          <div
+            class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 bg-white">
             <div class="p-6 pt-6">
               <div class="flex items-start justify-between mb-2">
                 <div>
@@ -169,7 +261,14 @@
                   <p class="text-2xl font-bold text-gray-900">{{ appointments_count }}</p>
                 </div>
                 <div class="p-2 bg-blue-100 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-blue-600"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6 text-blue-600">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
                 </div>
               </div>
               <p class="text-xs text-gray-500 mt-1">Upcoming this week</p>
@@ -185,9 +284,20 @@
           </div>
           <div class="p-6 pt-0">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group" onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
-                <div class="p-4 rounded-full bg-gradient-to-br from-navy to-light-blue text-white shadow-md group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+              <button
+                class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group"
+                onclick="document.getElementById('appointment-modal').classList.remove('hidden')">
+                <div
+                  class="p-4 rounded-full bg-gradient-to-br from-navy to-light-blue text-white shadow-md group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                    <path d="m9 16 2 2 4-4" />
+                  </svg>
                 </div>
                 <div class="text-center">
                   <p class="font-semibold text-base mb-1">Book Appointment</p>
@@ -195,9 +305,20 @@
                 </div>
               </button>
 
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group" onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
-                <div class="p-4 rounded-full bg-gradient-to-br from-light-blue to-navy text-white shadow-md group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+              <button
+                class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group"
+                onclick="document.getElementById('submit-form-modal').classList.remove('hidden')">
+                <div
+                  class="p-4 rounded-full bg-gradient-to-br from-light-blue to-navy text-white shadow-md group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" x2="8" y1="13" y2="13" />
+                    <line x1="16" x2="8" y1="17" y2="17" />
+                    <line x1="10" x2="8" y1="9" y2="9" />
+                  </svg>
                 </div>
                 <div class="text-center">
                   <p class="font-semibold text-base mb-1">Submit Forms</p>
@@ -205,9 +326,17 @@
                 </div>
               </button>
 
-              <button class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group" onclick="document.getElementById('history-modal').classList.remove('hidden')">
-                <div class="p-4 rounded-full bg-gradient-to-br from-navy to-light-blue text-white shadow-md group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <button
+                class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 hover:border-light-blue hover:shadow-lg transition-all group"
+                onclick="document.getElementById('history-modal').classList.remove('hidden')">
+                <div
+                  class="p-4 rounded-full bg-gradient-to-br from-navy to-light-blue text-white shadow-md group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-6">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
                 </div>
                 <div class="text-center">
                   <p class="font-semibold text-base mb-1">View History</p>
@@ -221,17 +350,39 @@
         <!-- Dashboard Tabs Container -->
         <div class="space-y-6" id="dashboard-tabs">
           <!-- Tab List -->
-          <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto grid-cols-3 mb-6 bg-gray-100 flex shadow-sm">
-            <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="courses" data-state="active">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <div
+            class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto grid-cols-3 mb-6 bg-gray-100 flex shadow-sm">
+            <button
+              class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              data-tab="courses" data-state="active">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="size-4 mr-2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
               My Courses
             </button>
-            <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="enroll" data-state="inactive">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <button
+              class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              data-tab="enroll" data-state="inactive">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="size-4 mr-2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
               Enroll
             </button>
-            <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="progress" data-state="inactive">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <button
+              class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              data-tab="progress" data-state="inactive">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="size-4 mr-2">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg>
               Progress
             </button>
           </div>
@@ -240,77 +391,104 @@
           <div class="tab-content" id="tab-courses">
             <div class="space-y-4">
               {% if term_enrollments %}
-                <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-between mb-4">
-                   <div class="flex items-center gap-3">
-                      <div class="size-10 bg-white rounded-full flex items-center justify-center text-light-blue shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                      </div>
-                      <div>
-                        <p class="text-sm font-bold text-navy">Current Enrollment: {{ term_enrollments.0.term_label }}</p>
-                        <p class="text-[10px] text-gray-500">Official subjects registered via enrollment code</p>
-                      </div>
-                   </div>
-                   <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-full uppercase">Officially Enrolled</span>
+              <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="size-10 bg-white rounded-full flex items-center justify-center text-light-blue shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                      <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-navy">Current Enrollment: {{ term_enrollments.0.term_label }}</p>
+                    <p class="text-[10px] text-gray-500">Official subjects registered via enrollment code</p>
+                  </div>
                 </div>
+                <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-full uppercase">Officially
+                  Enrolled</span>
+              </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {% for enrollment in term_enrollments %}
-                  <div class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-green-500 p-5">
-                    <div class="flex justify-between items-start">
-                      <div>
-                        <div class="flex items-center gap-2 mb-1">
-                          <span class="text-[10px] font-bold text-gray-400 font-mono uppercase tracking-wider">{{ enrollment.subject.code }}</span>
-                          <span class="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold uppercase">Enrolled</span>
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-lg leading-tight">{{ enrollment.subject.title }}</h4>
-                        <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                            {{ enrollment.subject.units }} Units
-                          </span>
-                        </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for enrollment in term_enrollments %}
+                <div
+                  class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-green-500 p-5">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold text-gray-400 font-mono uppercase tracking-wider">{{
+                          enrollment.subject.code }}</span>
+                        <span
+                          class="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold uppercase">Enrolled</span>
+                      </div>
+                      <h4 class="font-bold text-gray-900 text-lg leading-tight">{{ enrollment.subject.title }}</h4>
+                      <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                          </svg>
+                          {{ enrollment.subject.units }} Units
+                        </span>
                       </div>
                     </div>
                   </div>
-                  {% endfor %}
-                  
-                  {% for pending in pending_enrollments %}
-                  <div class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-yellow-500 p-5 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-yellow-500 text-white text-[8px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-tighter">Pending Approval</div>
-                    <div class="flex justify-between items-start">
-                      <div>
-                        <div class="flex items-center gap-2 mb-1">
-                          <span class="text-[10px] font-bold text-gray-400 font-mono uppercase tracking-wider">{{ pending.subject.code }}</span>
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-lg leading-tight">{{ pending.subject.title }}</h4>
-                        <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
-                          <span class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                            {{ pending.subject.units }} Units
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {% endfor %}
                 </div>
+                {% endfor %}
+
+                {% for pending in pending_enrollments %}
+                <div
+                  class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-yellow-500 p-5 relative overflow-hidden">
+                  <div
+                    class="absolute top-0 right-0 bg-yellow-500 text-white text-[8px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-tighter">
+                    Pending Approval</div>
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold text-gray-400 font-mono uppercase tracking-wider">{{
+                          pending.subject.code }}</span>
+                      </div>
+                      <h4 class="font-bold text-gray-900 text-lg leading-tight">{{ pending.subject.title }}</h4>
+                      <div class="mt-3 flex gap-4 text-[11px] text-gray-500">
+                        <span class="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                          </svg>
+                          {{ pending.subject.units }} Units
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
               {% elif enrollment_status != 'enrolled' %}
-                <div class="p-12 text-center bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
-                  <div class="size-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                  </div>
-                  <h3 class="text-xl font-bold text-gray-700 mb-2">Registration Pending</h3>
-                  <p class="text-sm max-w-xs mx-auto mb-6">You haven't officially enrolled in any subjects for this term. Get your enrollment code from your advisor.</p>
-                  <button onclick="document.getElementById('enrollment-modal').classList.remove('hidden')" 
-                          class="px-8 py-3 bg-navy text-white rounded-lg font-bold shadow-lg hover:bg-black transition-all">
-                    Redeem Enrollment Code
-                  </button>
+              <div class="p-12 text-center bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+                <div class="size-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" class="opacity-30">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
                 </div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">Registration Pending</h3>
+                <p class="text-sm max-w-xs mx-auto mb-6">You haven't officially enrolled in any subjects for this term.
+                  Get your enrollment code from your advisor.</p>
+                <button onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
+                  class="px-8 py-3 bg-navy text-white rounded-lg font-bold shadow-lg hover:bg-black transition-all">
+                  Redeem Enrollment Code
+                </button>
+              </div>
               {% else %}
-                <div class="p-12 text-center bg-white rounded-xl border text-gray-500">
-                  <h3 class="text-lg font-semibold text-gray-700">No Course Records Found</h3>
-                  <p class="text-sm">Your enrollment is verified, but subject records are not yet synchronized.</p>
-                </div>
+              <div class="p-12 text-center bg-white rounded-xl border text-gray-500">
+                <h3 class="text-lg font-semibold text-gray-700">No Course Records Found</h3>
+                <p class="text-sm">Your enrollment is verified, but subject records are not yet synchronized.</p>
+              </div>
               {% endif %}
             </div>
           </div>
@@ -324,34 +502,52 @@
               </div>
               <div class="p-6 pt-0">
                 <h3 class="text-lg font-bold text-navy mb-4 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-light-blue"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="M2 12h20"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" class="text-light-blue">
+                    <path d="M12 2v20" />
+                    <path d="m17 5-5-3-5 3" />
+                    <path d="m17 19-5 3-5-3" />
+                    <path d="M2 12h20" />
+                  </svg>
                   Recommended Next Subjects
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {% for subj in recommended_subjects %}
-                  <div class="p-4 border border-gray-200 rounded-xl hover:border-light-blue hover:shadow-md transition-all bg-gradient-to-br from-white to-gray-50/50 group">
+                  <div
+                    class="p-4 border border-gray-200 rounded-xl hover:border-light-blue hover:shadow-md transition-all bg-gradient-to-br from-white to-gray-50/50 group">
                     <div class="flex justify-between items-start mb-2">
                       <span class="text-[10px] font-bold text-gray-400 font-mono uppercase">{{ subj.code }}</span>
-                      <span class="text-[10px] bg-blue-50 text-light-blue px-2 py-0.5 rounded-full font-bold border border-blue-100">Year {{ subj.year_level }}</span>
+                      <span
+                        class="text-[10px] bg-blue-50 text-light-blue px-2 py-0.5 rounded-full font-bold border border-blue-100">Year
+                        {{ subj.year_level }}</span>
                     </div>
-                    <h4 class="font-bold text-gray-900 group-hover:text-navy transition-colors mb-2">{{ subj.title }}</h4>
+                    <h4 class="font-bold text-gray-900 group-hover:text-navy transition-colors mb-2">{{ subj.title }}
+                    </h4>
                     <div class="flex items-center gap-3 text-[11px] text-gray-500 mb-4">
-                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> {{ subj.units }} Units</span>
-                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg> Core Subject</span>
+                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="12"
+                          height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg> {{ subj.units }} Units</span>
+                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="12"
+                          height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                        </svg> Core Subject</span>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="requestEnrollment({{ subj.id }}, '{{ subj.code }}')" 
-                                class="flex-1 py-2 bg-light-blue text-white rounded-lg text-xs font-bold hover:bg-navy transition-all shadow-sm">
-                          Add Subject
-                        </button>
-                        <button onclick="document.getElementById('enrollment-modal').classList.remove('hidden')" 
-                                class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all border border-gray-200">
-                          Code
-                        </button>
+                      <button onclick="requestEnrollment({{ subj.id }}, '{{ subj.code }}')"
+                        class="flex-1 py-2 bg-light-blue text-white rounded-lg text-xs font-bold hover:bg-navy transition-all shadow-sm">
+                        Add Subject
+                      </button>
+                      <button onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
+                        class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all border border-gray-200">
+                        Code
+                      </button>
                     </div>
                   </div>
                   {% empty %}
-                  <div class="col-span-full p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                  <div
+                    class="col-span-full p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                     <p class="text-sm text-gray-500 font-medium">No recommendations available.</p>
                     <p class="text-xs text-gray-400 mt-1">Complete your current subjects to unlock next ones!</p>
                   </div>
@@ -365,11 +561,18 @@
           <div class="tab-content hidden" id="tab-progress">
             <div class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
+
+                <div
+                  class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
                   <div class="flex flex-col space-y-1.5 p-6">
                     <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-5 text-light-blue">
+                        <path
+                          d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                        <circle cx="12" cy="8" r="6" />
+                      </svg>
                       Academic Standing
                     </h3>
                   </div>
@@ -381,12 +584,13 @@
                           <span class="text-2xl font-bold text-light-blue" id="standing-percentage">0%</span>
                         </div>
                         <div class="relative w-full overflow-hidden rounded-full bg-gray-200 h-2">
-                          <div id="standing-progress-bar" class="h-full bg-light-blue transition-all" style="width: 0%"></div>
+                          <div id="standing-progress-bar" class="h-full bg-light-blue transition-all" style="width: 0%">
+                          </div>
                         </div>
                       </div>
-                      
+
                       <div class="shrink-0 bg-border h-[1px] w-full bg-gray-200"></div>
-                      
+
                       <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                           <span class="text-gray-600">Subjects Passed</span>
@@ -401,25 +605,32 @@
                   </div>
                 </div>
 
-                <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
+                <div
+                  class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-light-blue bg-white">
                   <div class="flex flex-col space-y-1.5 p-6">
                     <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-5 text-light-blue">
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                      </svg>
                       Curriculum Summary
                     </h3>
                   </div>
                   <div class="p-6 pt-0">
                     <div class="grid grid-cols-2 gap-4">
-                       <div class="p-3 bg-gray-50 rounded-lg text-center">
-                          <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Units</p>
-                          <p class="text-xl font-black text-navy">158</p>
-                       </div>
-                       <div class="p-3 bg-gray-50 rounded-lg text-center">
-                          <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
-                          <p class="text-xs font-bold text-green-600">ACTIVE</p>
-                       </div>
+                      <div class="p-3 bg-gray-50 rounded-lg text-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Units</p>
+                        <p class="text-xl font-black text-navy">158</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg text-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
+                        <p class="text-xs font-bold text-green-600">ACTIVE</p>
+                      </div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-4 leading-relaxed">Your curriculum is synchronized with your advisor. Any updates made by the advisor will reflect here immediately.</p>
+                    <p class="text-[10px] text-gray-400 mt-4 leading-relaxed">Your curriculum is synchronized with your
+                      advisor. Any updates made by the advisor will reflect here immediately.</p>
                   </div>
                 </div>
 
@@ -430,7 +641,8 @@
                 <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
                   <h4 class="font-bold text-gray-800">My Curriculum Checklist</h4>
                   <div class="flex gap-2">
-                    <select id="student-year-filter" class="text-xs border rounded px-2 py-1 outline-none" onchange="filterStudentChecklist()">
+                    <select id="student-year-filter" class="text-xs border rounded px-2 py-1 outline-none"
+                      onchange="filterStudentChecklist()">
                       <option value="all">All Years</option>
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
@@ -465,36 +677,50 @@
 
       <!-- Sidebar -->
       <div class="space-y-6">
-        
+
         <!-- Pending Appointments Sidebar -->
         <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-light-blue bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
             <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 text-light-blue"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="size-5 text-light-blue">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+              </svg>
               Upcoming & Pending
             </h3>
             <p class="text-sm text-muted-foreground">Adviser appointments status</p>
           </div>
           <div class="p-6 pt-0 space-y-3">
             {% for apt in student_appointments %}
-              {% if apt.status == 'pending' or apt.status == 'confirmed' %}
-              <div class="p-3 border rounded-lg bg-light-gray flex items-start gap-3">
-                <div class="bg-white p-2 rounded-full border shadow-sm shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" class="size-4 text-light-blue"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                </div>
-                <div>
-                  <p class="font-semibold text-sm text-gray-900">{{ apt.purpose }}</p>
-                  <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
-                  <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                    {{ apt.status }}
-                  </span>
-                </div>
+            {% if apt.status == 'pending' or apt.status == 'confirmed' %}
+            <div class="p-3 border rounded-lg bg-light-gray flex items-start gap-3">
+              <div class="bg-white p-2 rounded-full border shadow-sm shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  class="size-4 text-light-blue">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                  <line x1="16" x2="16" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="2" y2="6" />
+                  <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
               </div>
-              {% endif %}
+              <div>
+                <p class="font-semibold text-sm text-gray-900">{{ apt.purpose }}</p>
+                <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
+                <span
+                  class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                  {{ apt.status }}
+                </span>
+              </div>
+            </div>
+            {% endif %}
             {% empty %}
-              <div class="text-center py-4 text-gray-500 text-sm">
-                  <p>No upcoming appointments.</p>
-              </div>
+            <div class="text-center py-4 text-gray-500 text-sm">
+              <p>No upcoming appointments.</p>
+            </div>
             {% endfor %}
           </div>
         </div>
@@ -514,7 +740,11 @@
         <div class="w-72 border-r flex flex-col bg-gray-50 shrink-0">
           <div class="p-4 border-b bg-white">
             <h3 class="font-semibold text-gray-900 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-light-blue"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="text-light-blue">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
               Advisers
             </h3>
             <p class="text-xs text-gray-500 mt-0.5">Live chat with your advisers</p>
@@ -525,18 +755,22 @@
               <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Available Contacts</p>
             </div>
             {% for adv in advisers_list %}
-            <button class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
-                    data-student-id="{{ adv.id }}"
-                    data-student-name="Adviser {{ adv.first_name|default:adv.username }}"
-                    data-student-initials="{{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}">
+            <button
+              class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
+              data-student-id="{{ adv.id }}" data-student-name="Adviser {{ adv.first_name|default:adv.username }}"
+              data-student-initials="{{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}">
               <div class="relative shrink-0">
-                <div class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
-                  {{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}
+                <div
+                  class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
+                  {{ adv.first_name|default:adv.username|make_list|first|upper }}{{
+                  adv.last_name|default:''|make_list|first|upper }}
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 truncate">Adviser {{ adv.first_name|default:adv.username }} {{ adv.last_name }}</p>
-                <p class="text-xs text-green-500 flex items-center gap-1 mt-0.5"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span> Available</p>
+                <p class="text-sm font-semibold text-gray-900 truncate">Adviser {{ adv.first_name|default:adv.username
+                  }} {{ adv.last_name }}</p>
+                <p class="text-xs text-green-500 flex items-center gap-1 mt-0.5"><span
+                    class="size-1.5 bg-green-500 rounded-full inline-block"></span> Available</p>
               </div>
             </button>
             {% endfor %}
@@ -549,9 +783,14 @@
         <!-- Right panel: conversation view -->
         <div class="flex-1 flex flex-col min-w-0 bg-white relative" id="chat-panel">
           <!-- Empty state -->
-          <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+          <div id="chat-empty-state"
+            class="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
             <div class="size-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="text-gray-300">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
             </div>
             <h4 class="font-semibold text-gray-500 text-lg mb-1">Select an Adviser</h4>
             <p class="text-sm text-gray-400 max-w-xs">Choose an adviser from the left panel to start messaging.</p>
@@ -559,27 +798,33 @@
 
           <!-- Chat header -->
           <div id="chat-header" class="hidden border-b p-4 bg-white flex items-center gap-3 shrink-0">
-            <div id="chat-avatar" class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">??</div>
+            <div id="chat-avatar"
+              class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">
+              ??</div>
             <div class="flex-1 min-w-0">
               <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Adviser</p>
-              <p class="text-xs text-green-500 flex items-center gap-1"><span class="size-1.5 bg-green-500 rounded-full inline-block"></span>Online</p>
+              <p class="text-xs text-green-500 flex items-center gap-1"><span
+                  class="size-1.5 bg-green-500 rounded-full inline-block"></span>Online</p>
             </div>
           </div>
 
           <!-- Chat loading state -->
-          <div id="chat-loading" class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 bg-white/50 backdrop-blur-sm">
+          <div id="chat-loading"
+            class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 bg-white/50 backdrop-blur-sm">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-light-blue mb-2"></div>
             <p class="text-sm font-medium">Syncing messages...</p>
           </div>
 
           <!-- Chat no messages state -->
-          <div id="chat-no-messages" class="hidden flex-1 flex-col items-center justify-center text-gray-400 bg-gray-50/50">
+          <div id="chat-no-messages"
+            class="hidden flex-1 flex-col items-center justify-center text-gray-400 bg-gray-50/50">
             <p class="text-sm">No messages yet. Say hello to start the conversation.</p>
           </div>
 
           <!-- Chat messages area -->
-          <div id="chat-messages-area" class="hidden flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 relative" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
-             <!-- Message bubbles injected via JS -->
+          <div id="chat-messages-area" class="hidden flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 relative"
+            style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
+            <!-- Message bubbles injected via JS -->
           </div>
 
           <!-- Input area -->
@@ -590,10 +835,18 @@
               <input type="hidden" name="adviser_id" id="msg-adviser-id">
               <div class="flex items-end gap-2">
                 <div class="flex-1 relative">
-                  <textarea name="content" id="msg-content" rows="1" class="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue resize-none shadow-inner" placeholder="Type your message here..." required></textarea>
+                  <textarea name="content" id="msg-content" rows="1"
+                    class="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue resize-none shadow-inner"
+                    placeholder="Type your message here..." required></textarea>
                 </div>
-                <button type="submit" class="shrink-0 size-12 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-light-blue focus:ring-offset-2 shadow-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-[-2px]"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <button type="submit"
+                  class="shrink-0 size-12 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-light-blue focus:ring-offset-2 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="ml-[-2px]">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
                 </button>
               </div>
             </form>
@@ -606,48 +859,88 @@
 
   <!-- Chatbot Widget -->
   <div class="fixed bottom-6 right-6 z-50">
-      <button id="chatbot-toggle" class="bg-gradient-to-r from-navy to-light-blue text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-transform">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-white"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-      </button>
+    <button id="chatbot-toggle"
+      class="bg-gradient-to-r from-navy to-light-blue text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-transform">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-white">
+        <path d="M12 8V4H8" />
+        <rect width="16" height="12" x="4" y="8" rx="2" />
+        <path d="M2 14h2" />
+        <path d="M20 14h2" />
+        <path d="M15 13v2" />
+        <path d="M9 13v2" />
+      </svg>
+    </button>
   </div>
 
   <!-- Chatbot Window -->
-  <div id="chatbot-window" class="fixed bottom-24 right-6 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 hidden flex-col overflow-hidden transition-all transform origin-bottom-right duration-300">
+  <div id="chatbot-window"
+    class="fixed bottom-24 right-6 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 hidden flex-col overflow-hidden transition-all transform origin-bottom-right duration-300">
     <!-- Header -->
     <div class="bg-gradient-to-r from-navy to-light-blue p-4 flex justify-between items-center text-white">
       <div class="flex items-center gap-2">
         <div class="bg-white/20 p-2 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
+            <path d="M12 8V4H8" />
+            <rect width="16" height="12" x="4" y="8" rx="2" />
+            <path d="M2 14h2" />
+            <path d="M20 14h2" />
+            <path d="M15 13v2" />
+            <path d="M9 13v2" />
+          </svg>
         </div>
         <div>
           <h3 class="font-semibold text-sm">Advise AI Assistant</h3>
-          <p class="text-xs text-white/80 flex items-center gap-1"><span class="size-2 bg-green-400 rounded-full inline-block"></span> Online</p>
+          <p class="text-xs text-white/80 flex items-center gap-1"><span
+              class="size-2 bg-green-400 rounded-full inline-block"></span> Online</p>
         </div>
       </div>
       <button id="chatbot-close" class="hover:bg-white/20 p-1 rounded-md transition-colors text-white">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
       </button>
     </div>
-    
+
     <!-- Messages Area -->
     <div id="chatbot-messages" class="h-[350px] p-4 overflow-y-auto flex flex-col gap-3 bg-light-gray">
       <!-- Bot Message -->
       <div class="flex gap-2 w-5/6">
         <div class="shrink-0 size-8 rounded-full bg-light-blue flex items-center justify-center text-white mt-auto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5">
+            <path d="M12 8V4H8" />
+            <rect width="16" height="12" x="4" y="8" rx="2" />
+            <path d="M2 14h2" />
+            <path d="M20 14h2" />
+            <path d="M15 13v2" />
+            <path d="M9 13v2" />
+          </svg>
         </div>
         <div class="bg-white p-3 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100 text-sm text-gray-700">
-          Hello{% if user.first_name %} {{ user.first_name }}{% endif %}! 👋 I'm your AI Academic Advisor. How can I help you today?
+          Hello{% if user.first_name %} {{ user.first_name }}{% endif %}! 👋 I'm your AI Academic Advisor. How can I
+          help you today?
         </div>
       </div>
     </div>
-    
+
     <!-- Input Area -->
     <div class="p-3 bg-white border-t border-gray-100">
       <form id="chatbot-form" class="flex gap-2">
-        <input type="text" id="chatbot-input" class="flex-1 h-10 rounded-full border border-gray-300 px-4 text-sm focus:outline-none focus:border-light-blue focus:ring-1 focus:ring-light-blue" placeholder="Type your message..." autocomplete="off">
-        <button type="submit" class="shrink-0 size-10 rounded-full bg-light-blue flex items-center justify-center text-white hover:bg-navy transition-colors shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 -ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <input type="text" id="chatbot-input"
+          class="flex-1 h-10 rounded-full border border-gray-300 px-4 text-sm focus:outline-none focus:border-light-blue focus:ring-1 focus:ring-light-blue"
+          placeholder="Type your message..." autocomplete="off">
+        <button type="submit"
+          class="shrink-0 size-10 rounded-full bg-light-blue flex items-center justify-center text-white hover:bg-navy transition-colors shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="size-4 -ml-0.5">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
         </button>
       </form>
     </div>
@@ -661,32 +954,44 @@
           <h3 class="text-xl font-bold text-gray-900">Request History</h3>
           <p class="text-sm text-gray-500 mt-1">Track your submitted forms and appointments.</p>
         </div>
-        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')" class="inline-flex w-full sm:w-auto items-center justify-center rounded-md font-semibold transition-colors hover:bg-navy h-12 px-6 py-2 bg-light-blue shadow-lg text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-3"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')"
+          class="inline-flex w-full sm:w-auto items-center justify-center rounded-md font-semibold transition-colors hover:bg-navy h-12 px-6 py-2 bg-light-blue shadow-lg text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-5 mr-3">
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
           Go Back
         </button>
       </div>
-      
+
       <div class="p-6 overflow-y-auto space-y-6">
         <!-- Appointments History -->
         <div>
           <h4 class="font-semibold text-lg border-b pb-2 mb-4 text-light-blue">Appointments</h4>
           <div class="space-y-4">
             {% for apt in student_appointments %}
-            <div class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if apt.status == 'confirmed' %}border-l-green-500{% elif apt.status == 'cancelled' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
+            <div
+              class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if apt.status == 'confirmed' %}border-l-green-500{% elif apt.status == 'cancelled' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h5 class="font-medium text-gray-900">{{ apt.purpose }}</h5>
                   <p class="text-sm text-gray-500">{{ apt.date_time|date:"F j, Y, P" }}</p>
                 </div>
-                <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% elif apt.status == 'cancelled' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
+                <span
+                  class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% elif apt.status == 'cancelled' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
                   {{ apt.status }}
                 </span>
               </div>
-              
+
               {% if apt.adviser_notes %}
-              <div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0 text-blue-500"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+              <div
+                class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="size-5 shrink-0 text-blue-500">
+                  <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+                </svg>
                 <div>
                   <p class="font-semibold text-blue-900 mb-1">Adviser's Message:</p>
                   <p>{{ apt.adviser_notes }}</p>
@@ -705,21 +1010,29 @@
           <h4 class="font-semibold text-lg border-b pb-2 mb-4 text-light-blue">Forms & Inquiries</h4>
           <div class="space-y-4">
             {% for form in student_forms %}
-            <div class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if form.status == 'approved' %}border-l-green-500{% elif form.status == 'rejected' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
+            <div
+              class="p-4 border rounded-lg bg-white shadow-sm border-l-4 {% if form.status == 'approved' %}border-l-green-500{% elif form.status == 'rejected' %}border-l-red-500{% else %}border-l-yellow-500{% endif %}">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h5 class="font-medium text-gray-900">{{ form.title }}</h5>
                   <p class="text-xs text-gray-500">{{ form.submitted_at|date:"M j, Y, P" }}</p>
                 </div>
-                <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if form.status == 'approved' %}bg-green-100 text-green-700{% elif form.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
+                <span
+                  class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if form.status == 'approved' %}bg-green-100 text-green-700{% elif form.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %} capitalize">
                   {{ form.status }}
                 </span>
               </div>
-              <p class="text-sm text-gray-700 bg-light-gray p-2 rounded truncate max-h-16 overflow-hidden">{{ form.description }}</p>
+              <p class="text-sm text-gray-700 bg-light-gray p-2 rounded truncate max-h-16 overflow-hidden">{{
+                form.description }}</p>
 
               {% if form.adviser_notes %}
-              <div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0 text-blue-500"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+              <div
+                class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="size-5 shrink-0 text-blue-500">
+                  <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+                </svg>
                 <div>
                   <p class="font-semibold text-blue-900 mb-1">Response:</p>
                   <p>{{ form.adviser_notes }}</p>
@@ -733,9 +1046,10 @@
           </div>
         </div>
       </div>
-      
+
       <div class="p-6 border-t bg-light-gray flex justify-end">
-        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')" class="px-8 py-3 text-sm font-bold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 shadow-sm w-full sm:w-auto">Close</button>
+        <button type="button" onclick="document.getElementById('history-modal').classList.add('hidden')"
+          class="px-8 py-3 text-sm font-bold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 shadow-sm w-full sm:w-auto">Close</button>
       </div>
     </div>
   </div>
@@ -745,7 +1059,8 @@
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
       <div class="p-6 border-b bg-gradient-to-r from-navy to-light-blue text-white">
         <h3 class="text-xl font-bold">Redeem Enrollment Code</h3>
-        <p class="text-sm opacity-80 mt-1">Enter the code provided by your advisor to automatically enroll in approved subjects.</p>
+        <p class="text-sm opacity-80 mt-1">Enter the code provided by your advisor to automatically enroll in approved
+          subjects.</p>
       </div>
       <form method="POST" action="{% url 'student_dashboard' %}">
         {% csrf_token %}
@@ -753,15 +1068,18 @@
         <div class="p-8 space-y-4">
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Enrollment Code</label>
-            <input name="enrollment_code" type="text" required 
-                   class="flex h-14 w-full rounded-lg border-2 border-gray-100 text-2xl font-mono font-bold px-4 py-2 text-center focus:border-light-blue focus:ring-0 outline-none transition-all" 
-                   placeholder="XXXX-XXXX-XXXX">
+            <input name="enrollment_code" type="text" required
+              class="flex h-14 w-full rounded-lg border-2 border-gray-100 text-2xl font-mono font-bold px-4 py-2 text-center focus:border-light-blue focus:ring-0 outline-none transition-all"
+              placeholder="XXXX-XXXX-XXXX">
             <p class="text-[10px] text-gray-400 text-center italic">Example: 8fac-4b12-98ed</p>
           </div>
         </div>
         <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
-          <button type="button" onclick="document.getElementById('enrollment-modal').classList.add('hidden')" class="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700">Cancel</button>
-          <button type="submit" class="px-8 py-2.5 text-sm font-bold text-white bg-navy rounded-lg hover:bg-black shadow-lg transition-all active:scale-95">Redeem & Enroll</button>
+          <button type="button" onclick="document.getElementById('enrollment-modal').classList.add('hidden')"
+            class="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700">Cancel</button>
+          <button type="submit"
+            class="px-8 py-2.5 text-sm font-bold text-white bg-navy rounded-lg hover:bg-black shadow-lg transition-all active:scale-95">Redeem
+            & Enroll</button>
         </div>
       </form>
     </div>
@@ -780,16 +1098,21 @@
         <div class="p-6 space-y-4">
           <div class="space-y-2">
             <label class="text-sm font-medium">Form Type / Title *</label>
-            <input name="form_title" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. Leave of Absence Request">
+            <input name="form_title" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2"
+              placeholder="e.g. Leave of Absence Request">
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium">Description</label>
-            <textarea name="form_desc" rows="3" class="flex w-full rounded-md border text-sm px-3 py-2" placeholder="Briefly describe your request..."></textarea>
+            <textarea name="form_desc" rows="3" class="flex w-full rounded-md border text-sm px-3 py-2"
+              placeholder="Briefly describe your request..."></textarea>
           </div>
         </div>
         <div class="p-6 border-t bg-light-gray flex justify-end gap-3">
-          <button type="button" onclick="document.getElementById('submit-form-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:opacity-90 shadow-md">Submit Form</button>
+          <button type="button" onclick="document.getElementById('submit-form-modal').classList.add('hidden')"
+            class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:opacity-90 shadow-md">Submit
+            Form</button>
         </div>
       </form>
     </div>
@@ -809,21 +1132,27 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
               <label class="text-sm font-medium">Date *</label>
-              <input name="appointment_date" type="date" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
+              <input name="appointment_date" type="date" required
+                class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
             </div>
             <div class="space-y-2">
               <label class="text-sm font-medium">Time *</label>
-              <input name="appointment_time" type="time" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
+              <input name="appointment_time" type="time" required
+                class="flex h-10 w-full rounded-md border text-sm px-3 py-2">
             </div>
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium">Purpose *</label>
-            <input name="appointment_purpose" type="text" required class="flex h-10 w-full rounded-md border text-sm px-3 py-2" placeholder="e.g. Schedule clearance, Grade checking">
+            <input name="appointment_purpose" type="text" required
+              class="flex h-10 w-full rounded-md border text-sm px-3 py-2"
+              placeholder="e.g. Schedule clearance, Grade checking">
           </div>
         </div>
         <div class="p-6 border-t bg-light-gray flex justify-end gap-3">
-          <button type="button" onclick="document.getElementById('appointment-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:opacity-90 shadow-md">Schedule</button>
+          <button type="button" onclick="document.getElementById('appointment-modal').classList.add('hidden')"
+            class="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-light-blue rounded-md hover:opacity-90 shadow-md">Schedule</button>
         </div>
       </form>
     </div>
@@ -833,69 +1162,69 @@
 
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const triggers = document.querySelectorAll('.tab-trigger');
-        const contents = document.querySelectorAll('.tab-content');
+  document.addEventListener('DOMContentLoaded', () => {
+    const triggers = document.querySelectorAll('.tab-trigger');
+    const contents = document.querySelectorAll('.tab-content');
 
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', () => {
-                const targetId = `tab-${trigger.dataset.tab}`;
-                
-                // Reset all
-                triggers.forEach(t => {
-                    t.dataset.state = 'inactive';
-                    t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
-                });
-                contents.forEach(c => c.classList.add('hidden'));
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const targetId = `tab-${trigger.dataset.tab}`;
 
-                // Set active
-                trigger.dataset.state = 'active';
-                trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
-                document.getElementById(targetId).classList.remove('hidden');
-            });
+        // Reset all
+        triggers.forEach(t => {
+          t.dataset.state = 'inactive';
+          t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
         });
+        contents.forEach(c => c.classList.add('hidden'));
 
-        // Chatbot Logic
-        const chatToggle = document.getElementById('chatbot-toggle');
-        const chatWindow = document.getElementById('chatbot-window');
-        const chatClose = document.getElementById('chatbot-close');
-        const chatForm = document.getElementById('chatbot-form');
-        const chatInput = document.getElementById('chatbot-input');
-        const chatMessages = document.getElementById('chatbot-messages');
+        // Set active
+        trigger.dataset.state = 'active';
+        trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
+        document.getElementById(targetId).classList.remove('hidden');
+      });
+    });
 
-        function toggleChat() {
-            if (chatWindow.classList.contains('hidden')) {
-                chatWindow.classList.remove('hidden');
-                chatWindow.classList.add('flex');
-            } else {
-                chatWindow.classList.add('hidden');
-                chatWindow.classList.remove('flex');
-            }
-        }
+    // Chatbot Logic
+    const chatToggle = document.getElementById('chatbot-toggle');
+    const chatWindow = document.getElementById('chatbot-window');
+    const chatClose = document.getElementById('chatbot-close');
+    const chatForm = document.getElementById('chatbot-form');
+    const chatInput = document.getElementById('chatbot-input');
+    const chatMessages = document.getElementById('chatbot-messages');
 
-        chatToggle.addEventListener('click', toggleChat);
-        chatClose.addEventListener('click', toggleChat);
+    function toggleChat() {
+      if (chatWindow.classList.contains('hidden')) {
+        chatWindow.classList.remove('hidden');
+        chatWindow.classList.add('flex');
+      } else {
+        chatWindow.classList.add('hidden');
+        chatWindow.classList.remove('flex');
+      }
+    }
 
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const message = chatInput.value.trim();
-            if (!message) return;
+    chatToggle.addEventListener('click', toggleChat);
+    chatClose.addEventListener('click', toggleChat);
 
-            // Add user message
-            const userHtml = `
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      const userHtml = `
               <div class="flex gap-2 w-5/6 self-end justify-end">
                 <div class="bg-light-blue p-3 rounded-2xl rounded-br-sm shadow-sm text-sm text-white">
                   ${message}
                 </div>
               </div>
             `;
-            chatMessages.insertAdjacentHTML('beforeend', userHtml);
-            chatInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatMessages.insertAdjacentHTML('beforeend', userHtml);
+      chatInput.value = '';
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Simulate AI typing indicator
-            const typingId = 'typing-' + Date.now();
-            const typingHtml = `
+      // Simulate AI typing indicator
+      const typingId = 'typing-' + Date.now();
+      const typingHtml = `
               <div id="${typingId}" class="flex gap-2 w-5/6">
                 <div class="shrink-0 size-8 rounded-full bg-light-blue flex items-center justify-center text-white mt-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
@@ -907,24 +1236,24 @@
                 </div>
               </div>
             `;
-            chatMessages.insertAdjacentHTML('beforeend', typingHtml);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatMessages.insertAdjacentHTML('beforeend', typingHtml);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Simulate API response
-            setTimeout(() => {
-                document.getElementById(typingId).remove();
-                // Simple response logic
-                let reply = "I'm looking into that for you. For complex inquiries, you might want to consider booking an appointment with an adviser.";
-                const lowerMsg = message.toLowerCase();
-                if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-                    reply = "Hello! How can I assist you with your academics today?";
-                } else if (lowerMsg.includes('enroll')) {
-                    reply = "To enroll, make sure you enter your curriculum code in the Verify Enrollment section first. It might take some time for your adviser to review it.";
-                } else if (lowerMsg.includes('where is')) {
-                    reply = "You can find most services right here on the dashboard. Use the navigation buttons above!";
-                }
+      // Simulate API response
+      setTimeout(() => {
+        document.getElementById(typingId).remove();
+        // Simple response logic
+        let reply = "I'm looking into that for you. For complex inquiries, you might want to consider booking an appointment with an adviser.";
+        const lowerMsg = message.toLowerCase();
+        if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+          reply = "Hello! How can I assist you with your academics today?";
+        } else if (lowerMsg.includes('enroll')) {
+          reply = "To enroll, make sure you enter your curriculum code in the Verify Enrollment section first. It might take some time for your adviser to review it.";
+        } else if (lowerMsg.includes('where is')) {
+          reply = "You can find most services right here on the dashboard. Use the navigation buttons above!";
+        }
 
-                const botHtml = `
+        const botHtml = `
                   <div class="flex gap-2 w-5/6">
                     <div class="shrink-0 size-8 rounded-full bg-light-blue flex items-center justify-center text-white mt-auto">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
@@ -934,144 +1263,144 @@
                     </div>
                   </div>
                 `;
-                chatMessages.insertAdjacentHTML('beforeend', botHtml);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1500);
-        });
+        chatMessages.insertAdjacentHTML('beforeend', botHtml);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 1500);
+    });
 
-        // ==========================================
-        // Top-Level Navigation Tabs
-        // ==========================================
-        window.switchTopView = function(viewName) {
-            const overviewBtn = document.getElementById('nav-overview');
-            const messagesBtn = document.getElementById('nav-messages');
-            const overviewContainer = document.getElementById('view-overview');
-            const messagesContainer = document.getElementById('view-messages');
+    // ==========================================
+    // Top-Level Navigation Tabs
+    // ==========================================
+    window.switchTopView = function (viewName) {
+      const overviewBtn = document.getElementById('nav-overview');
+      const messagesBtn = document.getElementById('nav-messages');
+      const overviewContainer = document.getElementById('view-overview');
+      const messagesContainer = document.getElementById('view-messages');
 
-            if (viewName === 'overview') {
-                overviewBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
-                overviewBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
-                
-                messagesBtn.classList.add('text-gray-600', 'hover:text-gray-900');
-                messagesBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
+      if (viewName === 'overview') {
+        overviewBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
+        overviewBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
 
-                overviewContainer.classList.remove('hidden');
-                messagesContainer.classList.add('hidden');
-            } else {
-                messagesBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
-                messagesBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
-                
-                overviewBtn.classList.add('text-gray-600', 'hover:text-gray-900');
-                overviewBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
+        messagesBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+        messagesBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
 
-                messagesContainer.classList.remove('hidden');
-                overviewContainer.classList.add('hidden');
-            }
-        };
+        overviewContainer.classList.remove('hidden');
+        messagesContainer.classList.add('hidden');
+      } else {
+        messagesBtn.classList.add('shadow-sm', 'bg-white', 'text-gray-900');
+        messagesBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
 
-        // ==========================================
-        // Real-time Chat Sync for Student Messages (Dual-Pane)
-        // ==========================================
-        let pollTimer = null;
-        let activeAdviserId = null;
-        let lastMessageCount = 0;
+        overviewBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+        overviewBtn.classList.remove('shadow-sm', 'bg-white', 'text-gray-900');
 
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/\n/g, '<br>');
+        messagesContainer.classList.remove('hidden');
+        overviewContainer.classList.add('hidden');
+      }
+    };
+
+    // ==========================================
+    // Real-time Chat Sync for Student Messages (Dual-Pane)
+    // ==========================================
+    let pollTimer = null;
+    let activeAdviserId = null;
+    let lastMessageCount = 0;
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, '<br>');
+    }
+
+    const chatEmptyState = document.getElementById('chat-empty-state');
+    const chatHeader = document.getElementById('chat-header');
+    const chatLoading = document.getElementById('chat-loading');
+    const chatNoMessages = document.getElementById('chat-no-messages');
+    const chatMessagesArea = document.getElementById('chat-messages-area');
+    const chatInputArea = document.getElementById('chat-input-area');
+    const msgAdviserIdInput = document.getElementById('msg-adviser-id');
+    const msgContent = document.getElementById('msg-content');
+
+    window.loadConversation = function (adviserId, adviserName, initials, isPolling) {
+      activeAdviserId = adviserId;
+      msgAdviserIdInput.value = adviserId;
+
+      if (adviserName) {
+        document.getElementById('chat-student-name').textContent = adviserName;
+        document.getElementById('chat-avatar').textContent = initials;
+      }
+
+      chatEmptyState.classList.add('hidden');
+      chatHeader.classList.remove('hidden');
+      chatInputArea.classList.remove('hidden');
+
+      if (!isPolling) {
+        chatMessagesArea.classList.add('hidden');
+        chatNoMessages.classList.add('hidden');
+        chatLoading.classList.remove('hidden');
+        lastMessageCount = 0;
+      }
+
+      // Highlight active adviser
+      document.querySelectorAll('.student-item').forEach(el => {
+        if (el.dataset.studentId === String(adviserId)) {
+          el.classList.add('bg-blue-50', 'border-l-4', 'border-l-light-blue');
+        } else {
+          el.classList.remove('bg-blue-50', 'border-l-4', 'border-l-light-blue');
         }
+      });
 
-        const chatEmptyState = document.getElementById('chat-empty-state');
-        const chatHeader = document.getElementById('chat-header');
-        const chatLoading = document.getElementById('chat-loading');
-        const chatNoMessages = document.getElementById('chat-no-messages');
-        const chatMessagesArea = document.getElementById('chat-messages-area');
-        const chatInputArea = document.getElementById('chat-input-area');
-        const msgAdviserIdInput = document.getElementById('msg-adviser-id');
-        const msgContent = document.getElementById('msg-content');
+      fetch(`/student/conversation/?adviser_id=${adviserId}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(data => {
+          if (data.error) {
+            console.error('Conversation error:', data.error);
+            chatLoading.classList.add('hidden');
+            return;
+          }
 
-        window.loadConversation = function(adviserId, adviserName, initials, isPolling) {
-            activeAdviserId = adviserId;
-            msgAdviserIdInput.value = adviserId;
+          const msgs = data.messages || [];
 
-            if (adviserName) {
-                document.getElementById('chat-student-name').textContent = adviserName;
-                document.getElementById('chat-avatar').textContent = initials;
-            }
+          // Skip re-render if polling and no new messages
+          if (isPolling && msgs.length === lastMessageCount) return;
+          lastMessageCount = msgs.length;
 
-            chatEmptyState.classList.add('hidden');
-            chatHeader.classList.remove('hidden');
-            chatInputArea.classList.remove('hidden');
+          chatLoading.classList.add('hidden');
+          chatMessagesArea.innerHTML = '';
 
-            if (!isPolling) {
-                chatMessagesArea.classList.add('hidden');
-                chatNoMessages.classList.add('hidden');
-                chatLoading.classList.remove('hidden');
-                lastMessageCount = 0;
-            }
+          if (msgs.length === 0) {
+            chatNoMessages.classList.remove('hidden');
+            chatMessagesArea.classList.add('hidden');
+            return;
+          }
 
-            // Highlight active adviser
-            document.querySelectorAll('.student-item').forEach(el => {
-                if (el.dataset.studentId === String(adviserId)) {
-                    el.classList.add('bg-blue-50', 'border-l-4', 'border-l-light-blue');
-                } else {
-                    el.classList.remove('bg-blue-50', 'border-l-4', 'border-l-light-blue');
-                }
-            });
+          chatNoMessages.classList.add('hidden');
+          chatMessagesArea.classList.remove('hidden');
 
-            fetch(`/student/conversation/?adviser_id=${adviserId}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    console.error('Conversation error:', data.error);
-                    chatLoading.classList.add('hidden');
-                    return;
-                }
-
-                const msgs = data.messages || [];
-
-                // Skip re-render if polling and no new messages
-                if (isPolling && msgs.length === lastMessageCount) return;
-                lastMessageCount = msgs.length;
-
-                chatLoading.classList.add('hidden');
-                chatMessagesArea.innerHTML = '';
-
-                if (msgs.length === 0) {
-                    chatNoMessages.classList.remove('hidden');
-                    chatMessagesArea.classList.add('hidden');
-                    return;
-                }
-
-                chatNoMessages.classList.add('hidden');
-                chatMessagesArea.classList.remove('hidden');
-
-                msgs.forEach((m, idx) => {
-                    // Date separator
-                    const dateStr = m.sent_at.split(',')[0] || m.sent_at;
-                    const prevDate = idx > 0 ? (msgs[idx-1].sent_at.split(',')[0] || msgs[idx-1].sent_at) : null;
-                    if (idx === 0 || dateStr !== prevDate) {
-                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+          msgs.forEach((m, idx) => {
+            // Date separator
+            const dateStr = m.sent_at.split(',')[0] || m.sent_at;
+            const prevDate = idx > 0 ? (msgs[idx - 1].sent_at.split(',')[0] || msgs[idx - 1].sent_at) : null;
+            if (idx === 0 || dateStr !== prevDate) {
+              chatMessagesArea.insertAdjacentHTML('beforeend', `
                             <div class="flex items-center gap-3 my-2">
                                 <div class="flex-1 h-px bg-gray-200"></div>
                                 <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">${dateStr}</span>
                                 <div class="flex-1 h-px bg-gray-200"></div>
                             </div>
                         `);
-                    }
+            }
 
-                    if (m.is_student) {
-                        // Student message (right side)
-                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+            if (m.is_student) {
+              // Student message (right side)
+              chatMessagesArea.insertAdjacentHTML('beforeend', `
                             <div class="flex gap-2 justify-end mb-4 group">
                                 <div class="max-w-[85%] relative">
                                     <div class="bg-gradient-to-br from-navy to-light-blue text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-md text-sm leading-relaxed">${escapeHtml(m.content)}</div>
@@ -1079,10 +1408,10 @@
                                 </div>
                             </div>
                         `);
-                    } else {
-                        // Adviser message (left side)
-                        const av = (m.sender_name || 'A').substring(0, 2).toUpperCase();
-                        chatMessagesArea.insertAdjacentHTML('beforeend', `
+            } else {
+              // Adviser message (left side)
+              const av = (m.sender_name || 'A').substring(0, 2).toUpperCase();
+              chatMessagesArea.insertAdjacentHTML('beforeend', `
                             <div class="flex gap-2 justify-start mb-4 group">
                                 <div class="shrink-0 size-8 rounded-full bg-white border border-gray-200 text-light-blue text-xs font-bold flex items-center justify-center mt-auto shadow-sm">${av}</div>
                                 <div class="max-w-[85%] relative">
@@ -1091,120 +1420,120 @@
                                 </div>
                             </div>
                         `);
-                    }
-                });
+            }
+          });
 
-                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
-            })
-            .catch(err => {
-                chatLoading.classList.add('hidden');
-                console.error('Failed to fetch conversation:', err);
-            });
-        };
-
-        document.querySelectorAll('.student-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'AD').substring(0,2).toUpperCase();
-                loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false);
-                if (pollTimer) clearInterval(pollTimer);
-                pollTimer = setInterval(() => {
-                    if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
-                }, 5000);
-            });
+          chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+        })
+        .catch(err => {
+          chatLoading.classList.add('hidden');
+          console.error('Failed to fetch conversation:', err);
         });
+    };
 
-        // ─── Send message form ─────────────────────────────────────────────
-        const msgForm = document.getElementById('student-msg-form-new');
+    document.querySelectorAll('.student-item').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const initials = btn.dataset.studentInitials || (btn.dataset.studentName || 'AD').substring(0, 2).toUpperCase();
+        loadConversation(btn.dataset.studentId, btn.dataset.studentName, initials, false);
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(() => {
+          if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
+        }, 5000);
+      });
+    });
 
-        if (msgForm) {
-            msgForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+    // ─── Send message form ─────────────────────────────────────────────
+    const msgForm = document.getElementById('student-msg-form-new');
 
-                const content = document.getElementById('msg-content').value.trim();
-                const adviserId = document.getElementById('msg-adviser-id').value;
+    if (msgForm) {
+      msgForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-                if (!content) { alert('Please type a message.'); return; }
-                if (!adviserId) { alert('Please select an adviser first.'); return; }
+        const content = document.getElementById('msg-content').value.trim();
+        const adviserId = document.getElementById('msg-adviser-id').value;
 
-                const submitBtn = msgForm.querySelector('button[type=submit]');
-                if (submitBtn) { submitBtn.disabled = true; }
+        if (!content) { alert('Please type a message.'); return; }
+        if (!adviserId) { alert('Please select an adviser first.'); return; }
 
-                // Build form data manually
-                const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
-                const csrftoken = csrfInput ? csrfInput.value : '';
+        const submitBtn = msgForm.querySelector('button[type=submit]');
+        if (submitBtn) { submitBtn.disabled = true; }
 
-                const postData = new URLSearchParams();
-                postData.append('action', 'send_message');
-                postData.append('adviser_id', adviserId);
-                postData.append('content', content);
-                postData.append('csrfmiddlewaretoken', csrftoken);
+        // Build form data manually
+        const csrfInput = msgForm.querySelector('[name=csrfmiddlewaretoken]');
+        const csrftoken = csrfInput ? csrfInput.value : '';
 
-                fetch('{% url "student_dashboard" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: postData.toString()
-                })
-                .then(r => {
-                    if (!r.ok) throw new Error('Server error: ' + r.status);
-                    return r.json();
-                })
-                .then(data => {
-                    document.getElementById('msg-content').value = '';
-                    if (document.getElementById('msg-content').style) {
-                        document.getElementById('msg-content').style.height = 'auto';
-                    }
-                    // Reload conversation immediately
-                    if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
-                })
-                .catch(err => {
-                    console.error('Send error:', err);
-                })
-                .finally(() => {
-                    if (submitBtn) { submitBtn.disabled = false; }
-                });
-            });
-        }
+        const postData = new URLSearchParams();
+        postData.append('action', 'send_message');
+        postData.append('adviser_id', adviserId);
+        postData.append('content', content);
+        postData.append('csrfmiddlewaretoken', csrftoken);
 
-        // ─── My Curriculum Logic ─────────────────────────────────────────────
-        window.loadMyCurriculum = function() {
-            const body = document.getElementById('student-curriculum-body');
-            if (!body) return;
+        fetch('{% url "student_dashboard" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrftoken
+          },
+          body: postData.toString()
+        })
+          .then(r => {
+            if (!r.ok) throw new Error('Server error: ' + r.status);
+            return r.json();
+          })
+          .then(data => {
+            document.getElementById('msg-content').value = '';
+            if (document.getElementById('msg-content').style) {
+              document.getElementById('msg-content').style.height = 'auto';
+            }
+            // Reload conversation immediately
+            if (activeAdviserId) loadConversation(activeAdviserId, null, null, true);
+          })
+          .catch(err => {
+            console.error('Send error:', err);
+          })
+          .finally(() => {
+            if (submitBtn) { submitBtn.disabled = false; }
+          });
+      });
+    }
 
-            fetch('/api/curriculum/my/')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
-                        body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">${data.error}</td></tr>`;
-                        return;
-                    }
+    // ─── My Curriculum Logic ─────────────────────────────────────────────
+    window.loadMyCurriculum = function () {
+      const body = document.getElementById('student-curriculum-body');
+      if (!body) return;
 
-                    body.innerHTML = '';
-                    let passedCount = 0;
-                    const totalSubjects = data.curriculum.length;
+      fetch('/api/curriculum/my/')
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">${data.error}</td></tr>`;
+            return;
+          }
 
-                    data.curriculum.forEach(subj => {
-                        if (subj.status === 'passed') passedCount++;
+          body.innerHTML = '';
+          let passedCount = 0;
+          const totalSubjects = data.curriculum.length;
 
-                        const statusClass = {
-                            'passed': 'bg-green-100 text-green-700 border-green-200',
-                            'failed': 'bg-red-100 text-red-700 border-red-200',
-                            'in_progress': 'bg-blue-100 text-blue-700 border-blue-200',
-                            'not_taken': 'bg-gray-100 text-gray-500 border-gray-200'
-                        }[subj.status] || 'bg-gray-100';
+          data.curriculum.forEach(subj => {
+            if (subj.status === 'passed') passedCount++;
 
-                        const statusLabel = {
-                            'passed': 'DONE',
-                            'failed': 'FAILED',
-                            'in_progress': 'ON PROGRESS',
-                            'not_taken': 'NOT TAKEN'
-                        }[subj.status] || subj.status.toUpperCase();
+            const statusClass = {
+              'passed': 'bg-green-100 text-green-700 border-green-200',
+              'failed': 'bg-red-100 text-red-700 border-red-200',
+              'in_progress': 'bg-blue-100 text-blue-700 border-blue-200',
+              'not_taken': 'bg-gray-100 text-gray-500 border-gray-200'
+            }[subj.status] || 'bg-gray-100';
 
-                        const row = `
+            const statusLabel = {
+              'passed': 'DONE',
+              'failed': 'FAILED',
+              'in_progress': 'ON PROGRESS',
+              'not_taken': 'NOT TAKEN'
+            }[subj.status] || subj.status.toUpperCase();
+
+            const row = `
                             <tr class="student-curr-row hover:bg-gray-50 transition-colors" data-year="${subj.year_level}">
                                 <td class="p-3 font-mono text-xs font-bold text-navy">${subj.code}</td>
                                 <td class="p-3">
@@ -1219,55 +1548,55 @@
                                 </td>
                             </tr>
                         `;
-                        body.insertAdjacentHTML('beforeend', row);
-                    });
+            body.insertAdjacentHTML('beforeend', row);
+          });
 
-                    // Update metrics
-                    const percent = totalSubjects > 0 ? Math.round((passedCount / totalSubjects) * 100) : 0;
-                    const standingPerc = document.getElementById('standing-percentage');
-                    const standingBar = document.getElementById('standing-progress-bar');
-                    const passedLabel = document.getElementById('passed-count-label');
-                    
-                    if (standingPerc) standingPerc.innerText = `${percent}%`;
-                    if (standingBar) standingBar.style.width = `${percent}%`;
-                    if (passedLabel) passedLabel.innerText = `${passedCount} / ${totalSubjects}`;
-                })
-                .catch(err => {
-                    body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">Failed to load curriculum.</td></tr>`;
-                });
-        };
+          // Update metrics
+          const percent = totalSubjects > 0 ? Math.round((passedCount / totalSubjects) * 100) : 0;
+          const standingPerc = document.getElementById('standing-percentage');
+          const standingBar = document.getElementById('standing-progress-bar');
+          const passedLabel = document.getElementById('passed-count-label');
 
-        window.filterStudentChecklist = function() {
-            const year = document.getElementById('student-year-filter').value;
-            document.querySelectorAll('.student-curr-row').forEach(row => {
-                if (year === 'all' || row.dataset.year === year) row.style.display = '';
-                else row.style.display = 'none';
-            });
-        };
+          if (standingPerc) standingPerc.innerText = `${percent}%`;
+          if (standingBar) standingBar.style.width = `${percent}%`;
+          if (passedLabel) passedLabel.innerText = `${passedCount} / ${totalSubjects}`;
+        })
+        .catch(err => {
+          body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">Failed to load curriculum.</td></tr>`;
+        });
+    };
 
-        window.requestEnrollment = function(subjectId, subjectCode) {
-            if (!confirm(`Are you sure you want to request enrollment for ${subjectCode}?`)) return;
-            
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            fetch('/api/enrollment/request-subject/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                body: JSON.stringify({ subject_id: subjectId, term_label: 'Student Request' })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            });
-        };
+    window.filterStudentChecklist = function () {
+      const year = document.getElementById('student-year-filter').value;
+      document.querySelectorAll('.student-curr-row').forEach(row => {
+        if (year === 'all' || row.dataset.year === year) row.style.display = '';
+        else row.style.display = 'none';
+      });
+    };
 
-        // Load curriculum on start
-        loadMyCurriculum();
+    window.requestEnrollment = function (subjectId, subjectCode) {
+      if (!confirm(`Are you sure you want to request enrollment for ${subjectCode}?`)) return;
 
-    });
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      fetch('/api/enrollment/request-subject/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+        body: JSON.stringify({ subject_id: subjectId, term_label: 'Student Request' })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        });
+    };
+
+    // Load curriculum on start
+    loadMyCurriculum();
+
+  });
 </script>
 {% endblock %}

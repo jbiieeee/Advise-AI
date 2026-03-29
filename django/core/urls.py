@@ -24,7 +24,16 @@ urlpatterns = [
     path('api/curriculum/<int:student_id>/', views.get_student_curriculum, name='get_student_curriculum'),
     path('api/curriculum/mine/', views.get_my_curriculum, name='get_my_curriculum'),
     path('api/curriculum/update-subject/', views.update_student_subject, name='update_student_subject'),
+    path('api/curriculum/details/<int:student_id>/', views.get_adviser_student_details, name='get_student_details'),
     path('api/enrollment/generate-code/', views.generate_enrollment_code, name='generate_enrollment_code'),
     path('api/enrollment/request-subject/', views.request_subject_enrollment, name='request_subject_enrollment'),
     path('api/enrollment/process/', views.process_enrollment_request, name='process_enrollment_request'),
+    # ── Staff Messaging & Notifications ───────────────────────
+    path('api/staff/contacts/', views.staff_get_contacts, name='staff_get_contacts'),
+    path('api/staff/conversation/<int:contact_id>/', views.staff_get_conversation, name='staff_get_conversation'),
+    path('api/staff/send/', views.staff_send_message, name='staff_send_message'),
+    path('api/notifications/system/', views.api_get_notifications, name='api_get_notifications'),
+    path('api/analytics/sync/', views.api_analytics_sync, name='api_analytics_sync'),
+
+    path('api/notifications/mark-read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
 ]
