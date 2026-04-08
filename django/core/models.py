@@ -128,7 +128,7 @@ class CurriculumSubject(models.Model):
         help_text='IT elective track (Track 1 / Track 2 / Track 3) or blank for core subjects'
     )
     subject_type = models.CharField(
-        max_length=20, default='core',
+        max_length=50, default='core',
         help_text='core / it_elective / pe / nstp / professional_elective / ge'
     )
 
