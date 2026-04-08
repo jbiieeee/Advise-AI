@@ -163,6 +163,10 @@ def get_recommended_subjects(user):
     return recommended
 
 @login_required(login_url='login')
+def student_dashboard(request):
+    user = request.user
+    profile = user.userprofile
+
     # Get curriculum status for tags early to avoid UnboundLocalError during POST
     curriculum_records = StudentCurriculum.objects.filter(student=user)
     curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
