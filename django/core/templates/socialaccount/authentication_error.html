@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Social Network Login Failure" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-navy to-light-blue flex items-center justify-center p-4 relative overflow-hidden">
+  <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+  
+  <div class="w-full max-w-md relative z-10 text-center">
+    <div class="mb-8">
+      <div class="inline-flex items-center justify-center p-6 bg-white/20 rounded-full backdrop-blur-xl mb-4 border border-white/30 shadow-2xl">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-pulse"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </div>
+      <h1 class="text-4xl font-extrabold text-white tracking-tight drop-shadow-lg mb-2">Authentication Failed</h1>
+      <p class="text-white/80 text-lg">We couldn't connect your social account.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-2xl p-8 border border-white/20">
+      <div class="flex items-center gap-4 p-4 bg-red-50 border border-red-100 rounded-xl mb-6 text-left">
+        <div class="shrink-0 size-10 rounded-full bg-red-500/10 flex items-center justify-center">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </div>
+        <div>
+          <h4 class="text-red-900 font-bold text-sm">Action Required</h4>
+          <p class="text-red-600 text-xs">The authorization was cancelled or your provider is temporarily unavailable.</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <a href="{% url 'account_login' %}" class="block w-full py-4 bg-light-blue text-white rounded-xl font-bold hover:bg-navy transition-all shadow-lg hover:shadow-xl">
+          Return to Login
+        </a>
+        <a href="{% url 'landing' %}" class="block w-full py-3 text-gray-400 hover:text-gray-600 font-medium transition-colors text-sm">
+          Back to Homepage
+        </a>
+      </div>
+    </div>
+    
+    <p class="mt-8 text-white/50 text-[10px] font-medium uppercase tracking-[0.2em]">Error Reference: SocialAccountLoginFailure</p>
+  </div>
+</div>
+{% endblock %}
