@@ -12,6 +12,11 @@ from .models import (
     FormSubmission, Appointment, Message
 )
 
+def csrf_failure(request, reason=""):
+    """Handle CSRF failures by redirecting back with a message instead of showing 403."""
+    messages.error(request, "Security check failed (CSRF). Please refresh the page and try again.")
+    return redirect(request.META.get('HTTP_REFERER', 'landing'))
+
 def landing_page(request):
     return render(request, 'core/landing.html')
 
