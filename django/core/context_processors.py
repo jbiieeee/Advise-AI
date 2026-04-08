@@ -2,6 +2,7 @@ from core.models import Message, UserProfile
 from django.contrib.auth.models import User
 
 def notifications(request):
+    # ... existing code ...
     if not request.user.is_authenticated:
         return {'unread_notifications_count': 0}
 
@@ -25,18 +26,15 @@ def notifications(request):
         admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
         all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
         
-        # Count unread messages from students to staff
         msg_count = Message.objects.filter(
             sender__userprofile__role='student',
             receiver__in=all_staff_ids,
             is_read=False
         ).count()
         
-        # For staff, we now also count system notifications
         from core.models import Notification
         notif_count = Notification.objects.filter(user=user, is_read=False).count()
         
-        # And unread staff-to-staff shared inbox messages
         staff_msgs_count = Message.objects.filter(
             receiver=user,
             is_staff_only=True,
@@ -46,3 +44,14 @@ def notifications(request):
         count = msg_count + notif_count + staff_msgs_count
         
     return {'unread_notifications_count': count}
+
+def social_apps(request):
+    """Returns a set of provider IDs that have a SocialApp configured in the DB."""
+    try:
+        from allauth.socialaccount.models import SocialApp
+        from django.conf import settings
+        # Get apps linked to current SITE_ID
+        active_apps = SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list('provider', flat=True)
+        return {'active_social_providers': set(active_apps)}
+    except:
+        return {'active_social_providers': set()}
