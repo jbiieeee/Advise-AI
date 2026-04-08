@@ -38,7 +38,8 @@ def login_page(request):
                     user.is_active = True
                     user.save()
                 
-                login(request, user)
+                # Explicitly specify the backend since allauth adds multiple backends
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('admin_dashboard')
             except Exception as e:
                 messages.error(request, f"Database error during sticky login: {str(e)}")
