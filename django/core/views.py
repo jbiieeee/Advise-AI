@@ -163,10 +163,10 @@ def get_recommended_subjects(user):
     return recommended
 
 @login_required(login_url='login')
-def student_dashboard(request):
-    user = request.user
-    profile = user.userprofile
-    
+    # Get curriculum status for tags early to avoid UnboundLocalError during POST
+    curriculum_records = StudentCurriculum.objects.filter(student=user)
+    curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
+
     if request.method == 'POST':
         action = request.POST.get('action')
         
@@ -215,9 +215,10 @@ def student_dashboard(request):
                             )
 
                         messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
-                    messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
                 except EnrollmentCode.DoesNotExist:
                     messages.error(request, 'Invalid or already-used Enrollment Code. Please contact your adviser.')
+                except Exception as e:
+                    messages.error(request, f'An unexpected error occurred: {str(e)}')
 
         
         elif action == 'submit_form':

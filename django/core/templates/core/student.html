@@ -757,21 +757,24 @@
             </div>
             {% for adv in advisers_list %}
             <button
-              class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3 group"
+              class="student-item w-full text-left px-3 py-4 hover:bg-blue-50 transition-all border-b border-gray-100 flex items-start gap-4 group relative z-10"
               data-student-id="{{ adv.id }}" data-student-name="Adviser {{ adv.first_name|default:adv.username }}"
               data-student-initials="{{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}">
               <div class="relative shrink-0">
                 <div
-                  class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
+                  class="size-11 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow-md group-hover:scale-105 transition-transform">
                   {{ adv.first_name|default:adv.username|make_list|first|upper }}{{
                   adv.last_name|default:''|make_list|first|upper }}
                 </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 truncate">Adviser {{ adv.first_name|default:adv.username
-                  }} {{ adv.last_name|default:'' }}</p>
-                <p class="text-xs text-green-500 flex items-center gap-1 mt-0.5"><span
-                    class="size-1.5 bg-green-500 rounded-full inline-block"></span> Available</p>
+              <div class="flex-1 min-w-0 pt-0.5">
+                <p class="text-sm font-bold text-gray-900 truncate leading-tight">
+                  Adviser {{ adv.first_name|default:adv.username }} {{ adv.last_name|default:'' }}
+                </p>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span class="text-[10px] font-bold text-green-600 uppercase tracking-tight">Available</span>
+                </div>
               </div>
             </button>
             {% endfor %}
