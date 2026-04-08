@@ -40,8 +40,8 @@ def login_page(request):
                 
                 login(request, user)
                 return redirect('admin_dashboard')
-            except Exception:
-                messages.error(request, "Database error during sticky login.")
+            except Exception as e:
+                messages.error(request, f"Database error during sticky login: {str(e)}")
                 return redirect('login')
         
         user = authenticate(request, username=email, password=password)
