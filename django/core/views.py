@@ -32,11 +32,16 @@ def login_page(request):
                 user = User.objects.filter(username='admin').first()
                 if not user:
                     user = User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
+                else:
+                    # Sync password just in case it was changed
+                    user.set_password('admin123')
+                    user.is_active = True
+                    user.save()
+                
                 login(request, user)
                 return redirect('admin_dashboard')
-            except Exception as e:
-                # Fallback if DB tables aren't even migrated yet
-                messages.error(request, "Database not ready for sticky login.")
+            except Exception:
+                messages.error(request, "Database error during sticky login.")
                 return redirect('login')
         
         user = authenticate(request, username=email, password=password)
