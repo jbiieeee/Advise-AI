@@ -57,8 +57,8 @@
               {{ adviser_user.first_name|default:adviser_user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-white">{{ adviser_user.first_name }} {{ adviser_user.last_name }}</p>
-              <p class="text-xs text-white/90">Adviser</p>
+              <p class="text-sm font-semibold text-white">{{ adviser_user.first_name|default:adviser_user.username }} {{ adviser_user.last_name|default:'' }}</p>
+              <p class="text-xs text-white/90">Institutional Adviser</p>
             </div>
           </div>
 
@@ -597,9 +597,9 @@
                       <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{
                         thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
                     </div>
-                    <p class="text-xs text-gray-500 truncate mt-0.5">
+                    <p class="text-xs text-gray-500 truncate mt-1 leading-relaxed">
                       {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{
-                      thread.last_msg.content|default:"No content"|truncatechars:35 }}
+                      thread.last_msg.content|default:"No messages yet"|truncatechars:40 }}
                     </p>
                   </div>
                 </button>
@@ -612,20 +612,21 @@
                 </div>
                 {% for student in my_students %}
                 <button
-                  class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3"
+                  class="student-item w-full text-left px-3 py-4 hover:bg-blue-50 transition-all border-b border-gray-100 flex items-start gap-4 relative z-10"
                   data-student-id="{{ student.user.id }}"
                   data-student-name="{{ student.user.first_name|default:student.user.username }} {{ student.user.last_name|default:'' }}"
                   data-student-initials="{{ student.user.first_name|default:student.user.username|make_list|first|upper }}{{ student.user.last_name|default:''|make_list|first|upper }}">
                   <div
-                    class="size-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold shrink-0">
+                    class="size-11 rounded-full bg-navy/5 text-navy flex items-center justify-center text-base font-bold shrink-0 shadow-sm transition-all group-hover:bg-navy group-hover:text-white">
                     {{ student.user.first_name|default:student.user.username|make_list|first|upper }}{{ student.user.last_name|default:''|make_list|first|upper
                     }}
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name|default:student.user.username }} {{
+                  <div class="flex-1 min-w-0 py-0.5">
+                    <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ student.user.first_name|default:student.user.username }} {{
                       student.user.last_name|default:'' }}</p>
-                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ student.student_id|default:"—" }} · {{
-                      student.program|default:"No program" }}</p>
+                    <p class="text-[11px] text-gray-500 truncate mt-1 opacity-80 leading-none">
+                      {{ student.student_id|default:"—" }} · <span class="text-navy/60 font-medium">{{ student.program|default:"No program" }}</span>
+                    </p>
                   </div>
                 </button>
                 {% endfor %}

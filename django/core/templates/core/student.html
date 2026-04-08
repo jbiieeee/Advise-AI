@@ -56,7 +56,7 @@
               {{ user.first_name|default:user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-white">{{ user.first_name }} {{ user.last_name }}</p>
+              <p class="text-sm font-semibold text-white">{{ user.first_name|default:user.username }} {{ user.last_name|default:'' }}</p>
               <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }}</p>
             </div>
           </div>
@@ -138,12 +138,13 @@
           </div>
           <div class="p-6 pt-6 relative z-10">
             <div>
-              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back{% if user.first_name %}, {{ user.first_name
-                }}{% endif %}! 👋</h2>
+              {% verbatim %}
+              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back! 👋</h2>
               <p class="text-white/95 mb-6 drop-shadow-sm text-lg">
                 Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant
                 AI support.
               </p>
+              {% endverbatim %}
 
               <div class="flex gap-3">
                 <button
