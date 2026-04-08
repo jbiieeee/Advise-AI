@@ -592,14 +592,14 @@
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
-                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name }} {{
-                        thread.profile.user.last_name }}</p>
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name|default:thread.profile.user.username }} {{
+                        thread.profile.user.last_name|default:'' }}</p>
                       <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{
                         thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
                     </div>
                     <p class="text-xs text-gray-500 truncate mt-0.5">
                       {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{
-                      thread.last_msg.content|truncatechars:35 }}
+                      thread.last_msg.content|default:"No content"|truncatechars:35 }}
                     </p>
                   </div>
                 </button>
@@ -614,16 +614,16 @@
                 <button
                   class="student-item w-full text-left px-3 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-start gap-3"
                   data-student-id="{{ student.user.id }}"
-                  data-student-name="{{ student.user.first_name }} {{ student.user.last_name }}"
-                  data-student-initials="{{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper }}">
+                  data-student-name="{{ student.user.first_name|default:student.user.username }} {{ student.user.last_name|default:'' }}"
+                  data-student-initials="{{ student.user.first_name|default:student.user.username|make_list|first|upper }}{{ student.user.last_name|default:''|make_list|first|upper }}">
                   <div
                     class="size-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold shrink-0">
-                    {{ student.user.first_name|make_list|first|upper }}{{ student.user.last_name|make_list|first|upper
+                    {{ student.user.first_name|default:student.user.username|make_list|first|upper }}{{ student.user.last_name|default:''|make_list|first|upper
                     }}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name }} {{
-                      student.user.last_name }}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ student.user.first_name|default:student.user.username }} {{
+                      student.user.last_name|default:'' }}</p>
                     <p class="text-xs text-gray-400 truncate mt-0.5">{{ student.student_id|default:"—" }} · {{
                       student.program|default:"No program" }}</p>
                   </div>

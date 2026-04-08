@@ -768,7 +768,7 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-gray-900 truncate">Adviser {{ adv.first_name|default:adv.username
-                  }} {{ adv.last_name }}</p>
+                  }} {{ adv.last_name|default:'' }}</p>
                 <p class="text-xs text-green-500 flex items-center gap-1 mt-0.5"><span
                     class="size-1.5 bg-green-500 rounded-full inline-block"></span> Available</p>
               </div>
@@ -1205,6 +1205,7 @@
     chatToggle.addEventListener('click', toggleChat);
     chatClose.addEventListener('click', toggleChat);
 
+    {% verbatim %}
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const message = chatInput.value.trim();
@@ -1267,6 +1268,7 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 1500);
     });
+    {% endverbatim %}
 
     // ==========================================
     // Top-Level Navigation Tabs
