@@ -164,6 +164,10 @@ def get_recommended_subjects(user):
 
 @login_required(login_url='login')
 def student_dashboard(request):
+    from django.db.models import Q
+    from django.utils import timezone
+    from core.models import Notification, StudentCurriculum, EnrollmentCode, TermEnrollment, FormSubmission, Appointment, Message
+    
     user = request.user
     profile = user.userprofile
 
@@ -179,7 +183,6 @@ def student_dashboard(request):
             if not code_str:
                 messages.error(request, 'Please enter a valid Enrollment Code.')
             else:
-                from django.utils import timezone
                 try:
                     enc = EnrollmentCode.objects.get(code=code_str, student=user, used=False)
                     # Filter out subjects already passed or in-progress
@@ -209,7 +212,6 @@ def student_dashboard(request):
                         profile.save()
                         
                         # New: Notify all Admins about enrollment code redemption
-                        from core.models import Notification
                         admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
                         for admin in admins:
                             Notification.objects.create(
@@ -252,7 +254,6 @@ def student_dashboard(request):
             content = request.POST.get('content', '').strip()
             adviser_id = request.POST.get('adviser_id')
             if content:
-                from django.db.models import Q
                 # Get all adviser user IDs
                 adviser_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
                 admin_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
