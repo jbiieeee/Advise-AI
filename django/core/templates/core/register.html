@@ -53,16 +53,12 @@
             <!-- Native Select replacing Radix Select for vanilla HTML/JS approach -->
             <select id="institution" name="institution" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-white">
               <option value="" disabled selected>Select your institution</option>
-              <option value="Ateneo de Manila University">Ateneo de Manila University</option>
-              <option value="De La Salle University">De La Salle University</option>
-              <option value="University of the Philippines Manila">University of the Philippines Manila</option>
-              <option value="University of Santo Tomas">University of Santo Tomas</option>
-              <option value="Polytechnic University of the Philippines">Polytechnic University of the Philippines</option>
               <option value="Far Eastern University">Far Eastern University</option>
-              <option value="Adamson University">Adamson University</option>
               <option value="University of the East">University of the East</option>
+              <option value="San Beda University">National Teachers College</option>
               <option value="Mapúa University">Mapúa University</option>
               <option value="San Beda University">San Beda University</option>
+              <option value="San Beda University">Technological Institute of the Philippines</option>
             </select>
           </div>
 
@@ -148,13 +144,23 @@
 
             if (password !== confirm) {
                 e.preventDefault();
-                alert('Passwords do not match');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Passwords do not match. Please ensure both password fields are identical.',
+                    confirmButtonColor: '#0056b3'
+                });
                 return;
             }
 
             if (password.length < 8) {
                 e.preventDefault();
-                alert('Password must be at least 8 characters long');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Password must be at least 8 characters long.',
+                    confirmButtonColor: '#0056b3'
+                });
                 return;
             }
         });

