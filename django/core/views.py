@@ -563,7 +563,7 @@ def adviser_dashboard(request):
         'all_subjects': all_subjects,
         'generated_codes': generated_codes,
         'staff_list': staff_list,
-        'unread_notifications_count': Notification.objects.filter(recipient=user, is_read=False).count(),
+        'unread_notifications_count': Notification.objects.filter(user=user, is_read=False).count(),
     }
     return render(request, 'core/adviser.html', context)
 
