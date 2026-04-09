@@ -485,8 +485,8 @@
                </div>
             </div>
 
-           <!-- Chat Area: Hidden on mobile until contact selected, full width on mobile, flex-1 on desktop -->
-            <div id="staff-chat-window" class="hidden lg:flex flex-1 flex-col bg-white transition-all duration-300 relative">
+           <!-- Chat Area: always responsive flex -->
+            <div id="staff-chat-window" class="flex-1 flex flex-col bg-white transition-all duration-300 relative hidden lg:flex">
                
                <!-- Empty State -->
                <div id="staff-chat-empty" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-gray-50/30 z-20 transition-opacity duration-300">
@@ -1073,6 +1073,15 @@
         document.getElementById('staff-chat-header')?.classList.remove('hidden');
         document.getElementById('staff-chat-messages')?.classList.remove('hidden');
         document.getElementById('staff-chat-input-area')?.classList.remove('hidden');
+
+        // Handle mobile responsiveness (master-detail toggle)
+        if (window.innerWidth < 1024) {
+            document.getElementById('staff-contacts-sidebar')?.classList.add('hidden');
+            document.getElementById('staff-chat-window')?.classList.remove('hidden');
+        } else {
+            document.getElementById('staff-chat-window')?.classList.remove('hidden');
+            document.getElementById('staff-chat-window')?.classList.add('flex');
+        }
 
         document.querySelectorAll('.staff-contact-item').forEach(el => {
             if (el.dataset.id === String(id)) el.classList.add('bg-white', 'shadow-md', 'border-light-blue/20');

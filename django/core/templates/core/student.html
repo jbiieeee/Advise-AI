@@ -768,8 +768,7 @@
               <div class="relative shrink-0">
                 <div
                   class="size-11 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow-md group-hover:scale-105 transition-transform">
-                  {{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|default:''|slice:":1"|upper
-                  }}
+                  {{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|slice:":1"|upper }}
                 </div>
               </div>
               <div class="flex-1 min-w-0 pt-0.5">
@@ -813,9 +812,9 @@
               class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">
               ??</div>
             <div class="flex-1 min-w-0">
-              <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Adviser</p>
+              <p id="chat-student-name" class="font-semibold text-gray-900 text-sm">Select Adviser</p>
               <p class="text-xs text-green-500 flex items-center gap-1"><span
-                  class="size-1.5 bg-green-500 rounded-full inline-block"></span>Online</p>
+                  class="size-1.5 bg-green-500 rounded-full inline-block"></span>Contacting...</p>
             </div>
           </div>
 
@@ -1215,7 +1214,7 @@
     chatToggle.addEventListener('click', toggleChat);
     chatClose.addEventListener('click', toggleChat);
 
-    {% verbatim %}
+
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const message = chatInput.value.trim();
@@ -1278,7 +1277,7 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 1500);
     });
-    {% endverbatim %}
+
 
     // ==========================================
     // Top-Level Navigation Tabs
