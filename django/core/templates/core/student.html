@@ -138,13 +138,11 @@
           </div>
           <div class="p-6 pt-6 relative z-10">
             <div>
-              {% verbatim %}
-              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back! 👋</h2>
+              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back, {{ user.first_name|default:user.username }}! 👋</h2>
               <p class="text-white/95 mb-6 drop-shadow-sm text-lg">
                 Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant
                 AI support.
               </p>
-              {% endverbatim %}
 
               <div class="flex gap-3">
                 <button
@@ -758,8 +756,8 @@
             {% for adv in advisers_list %}
             <button
               class="student-item w-full text-left px-3 py-4 hover:bg-blue-50 transition-all border-b border-gray-100 flex items-start gap-4 group relative z-10"
-              data-student-id="{{ adv.id }}" data-student-name="Adviser {{ adv.first_name|default:adv.username }}"
-              data-student-initials="{{ adv.first_name|default:adv.username|make_list|first|upper }}{{ adv.last_name|default:''|make_list|first|upper }}">
+              data-student-id="{{ adv.id }}" data-student-name="{{ adv.get_full_name|default:adv.username }}"
+              data-student-initials="{{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|slice:":1"|upper }}">
               <div class="relative shrink-0">
                 <div
                   class="size-11 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow-md group-hover:scale-105 transition-transform">
@@ -769,11 +767,11 @@
               </div>
               <div class="flex-1 min-w-0 pt-0.5">
                 <p class="text-sm font-bold text-gray-900 truncate leading-tight">
-                  Adviser {{ adv.first_name|default:adv.username }} {{ adv.last_name|default:'' }}
+                  {{ adv.get_full_name|default:adv.username }}
                 </p>
                 <div class="flex items-center gap-1.5 mt-1">
-                  <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span class="text-[10px] font-bold text-green-600 uppercase tracking-tight">Available</span>
+                  <span class="size-2 {% if adv.is_active %}bg-green-500 animate-pulse{% else %}bg-gray-400{% endif %} rounded-full"></span>
+                  <span class="text-[10px] font-bold {% if adv.is_active %}text-green-600{% else %}text-gray-400{% endif %} uppercase tracking-tight">{% if adv.is_active %}Online{% else %}Offline{% endif %}</span>
                 </div>
               </div>
             </button>
@@ -1510,7 +1508,7 @@
       const body = document.getElementById('student-curriculum-body');
       if (!body) return;
 
-      fetch('/api/curriculum/my/')
+      fetch('/api/curriculum/mine/')
         .then(res => res.json())
         .then(data => {
           if (data.error) {
@@ -1521,32 +1519,49 @@
           body.innerHTML = '';
           let passedCount = 0;
           const totalSubjects = data.curriculum.length;
+          let currentGroup = '';
 
           data.curriculum.forEach(subj => {
             if (subj.status === 'passed') passedCount++;
+
+            // Grouping logic: Year X - Semester Y
+            const groupKey = `Year ${subj.year_level} - ${subj.semester_label || subj.semester}`;
+            if (groupKey !== currentGroup) {
+              currentGroup = groupKey;
+              const header = `
+                <tr class="bg-gray-100/50">
+                  <td colspan="4" class="p-2 px-4 text-[10px] font-black text-navy/40 uppercase tracking-[0.2em]">
+                    ${groupKey}
+                  </td>
+                </tr>
+              `;
+              body.insertAdjacentHTML('beforeend', header);
+            }
 
             const statusClass = {
               'passed': 'bg-green-100 text-green-700 border-green-200',
               'failed': 'bg-red-100 text-red-700 border-red-200',
               'in_progress': 'bg-blue-100 text-blue-700 border-blue-200',
+              'pending': 'bg-yellow-100 text-yellow-700 border-yellow-200',
               'not_taken': 'bg-gray-100 text-gray-500 border-gray-200'
             }[subj.status] || 'bg-gray-100';
 
             const statusLabel = {
-              'passed': 'DONE',
+              'passed': 'PASSED',
               'failed': 'FAILED',
-              'in_progress': 'ON PROGRESS',
+              'in_progress': 'CURRENTLY TAKING',
+              'pending': 'PENDING',
               'not_taken': 'NOT TAKEN'
             }[subj.status] || subj.status.toUpperCase();
 
             const row = `
-                            <tr class="student-curr-row hover:bg-gray-50 transition-colors" data-year="${subj.year_level}">
+                            <tr class="student-curr-row hover:bg-gray-50 transition-colors border-b border-gray-50" data-year="${subj.year_level}">
                                 <td class="p-3 font-mono text-xs font-bold text-navy">${subj.code}</td>
                                 <td class="p-3">
                                     <p class="font-medium text-gray-900 leading-tight">${subj.title}</p>
-                                    <p class="text-[9px] text-gray-400 mt-0.5">Prereq: ${subj.prerequisite_codes || 'None'}</p>
+                                    <p class="text-[9px] text-gray-400 mt-0.5 uppercase font-bold tracking-tighter">Prereq: ${subj.prerequisite_codes || 'None'}</p>
                                 </td>
-                                <td class="p-3 text-center font-medium">${subj.units}</td>
+                                <td class="p-3 text-center font-medium text-gray-600">${subj.units}</td>
                                 <td class="p-3">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold border ${statusClass} tracking-wide">
                                         ${statusLabel}

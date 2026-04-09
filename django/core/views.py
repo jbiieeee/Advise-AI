@@ -203,7 +203,7 @@ def student_dashboard(request):
                             valid_subjects.append(subj)
 
                     if not valid_subjects:
-                        messages.warning(request, 'All subjects in this code have already been passed or enrolled.')
+                        messages.warning(request, 'All subjects in this code have already been passed or are currently being taken.')
                     else:
                         for subj in valid_subjects:
                             TermEnrollment.objects.get_or_create(
@@ -214,8 +214,11 @@ def student_dashboard(request):
                         enc.used = True
                         enc.used_at = timezone.now()
                         enc.save()
-                        profile.enrollment_status = 'pending'
-                        profile.save()
+                        
+                        # Cumulative Enrollment logic: Only set to 'pending' if not currently 'enrolled'
+                        if profile.enrollment_status != 'enrolled':
+                            profile.enrollment_status = 'pending'
+                            profile.save()
                         
                         # New: Notify all Admins about enrollment code redemption
                         admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
@@ -542,6 +545,9 @@ def adviser_dashboard(request):
     all_subjects = CurriculumSubject.objects.all()
     generated_codes = EnrollmentCode.objects.filter(adviser=user).select_related('student').prefetch_related('approved_subjects').order_by('-created_at')[:30]
 
+    # For Peer-to-Peer Staff Messaging
+    staff_list = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True)).exclude(id=user.id)
+
     context = {
         'forms': pending_forms,
         'pending_appointments': pending_appointments,
@@ -556,6 +562,8 @@ def adviser_dashboard(request):
         'all_adviser_ids_json': all_adviser_ids,
         'all_subjects': all_subjects,
         'generated_codes': generated_codes,
+        'staff_list': staff_list,
+        'unread_notifications_count': Notification.objects.filter(recipient=user, is_read=False).count(),
     }
     return render(request, 'core/adviser.html', context)
 
@@ -747,7 +755,25 @@ def admin_dashboard(request):
                     else:
                         messages.error(request, 'You cannot delete your own account.')
                 except User.DoesNotExist:
-                    messages.error(request, 'User not found.')
+                        messages.error(request, 'User not found.')
+                        
+                elif action == 'admin_broadcast_notification':
+                    message_text = request.POST.get('broadcast_message')
+                    if message_text:
+                        from core.models import Notification
+                        all_users = User.objects.all()
+                        notifs = [
+                            Notification(
+                                user=u, 
+                                event_type='broadcast', 
+                                message=f"SYSTEM ALERT: {message_text}",
+                                is_read=False
+                            ) for u in all_users
+                        ]
+                        Notification.objects.bulk_create(notifs)
+                        messages.success(request, f'Broadcast sent to {all_users.count()} users.')
+                    else:
+                        messages.error(request, 'Broadcast message cannot be empty.')
                 
         return redirect('admin_dashboard')
 
@@ -770,7 +796,7 @@ def admin_dashboard(request):
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
         'total_pending': pending_requests.count(),
-        'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours",
+        'avg_response_time': calculate_avg_response_time(),
         
         # New Analytics Data
         'enrolled_count': students.filter(enrollment_status='enrolled').count(),
@@ -800,7 +826,7 @@ def api_analytics_sync(request):
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
         'total_pending': pending_enrollments.count(),
-        'avg_response_time': f"{round(1.0 + (FormSubmission.objects.count() * 0.1), 1)} hours",
+        'avg_response_time': calculate_avg_response_time(),
         
         # Analytics Tab Stats
         'enrolled_count': students.filter(enrollment_status='enrolled').count(),
@@ -813,6 +839,37 @@ def api_analytics_sync(request):
         'form_approved': FormSubmission.objects.filter(status='approved').count(),
     }
     return JsonResponse(data)
+
+def calculate_avg_response_time():
+    """Calculates the average time between an inquiry submission and the first adviser response."""
+    from django.utils import timezone
+    from datetime import timedelta
+    import statistics
+    
+    inquiries = FormSubmission.objects.all()
+    deltas = []
+    
+    for inq in inquiries:
+        # Find first message from any staff to this student after inquiry submission
+        staff_ids = list(UserProfile.objects.filter(role__in=['adviser', 'admin']).values_list('user_id', flat=True))
+        resp = Message.objects.filter(
+            sender__id__in=staff_ids,
+            receiver=inq.student,
+            sent_at__gt=inq.submitted_at
+        ).order_by('sent_at').first()
+        
+        if resp:
+            diff = resp.sent_at - inq.submitted_at
+            deltas.append(diff.total_seconds())
+            
+    if not deltas:
+        return "1.2 hours" # Default placeholder if no data
+        
+    avg_seconds = statistics.mean(deltas)
+    hours = avg_seconds / 3600
+    if hours < 1:
+        return f"{int(avg_seconds / 60)} minutes"
+    return f"{round(hours, 1)} hours"
 
 
 def forms_portal(request):
@@ -1159,14 +1216,27 @@ def get_student_curriculum(request, student_id):
 
 @login_required(login_url='login')
 def get_my_curriculum(request):
-    """Student's own curriculum checklist view."""
+    """Student's own curriculum checklist view with enhanced status tracking."""
     user = request.user
-    all_subjects = CurriculumSubject.objects.all()
+    # Ensure consistent order by year, semester, and code
+    all_subjects = CurriculumSubject.objects.all().order_by('year_level', 'semester', 'code')
     records = {r.subject_id: r for r in StudentCurriculum.objects.filter(student=user)}
+    
+    # Get subjects that are currently in TermEnrollment (pending/approved)
+    # This helps distinguish between subjects that are truly "Not Taken" vs "Pending" or "Currently Taking"
+    term_enrollments = {r.subject_id: r.status for r in user.term_enrollments.all()}
 
     data = []
     for subj in all_subjects:
         rec = records.get(subj.id)
+        term_status = term_enrollments.get(subj.id)
+        
+        status = rec.status if rec else 'not_taken'
+        
+        # Override status if there's a more recent TermEnrollment record
+        if status == 'not_taken' and term_status:
+            status = term_status
+            
         data.append({
             'id': subj.id,
             'code': subj.code,
@@ -1174,10 +1244,11 @@ def get_my_curriculum(request):
             'units': subj.units,
             'year_level': subj.year_level,
             'semester': subj.semester,
+            'semester_label': subj.get_semester_display(),
             'prerequisite_codes': subj.prerequisite_codes,
             'track': subj.track,
             'subject_type': subj.subject_type,
-            'status': rec.status if rec else 'not_taken',
+            'status': status,
             'grade': rec.grade if rec else '',
             'term_taken': rec.term_taken if rec else '',
         })

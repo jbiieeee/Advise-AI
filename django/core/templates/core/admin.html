@@ -62,7 +62,7 @@
           Real-Time System Metrics
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-default">
             <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
@@ -72,7 +72,7 @@
             </div>
           </div>
           <!-- Metrics -->
-          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-default">
             <div class="p-2 bg-blue-500 rounded-lg text-white shadow">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
             </div>
@@ -81,22 +81,22 @@
               <p class="text-xs text-gray-600">Total Forms</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow">
-            <div class="p-2 bg-green-500 rounded-lg text-white shadow">
+          <div onclick="switchTab('analytics')" class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+            <div class="p-2 bg-green-500 rounded-lg text-white shadow group-hover:scale-110 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             </div>
             <div>
               <p id="stat-total-appointments" class="text-2xl font-bold text-gray-900">{{ total_appointments }}</p>
-              <p class="text-xs text-gray-600">Total Appointments</p>
+              <p class="text-xs text-gray-600 group-hover:text-green-600 transition-colors">Total Appointments</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow">
-            <div class="p-2 bg-yellow-500 rounded-lg text-white shadow">
+          <div onclick="switchTab('enrollments')" class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+            <div class="p-2 bg-yellow-500 rounded-lg text-white shadow group-hover:scale-110 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="size-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
               <p id="stat-total-pending" class="text-2xl font-bold text-gray-900">{{ total_pending }}</p>
-              <p class="text-xs text-gray-600">Pending Enrollments</p>
+              <p class="text-xs text-gray-600 group-hover:text-yellow-600 transition-colors">Pending Enrollments</p>
             </div>
           </div>
         </div>
@@ -105,16 +105,16 @@
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-shadow border-l-4 border-l-light-blue shadow-md bg-white">
+      <div onclick="switchTab('students')" class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-all border-l-4 border-l-light-blue shadow-md bg-white cursor-pointer group active:scale-[0.98]">
         <div class="p-6 pt-6">
           <div class="flex justify-between items-start mb-4">
-            <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
+            <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow group-hover:scale-110 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-700">+12%</div>
+            <div class="text-[10px] uppercase font-black text-light-blue tracking-tighter group-hover:tracking-widest transition-all">Manage Directory</div>
           </div>
           <h3 id="stat-total-students-l" class="text-3xl font-bold text-gray-900 mb-1">{{ total_students }}</h3>
-          <p class="text-sm text-gray-600">Total Students</p>
+          <p class="text-sm text-gray-600 group-hover:text-navy transition-colors">Total Enrolled Students</p>
         </div>
       </div>
       <!-- Additional Stat cards mapped similarly -->
@@ -155,11 +155,33 @@
               <p class="text-sm text-muted-foreground">Real-time monitoring of student-adviser interactions and support system</p>
             </div>
             <div class="p-6 pt-0">
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <!-- Example insight card -->
-                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div id="stat-total-students-s" class="text-3xl font-bold text-blue-600 mb-1">{{ total_students }}</div>
-                  <div class="text-sm text-gray-600">Active Student-Adviser Pairs</div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- System Broadcast Hub -->
+                <div class="p-5 rounded-xl border-2 border-dashed border-light-blue/30 bg-blue-50/20">
+                   <h4 class="font-bold text-navy flex items-center gap-2 mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.42 10.61c.45-.78 1.15-1.3 1.96-1.47"/><path d="M11 15.5c.21.05.42.08.64.1"/><path d="M12 2a10 10 0 0 1 10 10c0 3.22-1.52 6.08-3.89 7.89"/><path d="M14.5 12.5c.27.3.5.64.69 1.01"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="M17.84 8.61c.45-.78 1.15-1.3 1.96-1.47"/><path d="M19 15.5c.21.05.42.08.64.1"/><path d="M2 12a10 10 0 0 1 10-10"/><path d="M22 12a10 10 0 0 1-10 10 10 10 0 0 1-10-10"/><path d="M4.5 12.5c.27.3.5.64.69 1.01"/><path d="M6 12a4 4 0 0 1 4-4"/><path d="M8 12a4 4 0 0 0 4 4"/></svg>
+                      Global System Broadcast
+                   </h4>
+                   <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-3">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="admin_broadcast_notification">
+                      <textarea name="broadcast_message" 
+                                class="w-full p-3 rounded-lg border border-blue-100 focus:ring-2 focus:ring-light-blue outline-none text-sm min-h-[80px]" 
+                                placeholder="Type a message to broadcast to all students and advisers..."></textarea>
+                      <button type="submit" class="w-full py-2.5 bg-navy text-white rounded-lg font-bold text-xs hover:bg-navy/90 transition-all shadow-md active:scale-95 uppercase tracking-widest">
+                         Broadcast Pulse Alert
+                      </button>
+                   </form>
+                </div>
+
+                <!-- Insights/Pairs count -->
+                <div class="p-5 rounded-xl border bg-white shadow-sm flex flex-col justify-center">
+                   <div id="stat-total-students-s" class="text-4xl font-black text-navy mb-1">{{ total_students }}</div>
+                   <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Student-Adviser Pairs</div>
+                   <div class="mt-4 flex items-center gap-2 text-[10px] font-bold text-green-600">
+                      <div class="size-2 rounded-full bg-green-500 animate-pulse"></div>
+                      SYSTEM STABLE & ANALYTICS CONNECTED
+                   </div>
                 </div>
               </div>
             </div>
@@ -426,10 +448,10 @@
       <!-- Staff Messaging Tab (DMs) -->
       <div class="tab-content hidden" id="tab-staff-messaging">
         <!-- Main container: Responsive flex layout -->
-        <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-lg border overflow-hidden relative" style="height: 600px;">
+        <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-lg border overflow-hidden relative" style="height: 650px;">
            
-           <!-- Contacts Sidebar: Full width on mobile, fixed width on desktop -->
-           <div id="staff-contacts-sidebar" class="w-full lg:w-80 border-r bg-gray-50 flex flex-col transition-all duration-300">
+           <!-- Contacts Sidebar (33%) -->
+           <div id="staff-contacts-sidebar" class="w-full lg:w-[33%] border-r bg-gray-50/50 flex flex-col transition-all duration-300 relative z-10">
               <div class="p-5 border-b bg-white flex items-center justify-between">
                  <div>
                     <h3 class="font-bold text-navy flex items-center gap-2">
@@ -763,21 +785,36 @@
 
         triggers.forEach(trigger => {
             trigger.addEventListener('click', () => {
-                const targetId = `tab-${trigger.dataset.tab}`;
-                
-                // Reset all
-                triggers.forEach(t => {
-                    t.dataset.state = 'inactive';
-                    t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
-                });
-                contents.forEach(c => c.classList.add('hidden'));
-
-                // Set active
-                trigger.dataset.state = 'active';
-                trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
-                document.getElementById(targetId).classList.remove('hidden');
+                switchTab(trigger.dataset.tab);
             });
         });
+
+        window.switchTab = function(tabName) {
+            const triggers = document.querySelectorAll('.tab-trigger');
+            const contents = document.querySelectorAll('.tab-content');
+            const trigger = Array.from(triggers).find(t => t.dataset.tab === tabName);
+            if (!trigger) return;
+
+            const targetId = `tab-${tabName}`;
+            
+            // Reset all
+            triggers.forEach(t => {
+                t.dataset.state = 'inactive';
+                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
+            });
+            contents.forEach(c => c.classList.add('hidden'));
+
+            // Set active
+            trigger.dataset.state = 'active';
+            trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
+            const target = document.getElementById(targetId);
+            if (target) target.classList.remove('hidden');
+
+            // Scroll to tabs if on mobile
+            if (window.innerWidth < 768) {
+                document.getElementById('dashboard-tabs').scrollIntoView({ behavior: 'smooth' });
+            }
+        };
 
         // Add Adviser Modal toggling
         const addAdviserBtn = document.getElementById('add-adviser-btn');
@@ -995,6 +1032,11 @@
             // Polling: Refresh every 3s
             if (window.staffChatInterval) clearInterval(window.staffChatInterval);
             window.staffChatInterval = setInterval(() => loadStaffConversation(contact.id), 3000);
+
+            // Responsive: Scroll to bottom
+            setTimeout(() => {
+                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+            }, 100);
         }
 
         if (chatBackBtn) {
@@ -1166,14 +1208,21 @@
                                                         <p class="font-bold text-gray-900 leading-tight">${subj.title}</p>
                                                         <p class="text-[10px] text-gray-400 mt-1">${subj.units} Units</p>
                                                     </td>
-                                                    <td class="p-4 w-40">
-                                                        <select onchange="adminUpdateStatus('${studentId}', '${subj.id}', this.value)" 
-                                                                class="w-full text-[11px] font-bold border rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-light-blue cursor-pointer bg-white">
-                                                            <option value="not_taken" ${subj.status === 'not_taken' ? 'selected' : ''}>NOT TAKEN</option>
-                                                            <option value="in_progress" ${subj.status === 'in_progress' ? 'selected' : ''}>IN PROGRESS</option>
-                                                            <option value="passed" ${subj.status === 'passed' ? 'selected' : ''}>PASSED</option>
-                                                            <option value="failed" ${subj.status === 'failed' ? 'selected' : ''}>FAILED</option>
-                                                        </select>
+                                                    <td class="p-4 w-48 text-right">
+                                                        <div class="flex flex-wrap gap-1 justify-end">
+                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'passed')" 
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'passed' ? 'bg-green-500 text-white border-green-600' : 'bg-white text-green-600 border-green-200 hover:bg-green-50'}">
+                                                                Pass
+                                                            </button>
+                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'failed')" 
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'failed' ? 'bg-red-500 text-white border-red-600' : 'bg-white text-red-600 border-red-200 hover:bg-red-50'}">
+                                                                Fail
+                                                            </button>
+                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'not_taken')" 
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border border-gray-200 uppercase bg-white text-gray-400 hover:bg-gray-100 transition-all">
+                                                                Clear
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             `;
@@ -1199,9 +1248,8 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === 'success') {
-                // Background update silently or could refresh
-                console.log('Status updated successfully');
+            if (data.status === 'success' || data.status === 'ok') {
+                viewStudentCurriculum(studentId, document.getElementById('admin-modal-student-name').innerText);
             } else {
                 alert('Error: ' + (data.error || 'Unknown error'));
             }
