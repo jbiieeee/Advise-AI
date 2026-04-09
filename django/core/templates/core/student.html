@@ -58,7 +58,7 @@
             <div class="text-left">
               <p class="text-sm font-semibold text-white">{{ user.first_name|default:user.username }} {{
                 user.last_name|default:'' }}</p>
-              <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }} | {{ user.userprofile.program|default:"Not Assigned" }}</p>
+              <p class="text-xs text-white/90">{{ profile.student_id|default:"" }} | {{ profile.program|default:"Not Assigned" }}</p>
             </div>
           </div>
 

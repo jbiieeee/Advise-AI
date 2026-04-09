@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
@@ -53,26 +55,23 @@ def login_page(request):
                 login(request, user)
                 return redirect('admin_dashboard')
             
-            # Check profile for student/adviser
-            try:
-                profile = user.userprofile
-                if profile.role != role:
-                    messages.error(request, f'You do not have a {role} account.')
-                    return redirect('login')
-                
-                login(request, user)
-                if role == 'student':
-                    return redirect('student_dashboard')
-                elif role == 'adviser':
-                    return redirect('adviser_dashboard')
-            except UserProfile.DoesNotExist:
-                # Fallback for old users without profile
-                if not user.is_superuser:
-                    messages.error(request, 'User profile is incomplete. Please register again.')
-                    return redirect('login')
-                else:
-                    login(request, user)
-                    return redirect('admin_dashboard')
+            # Ensure profile exists using get_or_create to prevent 500 on first login
+            profile, created = UserProfile.objects.get_or_create(
+                user=user,
+                defaults={'role': 'admin' if user.is_superuser else role}
+            )
+            
+            if profile.role != role and not user.is_superuser:
+                messages.error(request, f'You do not have a {role} account.')
+                return redirect('login')
+            
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if role == 'student' or profile.role == 'student':
+                return redirect('student_dashboard')
+            elif role == 'adviser' or profile.role == 'adviser':
+                return redirect('adviser_dashboard')
+            elif user.is_superuser:
+                return redirect('admin_dashboard')
                     
         else:
             messages.error(request, 'Invalid email or password.')
@@ -143,18 +142,13 @@ def about_page(request):
     return render(request, 'core/about.html')
 
 from .models import (
-    UserProfile, Course, Enrollment, FormSubmission, Appointment, Message,
-    CurriculumSubject, StudentCurriculum, EnrollmentCode, TermEnrollment,
+    UserProfile, CurriculumSubject, 
+    TermEnrollment, StudentCurriculum, EnrollmentCode,
+    FormSubmission, Appointment, Message, Notification
 )
-
-# (Helper function shifted or consolidated below)
 
 @login_required(login_url='login')
 def student_dashboard(request):
-    from django.db.models import Q
-    from django.utils import timezone
-    from core.models import StudentCurriculum, EnrollmentCode, TermEnrollment, FormSubmission, Appointment, Message
-    
     user = request.user
     
     # Robust profile retrieval — use get_or_create to prevent 500 on first login
@@ -244,7 +238,6 @@ def student_dashboard(request):
             time_str = request.POST.get('appointment_time')
             purpose = request.POST.get('appointment_purpose')
             if date_str and time_str and purpose:
-                from datetime import datetime
                 try:
                     dt_str = f"{date_str} {time_str}"
                     dt_obj = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
@@ -278,7 +271,6 @@ def student_dashboard(request):
                 if target_adviser:
                     msg = Message.objects.create(sender=user, receiver=target_adviser, content=content, is_read=False)
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                        from django.utils.timezone import localtime
                         return JsonResponse({
                             'status': 'success', 
                             'message': {
@@ -334,7 +326,7 @@ def student_dashboard(request):
     else:
         advisers_list = User.objects.filter(id__in=all_staff_ids).order_by('first_name', 'last_name')
     
-    import json
+    
     all_staff_ids_json = json.dumps(all_staff_ids)
 
     from core.models import Notification

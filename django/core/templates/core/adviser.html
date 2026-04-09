@@ -277,8 +277,7 @@
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                             <circle cx="12" cy="7" r="4" />
                           </svg>
-                          {{ form.student.get_full_name|default:form.student.username }} ({{
-                          form.student.userprofile.student_id|default:"-" }})
+                          {{ form.student.get_full_name|default:form.student.username }} ({{ form.student.userprofile.student_id|default:"-" }})
                         </span>
                         <span class="flex items-center gap-1">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -587,19 +586,16 @@
                     {% if thread.unread > 0 %}
                     <span
                       class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{
-                      thread.unread }}</span>
+                      class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ thread.unread }}</span>
                     {% endif %}
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
-                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name|default:thread.profile.user.username }} {{
-                        thread.profile.user.last_name|default:'' }} <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-navy/5 text-navy/60 border border-navy/10 font-bold uppercase">{{ thread.profile.program }}</span></p>
-                      <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{
-                        thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name|default:thread.profile.user.username }} {{ thread.profile.user.last_name|default:'' }} <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-navy/5 text-navy/60 border border-navy/10 font-bold uppercase">{{ thread.profile.program }}</span></p>
+                      <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{ thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
                     </div>
                     <p class="text-xs text-gray-500 truncate mt-1 leading-relaxed">
-                      {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{
-                      thread.last_msg.content|default:"No messages yet"|truncatechars:40 }}
+                      {% if thread.last_msg.sender == adviser_user %}You: {% endif %}{{ thread.last_msg.content|default:"No messages yet"|truncatechars:40 }}
                     </p>
                   </div>
                 </button>
@@ -622,8 +618,7 @@
                     {{ student.user.first_name|default:student.user.username|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}
                   </div>
                   <div class="flex-1 min-w-0 py-0.5">
-                    <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ student.user.first_name|default:student.user.username }} {{
-                      student.user.last_name|default:'' }}</p>
+                    <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ student.user.first_name|default:student.user.username }} {{ student.user.last_name|default:'' }}</p>
                     <p class="text-[11px] text-gray-500 truncate mt-1 opacity-80 leading-none">
                       {{ student.student_id|default:"—" }} · <span class="text-navy/60 font-medium">{{ student.program|default:"No program" }}</span>
                     </p>
@@ -950,15 +945,6 @@
            </div>
         </div>
       </div>
-
-
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
 
     </div>
   </div>
