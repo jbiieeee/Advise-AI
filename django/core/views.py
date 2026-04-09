@@ -9,7 +9,7 @@ from django.db.models import Q
 from .models import (
     UserProfile, CurriculumSubject, 
     TermEnrollment, StudentCurriculum, EnrollmentCode,
-    FormSubmission, Appointment, Message
+    FormSubmission, Appointment, Message, Notification
 )
 
 def csrf_failure(request, reason=""):
@@ -121,10 +121,7 @@ def register_page(request):
             role='student'
         )
         
-        messages.success(request, 'Account created successfully. You can now log in.')
-        
         # New: Notify all Admins about new student registration
-        from core.models import Notification
         admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
         for admin in admins:
             Notification.objects.create(
@@ -156,7 +153,7 @@ from .models import (
 def student_dashboard(request):
     from django.db.models import Q
     from django.utils import timezone
-    from core.models import Notification, StudentCurriculum, EnrollmentCode, TermEnrollment, FormSubmission, Appointment, Message
+    from core.models import StudentCurriculum, EnrollmentCode, TermEnrollment, FormSubmission, Appointment, Message
     
     user = request.user
     profile = user.userprofile
@@ -543,7 +540,7 @@ def adviser_dashboard(request):
         'student_threads': student_threads,
         'total_unread': total_unread,
         'adviser_user': user,
-        'all_adviser_ids_json': all_adviser_ids,
+        'all_adviser_ids_json': json.dumps(all_adviser_ids),
         'all_subjects': all_subjects,
         'generated_codes': generated_codes,
         'staff_list': staff_list,
@@ -628,7 +625,6 @@ def admin_dashboard(request):
                     
                     # New: Notify Adviser that enrollment is approved
                     if p.assigned_adviser:
-                        from core.models import Notification
                         Notification.objects.create(
                             user=p.assigned_adviser,
                             event_type='enrollment_approved',
@@ -742,23 +738,22 @@ def admin_dashboard(request):
                 except User.DoesNotExist:
                     messages.error(request, 'User not found.')
 
-            elif action == 'admin_broadcast_notification':
-                message_text = request.POST.get('broadcast_message')
-                if message_text:
-                    from core.models import Notification
-                    all_users = User.objects.all()
-                    notifs = [
-                        Notification(
-                            user=u, 
-                            event_type='broadcast', 
-                            message=f"SYSTEM ALERT: {message_text}",
-                            is_read=False
-                        ) for u in all_users
-                    ]
-                    Notification.objects.bulk_create(notifs)
-                    messages.success(request, f'Broadcast sent to {all_users.count()} users.')
-                else:
-                    messages.error(request, 'Broadcast message cannot be empty.')
+        elif action == 'admin_broadcast_notification':
+            message_text = request.POST.get('broadcast_message')
+            if message_text:
+                all_users = User.objects.all()
+                notifs = [
+                    Notification(
+                        user=u, 
+                        event_type='broadcast', 
+                        message=f"SYSTEM ALERT: {message_text}",
+                        is_read=False
+                    ) for u in all_users
+                ]
+                Notification.objects.bulk_create(notifs)
+                messages.success(request, f'Broadcast sent to {all_users.count()} users.')
+            else:
+                messages.error(request, 'Broadcast message cannot be empty.')
                 
         return redirect('admin_dashboard')
 
