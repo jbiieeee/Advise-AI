@@ -157,18 +157,19 @@ def student_dashboard(request):
     
     user = request.user
     
-    # Robust profile retrieval to prevent 500 error if profile is missing
-    try:
-        profile = user.userprofile
-    except UserProfile.DoesNotExist:
-        if user.is_superuser:
-            return redirect('admin_dashboard')
-        # Create a basic profile if missing for students
-        profile = UserProfile.objects.create(user=user, role='student')
-    
+    # Robust profile retrieval — use get_or_create to prevent 500 on first login
+    profile, created = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={'role': 'admin' if user.is_superuser else 'student'}
+    )
+
+    # Redirect superusers without student role to admin dashboard
+    if user.is_superuser and profile.role != 'student':
+        return redirect('admin_dashboard')
+
     # Mission: Enforce Program Logic (BSIT/BSCS)
     # If program is not set or invalid, redirect to profile completion
-    if profile.role == 'student' and profile.program not in ['BSIT', 'BSCS']:
+    if profile.role == 'student' and (not profile.program or profile.program not in ['BSIT', 'BSCS']):
         messages.warning(request, "Please select your degree program (BSIT or BSCS) to access your dashboard.")
         return redirect('profile')
 
@@ -989,24 +990,27 @@ def get_notification_count(request):
 @login_required(login_url='login')
 def staff_get_contacts(request):
     """Returns list of other staff members (Admins/Advisers) for DMs."""
-    if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
+    try:
+        user_profile = request.user.userprofile
+        is_staff_role = user_profile.role in ['admin', 'adviser']
+    except UserProfile.DoesNotExist:
+        is_staff_role = False
+
+    if not (request.user.is_superuser or is_staff_role):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
-    
-    current_role = 'admin' if (request.user.is_superuser or request.user.userprofile.role == 'admin') else 'adviser'
-    
-    # User wants DM between Admin and Adviser. 
-    # If I am Admin, show Advisers. If I am Adviser, show Admins.
-    if current_role == 'admin':
-        # Admins can see all other staff (Advisers and other Admins)
-        contacts = UserProfile.objects.filter(role__in=['admin', 'adviser']).select_related('user')
-    else:
-        # Advisers can see all staff members (Admins and other Advisers)
-        contacts = UserProfile.objects.filter(role__in=['admin', 'adviser']).select_related('user')
-    
+
     data = []
-    for c in contacts:
-        if c.user == request.user: continue
-        # Get last message for snippet/unread status if needed
+
+    # Include superusers who may not have a UserProfile
+    seen_ids = set()
+
+    # First: collect all UserProfile-backed staff
+    profile_contacts = UserProfile.objects.filter(
+        role__in=['admin', 'adviser']
+    ).select_related('user').exclude(user=request.user)
+
+    for c in profile_contacts:
+        seen_ids.add(c.user.id)
         data.append({
             'id': c.user.id,
             'name': f"{c.user.first_name} {c.user.last_name}".strip() or c.user.username,
@@ -1014,6 +1018,21 @@ def staff_get_contacts(request):
             'email': c.user.email,
             'online': (timezone.now() - c.last_activity).total_seconds() < 300 if c.last_activity else False
         })
+
+    # Second: collect superusers without a UserProfile entry (e.g., sticky admin)
+    superusers = User.objects.filter(
+        is_superuser=True
+    ).exclude(id=request.user.id).exclude(id__in=seen_ids)
+
+    for su in superusers:
+        data.append({
+            'id': su.id,
+            'name': f"{su.first_name} {su.last_name}".strip() or su.username,
+            'role': 'Admin',
+            'email': su.email,
+            'online': False
+        })
+
     return JsonResponse({'contacts': data})
 
 @login_required(login_url='login')

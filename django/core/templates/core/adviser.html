@@ -1135,17 +1135,18 @@
         recList.innerHTML = `<div class="py-10 text-center text-gray-400 italic text-xs">No recommendations available. Check prerequisites.</div>`;
       } else {
         recList.innerHTML = details.recommendations.map(subj => `
-          <div class="p-3 rounded-lg border border-emerald-50 bg-emerald-50/30 flex justify-between items-center group hover:border-emerald-200 transition-all">
+          <div class="rec-card p-3 rounded-lg border border-emerald-50 bg-emerald-50/30 flex justify-between items-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50 hover:shadow-md transition-all active:scale-[0.98]"
+               onclick="addRecommendedToEnrollment('${subj.id}')"
+               id="rec-card-${subj.id}"
+               data-subj-id="${subj.id}">
             <div class="flex-1 min-w-0">
                <p class="font-bold text-emerald-800 text-xs mb-0.5">${subj.code} &bull; ${subj.units} Units</p>
                <p class="text-[11px] text-gray-600 truncate">${subj.title}</p>
             </div>
-            <div class="text-right shrink-0 ml-3">
-               <button onclick="addRecommendedToEnrollment('${subj.id}')" 
-                       class="opacity-0 group-hover:opacity-100 bg-emerald-600 text-white px-3 py-1 rounded text-[9px] font-bold transition-all shadow-sm hover:bg-emerald-700">
-                 + Add
-               </button>
-               <p class="text-[8px] font-bold text-emerald-400 uppercase tracking-tighter group-hover:hidden">Y${subj.year} S${subj.sem}</p>
+            <div class="text-right shrink-0 ml-3 flex items-center gap-2">
+               <span id="rec-added-${subj.id}" class="hidden text-[10px] font-black text-white bg-emerald-600 px-2 py-0.5 rounded-full">✓ Added</span>
+               <span class="rec-add-hint text-[10px] font-bold text-emerald-500 bg-emerald-100 px-2 py-0.5 rounded-md">+ Add</span>
+               <p class="text-[8px] font-bold text-emerald-300 uppercase tracking-tighter ml-1">Y${subj.year} S${subj.sem}</p>
             </div>
           </div>
         `).join('');
@@ -1155,20 +1156,34 @@
     window.addRecommendedToEnrollment = function(subjId) {
         // Find the checkbox in the checklist and click it if not checked
         const cb = document.querySelector(`.subject-checkbox[value="${subjId}"]`);
+        // Update the rec card visual state
+        const recCard = document.getElementById(`rec-card-${subjId}`);
+        const addedBadge = document.getElementById(`rec-added-${subjId}`);
+        const addHint = recCard ? recCard.querySelector('.rec-add-hint') : null;
+
         if (cb) {
             if (!cb.checked) {
                 cb.checked = true;
                 selectedSubjectIds.add(String(subjId));
                 updateEnrollmentToolState();
             }
-            // Optional: scroll to the item
-            cb.closest('.curr-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Flash effect
+            // Scroll to the checkbox row
             const row = cb.closest('.curr-row');
-            row.classList.add('bg-emerald-50');
-            setTimeout(() => row.classList.remove('bg-emerald-50'), 1000);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.classList.add('bg-emerald-50');
+                setTimeout(() => row.classList.remove('bg-emerald-50'), 1200);
+            }
         } else {
-            alert("Subject found in recommendations but not in the main checklist. It might be filtered out.");
+            // Subject might not be in the checklist yet — just add to selected IDs for code generation
+            selectedSubjectIds.add(String(subjId));
+            updateEnrollmentToolState();
+        }
+        // Mark rec card as added
+        if (recCard) {
+            recCard.classList.add('border-emerald-400', 'bg-emerald-100/60', 'shadow-sm');
+            if (addedBadge) addedBadge.classList.remove('hidden');
+            if (addHint) addHint.classList.add('hidden');
         }
     }
 
@@ -1212,10 +1227,12 @@
       const term = document.getElementById('term-label-input').value.trim();
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       if (!term) { alert('Please enter a term label.'); return; }
-      
+      if (!selectedStudentId) { alert('Please select a student first.'); return; }
+      if (selectedSubjectIds.size === 0) { alert('Please select at least one subject.'); return; }
+
       const btn = document.getElementById('gen-code-btn');
       btn.disabled = true;
-      btn.innerText = 'Generating...';
+      btn.innerHTML = '<svg class="animate-spin size-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Generating...';
 
       fetch('/api/enrollment/generate-code/', {
         method: 'POST',
@@ -1224,16 +1241,33 @@
       })
       .then(res => res.json())
       .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>Generate Code';
         if (data.status === 'success') {
-          alert('Code Generated: ' + data.code);
-          location.reload(); // Refresh to show in recent codes
+          // Show success modal
+          const modal = document.getElementById('code-success-modal');
+          const modalCode = document.getElementById('modal-gen-code');
+          const modalStudent = document.getElementById('modal-student-name');
+          if (modal && modalCode) {
+            modalCode.innerText = data.code;
+            if (modalStudent) modalStudent.innerText = data.student_name || '';
+            modal.classList.remove('hidden');
+          } else {
+            // Fallback
+            alert('Code Generated: ' + data.code);
+          }
+          if (data.warning) {
+            console.warn('Code warning:', data.warning);
+          }
         } else {
           alert('Error: ' + data.error);
         }
       })
-      .finally(() => {
+      .catch(err => {
         btn.disabled = false;
-        btn.innerText = 'Generate Enrollment Code';
+        btn.innerHTML = 'Generate Code';
+        alert('Network error. Please try again.');
+        console.error(err);
       });
     };
 
