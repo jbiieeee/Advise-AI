@@ -755,25 +755,25 @@ def admin_dashboard(request):
                     else:
                         messages.error(request, 'You cannot delete your own account.')
                 except User.DoesNotExist:
-                        messages.error(request, 'User not found.')
-                        
-                elif action == 'admin_broadcast_notification':
-                    message_text = request.POST.get('broadcast_message')
-                    if message_text:
-                        from core.models import Notification
-                        all_users = User.objects.all()
-                        notifs = [
-                            Notification(
-                                user=u, 
-                                event_type='broadcast', 
-                                message=f"SYSTEM ALERT: {message_text}",
-                                is_read=False
-                            ) for u in all_users
-                        ]
-                        Notification.objects.bulk_create(notifs)
-                        messages.success(request, f'Broadcast sent to {all_users.count()} users.')
-                    else:
-                        messages.error(request, 'Broadcast message cannot be empty.')
+                    messages.error(request, 'User not found.')
+
+            elif action == 'admin_broadcast_notification':
+                message_text = request.POST.get('broadcast_message')
+                if message_text:
+                    from core.models import Notification
+                    all_users = User.objects.all()
+                    notifs = [
+                        Notification(
+                            user=u, 
+                            event_type='broadcast', 
+                            message=f"SYSTEM ALERT: {message_text}",
+                            is_read=False
+                        ) for u in all_users
+                    ]
+                    Notification.objects.bulk_create(notifs)
+                    messages.success(request, f'Broadcast sent to {all_users.count()} users.')
+                else:
+                    messages.error(request, 'Broadcast message cannot be empty.')
                 
         return redirect('admin_dashboard')
 
