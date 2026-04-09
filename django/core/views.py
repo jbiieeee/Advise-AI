@@ -1,6 +1,7 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
@@ -1094,7 +1095,7 @@ def api_get_active_sessions(request):
     
     from core.models import UserProfile
     from django.utils import timezone
-    five_mins_ago = timezone.now() - timezone.timedelta(minutes=5)
+    five_mins_ago = timezone.now() - timedelta(minutes=5)
     
     online_profiles = UserProfile.objects.filter(last_activity__gte=five_mins_ago).select_related('user')
     
