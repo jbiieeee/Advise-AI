@@ -56,8 +56,9 @@
               {{ user.first_name|default:user.username|make_list|first|upper }}
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-white">{{ user.first_name|default:user.username }} {{ user.last_name|default:'' }}</p>
-              <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }}</p>
+              <p class="text-sm font-semibold text-white">{{ user.first_name|default:user.username }} {{
+                user.last_name|default:'' }}</p>
+              <p class="text-xs text-white/90">{{ user.userprofile.student_id|default:"" }} | {{ user.userprofile.program|default:"Not Assigned" }}</p>
             </div>
           </div>
 
@@ -138,7 +139,8 @@
           </div>
           <div class="p-6 pt-6 relative z-10">
             <div>
-              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back, {{ user.first_name|default:user.username }}! 👋</h2>
+              <h2 class="text-3xl font-bold mb-2 drop-shadow">Welcome back, {{ user.first_name|default:user.username }}!
+                👋</h2>
               <p class="text-white/95 mb-6 drop-shadow-sm text-lg">
                 Your central hub for all academic advising tasks - schedule appointments, submit forms, and get instant
                 AI support.
@@ -223,9 +225,19 @@
               <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
                 class="text-xs text-light-blue hover:underline font-semibold mt-1">Verify Enrollment &rarr;</button>
               {% elif enrollment_status == 'pending' %}
-              <p class="text-xs text-gray-500 mt-1">Waiting for adviser review</p>
+              <div class="flex items-center justify-between mt-1">
+                <p class="text-xs text-gray-500 italic">Waiting for review</p>
+                <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
+                  class="text-[10px] bg-navy text-white px-2 py-0.5 rounded font-bold hover:bg-black transition-all">+
+                  Add Code</button>
+              </div>
               {% else %}
-              <p class="text-xs text-gray-500 mt-1">2nd Semester, AY 2025-2026</p>
+              <div class="flex items-center justify-between mt-1">
+                <p class="text-xs text-gray-500">2nd Sem, AY 2025-26</p>
+                <button type="button" onclick="document.getElementById('enrollment-modal').classList.remove('hidden')"
+                  class="text-[10px] bg-navy text-white px-2 py-0.5 rounded font-bold hover:bg-black transition-all">+
+                  Add via Code</button>
+              </div>
               {% endif %}
             </div>
           </div>
@@ -757,12 +769,13 @@
             <button
               class="student-item w-full text-left px-3 py-4 hover:bg-blue-50 transition-all border-b border-gray-100 flex items-start gap-4 group relative z-10"
               data-student-id="{{ adv.id }}" data-student-name="{{ adv.get_full_name|default:adv.username }}"
-              data-student-initials="{{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|slice:":1"|upper }}">
+              data-student-initials="{{ adv.first_name|default:adv.username|slice:" :1"|upper }}{{
+              adv.last_name|slice:":1"|upper }}">
               <div class="relative shrink-0">
                 <div
                   class="size-11 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow-md group-hover:scale-105 transition-transform">
-                  {{ adv.first_name|default:adv.username|make_list|first|upper }}{{
-                  adv.last_name|default:''|make_list|first|upper }}
+                  {{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|default:''|slice:":1"|upper
+                  }}
                 </div>
               </div>
               <div class="flex-1 min-w-0 pt-0.5">
@@ -770,8 +783,11 @@
                   {{ adv.get_full_name|default:adv.username }}
                 </p>
                 <div class="flex items-center gap-1.5 mt-1">
-                  <span class="size-2 {% if adv.is_active %}bg-green-500 animate-pulse{% else %}bg-gray-400{% endif %} rounded-full"></span>
-                  <span class="text-[10px] font-bold {% if adv.is_active %}text-green-600{% else %}text-gray-400{% endif %} uppercase tracking-tight">{% if adv.is_active %}Online{% else %}Offline{% endif %}</span>
+                  <span
+                    class="size-2 {% if adv.is_active %}bg-green-500 animate-pulse{% else %}bg-gray-400{% endif %} rounded-full"></span>
+                  <span
+                    class="text-[10px] font-bold {% if adv.is_active %}text-green-600{% else %}text-gray-400{% endif %} uppercase tracking-tight">{%
+                    if adv.is_active %}Online{% else %}Offline{% endif %}</span>
                 </div>
               </div>
             </button>
@@ -1371,6 +1387,36 @@
           }
 
           const msgs = data.messages || [];
+
+          // One-way notice detection logic
+          const chatInput = document.getElementById('msg-content');
+          const sendBtn = document.getElementById('student-msg-form-new')?.querySelector('button[type=submit]');
+          let hasOfficialNotice = false;
+          msgs.forEach(m => {
+            if (m.content && m.content.includes('[OFFICIAL ADMIN NOTICE]')) hasOfficialNotice = true;
+          });
+
+          if (hasOfficialNotice) {
+            if (chatInput) {
+              chatInput.disabled = true;
+              chatInput.placeholder = "Official Administrative Channel (No Reply)";
+              chatInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+            if (sendBtn) {
+              sendBtn.disabled = true;
+              sendBtn.classList.add('opacity-30', 'grayscale', 'cursor-not-allowed');
+            }
+          } else {
+            if (chatInput) {
+              chatInput.disabled = false;
+              chatInput.placeholder = "Type your message here...";
+              chatInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            if (sendBtn) {
+              sendBtn.disabled = false;
+              sendBtn.classList.remove('opacity-30', 'grayscale', 'cursor-not-allowed');
+            }
+          }
 
           // Skip re-render if polling and no new messages
           if (isPolling && msgs.length === lastMessageCount) return;

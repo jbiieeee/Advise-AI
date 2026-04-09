@@ -62,13 +62,13 @@
           Real-Time System Metrics
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-default">
-            <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow">
+          <div onclick="openActiveSessionsModal()" class="flex items-center gap-3 p-3 bg-light-gray rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+            <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow group-hover:scale-110 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
               <p id="stat-online-users" class="text-2xl font-bold text-gray-900">{{ online_users }}</p>
-              <p class="text-xs text-gray-600">Current Online Users</p>
+              <p class="text-xs text-gray-600 group-hover:text-light-blue transition-colors">Current Online Users</p>
             </div>
           </div>
           <!-- Metrics -->
@@ -375,6 +375,13 @@
                       <input name="student_id" type="text" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="1234567" required>
                     </div>
                 </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium leading-none">Program *</label>
+                  <select name="program" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                    <option value="BSIT">BS Information Technology (BSIT)</option>
+                    <option value="BSCS">BS Computer Science (BSCS)</option>
+                  </select>
+                </div>
                 <div class="pt-4 flex justify-end gap-2">
                   <button type="button" id="cancel-add-student" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border shadow hover:bg-gray-100 h-10 px-4 py-2">
                     Cancel
@@ -395,7 +402,7 @@
                     <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Student ID</th>
                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
-                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Email</th>
+                      <th class="h-12 px-4 text-left font-medium text-muted-foreground">Program</th>
                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
                     </tr>
@@ -404,8 +411,13 @@
                     {% for student in students %}
                     <tr class="border-b transition-colors hover:bg-light-gray">
                       <td class="p-4 align-middle font-medium">{{ student.student_id|default:"-" }}</td>
-                      <td class="p-4 align-middle">{{ student.user.first_name }} {{ student.user.last_name }}</td>
-                      <td class="p-4 align-middle">{{ student.user.email }}</td>
+                      <td class="p-4 align-middle">
+                        <p class="font-bold">{{ student.user.first_name }} {{ student.user.last_name }}</p>
+                        <p class="text-xs text-gray-400">{{ student.user.email }}</p>
+                      </td>
+                      <td class="p-4 align-middle">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold border border-navy/20 bg-navy/5 text-navy uppercase">{{ student.program }}</span>
+                      </td>
                       <td class="p-4 align-middle">
                           <div class="inline-flex items-center rounded-md border text-white px-2.5 py-0.5 text-xs font-semibold {% if student.enrollment_status == 'enrolled' %}bg-green-500{% elif student.enrollment_status == 'pending' %}bg-yellow-500{% else %}bg-red-500{% endif %}">
                               {{ student.enrollment_status }}
@@ -413,11 +425,14 @@
                           {% if not student.user.is_active %}<span class="text-xs text-red-500 ml-1">(deactivated)</span>{% endif %}
                       </td>
                       <td class="p-4 align-middle">
-                          <div class="flex gap-2">
-                            <button onclick="viewStudentCurriculum('{{ student.user.id }}', '{{ student.user.first_name }} {{ student.user.last_name }}')" 
-                                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-navy/20 hover:bg-navy/5 h-9 px-3 bg-white text-navy" title="View Curriculum & Set Grades">
-                                Curriculum
-                            </button>
+                             <button onclick="openOfficialNoticeModal('{{ student.user.id }}', '{{ student.user.first_name }} {{ student.user.last_name }}')"
+                                     class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-light-blue/20 hover:bg-light-blue/5 h-9 px-3 bg-white text-light-blue" title="Send Official Notice">
+                                 Message
+                             </button>
+                             <button onclick="viewStudentCurriculum('{{ student.user.id }}', '{{ student.user.first_name }} {{ student.user.last_name }}')" 
+                                     class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-navy/20 hover:bg-navy/5 h-9 px-3 bg-white text-navy" title="View Curriculum & Set Grades">
+                                 Curriculum
+                             </button>
                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
                               {% csrf_token %}
                               <input type="hidden" name="action" value="toggle_user_status">
@@ -451,78 +466,149 @@
         <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-lg border overflow-hidden relative" style="height: 650px;">
            
            <!-- Contacts Sidebar (33%) -->
-           <div id="staff-contacts-sidebar" class="w-full lg:w-[33%] border-r bg-gray-50/50 flex flex-col transition-all duration-300 relative z-10">
-              <div class="p-5 border-b bg-white flex items-center justify-between">
-                 <div>
-                    <h3 class="font-bold text-navy flex items-center gap-2">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                       Staff Directory
-                    </h3>
-                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-black">Advisors & Admins</p>
-                 </div>
-              </div>
-              <div id="staff-contacts-list" class="flex-1 overflow-y-auto divide-y divide-gray-100 custom-scrollbar">
-                  <!-- JS Injected Contacts -->
-                  <div class="p-8 text-center text-gray-400">
-                    <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                    <p class="text-xs">Loading directory...</p>
+            <div id="staff-contacts-sidebar" class="w-full lg:w-[33%] border-r bg-gray-50/50 flex flex-col transition-all duration-300 relative z-10">
+               <div class="p-5 border-b bg-white flex items-center justify-between">
+                  <div>
+                     <h3 class="font-bold text-navy flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Staff Directory
+                     </h3>
+                     <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-black">Advisors & Admins</p>
                   </div>
-              </div>
-           </div>
+               </div>
+               <div id="staff-directory-list" class="flex-1 overflow-y-auto divide-y divide-gray-100 custom-scrollbar">
+                   <!-- JS Injected Contacts -->
+                   <div class="p-8 text-center text-gray-400">
+                     <div class="size-8 border-2 border-light-blue border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                     <p class="text-xs">Loading directory...</p>
+                   </div>
+               </div>
+            </div>
 
            <!-- Chat Area: Hidden on mobile until contact selected, full width on mobile, flex-1 on desktop -->
-           <div id="staff-chat-window" class="hidden lg:flex flex-1 flex-col bg-white transition-all duration-300">
-              <!-- Header -->
-              <div id="chat-header" class="p-4 border-b flex items-center justify-between bg-white shadow-sm z-10 shrink-0">
-                 <div class="flex items-center gap-3">
-                    <!-- Mobile Back Button -->
-                    <button id="chat-back-btn" class="lg:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
-                    </button>
-                    <!-- Avatar -->
-                    <div id="chat-contact-avatar" class="size-10 bg-gradient-to-br from-navy to-light-blue rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md hidden animate-in zoom-in duration-300">?</div>
-                    <div>
-                       <h3 id="chat-contact-name" class="font-bold text-gray-800 leading-tight">Select a contact</h3>
-                       <p id="chat-contact-role" class="text-[10px] font-bold text-light-blue uppercase tracking-tighter mt-0.5"></p>
-                    </div>
-                 </div>
-              </div>
-              
-              <!-- Messages -->
-              <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/20 custom-scrollbar scroll-smooth">
-                 <!-- JS Injected Messages -->
-                 <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-4 px-6 text-center">
-                    <div class="size-16 rounded-full bg-navy/5 flex items-center justify-center mb-2">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8L3 21"/><path d="M12 8h.01"/><path d="M12 12h.01"/><path d="M12 16h.01"/></svg>
-                    </div>
-                    <div>
-                       <p class="text-sm font-bold text-gray-500">Pick a conversation</p>
-                       <p class="text-xs mt-1">Select an advisor or admin to start a secure internal message.</p>
-                    </div>
-                 </div>
-              </div>
+            <div id="staff-chat-window" class="hidden lg:flex flex-1 flex-col bg-white transition-all duration-300 relative">
+               
+               <!-- Empty State -->
+               <div id="staff-chat-empty" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-gray-50/30 z-20 transition-opacity duration-300">
+                  <div class="size-16 rounded-full bg-light-blue/10 flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-light-blue"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+                  </div>
+                  <h4 class="font-bold text-navy text-lg">Secure Staff DM</h4>
+                  <p class="text-sm text-gray-500 max-w-xs mt-2 italic font-medium">Select an advisor or administrator to initiate a secure internal message.</p>
+               </div>
 
-              <!-- Input Area -->
-              <div class="p-4 border-t bg-white shrink-0">
-                 <form id="staff-chat-form" class="flex gap-2 items-end">
-                    <input type="hidden" id="staff-receiver-id" value="">
-                    <div class="flex-1 relative">
-                       <textarea id="staff-chat-input" 
-                                 class="w-full flex min-h-[44px] max-h-32 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-light-blue focus:border-transparent outline-none text-sm transition-all resize-none bg-gray-50 whitespace-pre-wrap" 
-                                 placeholder="Write a message..." 
-                                 rows="1" 
-                                 disabled></textarea>
-                    </div>
-                    <button type="submit" 
-                            class="bg-navy text-white size-11 flex items-center justify-center rounded-xl font-bold hover:bg-navy/90 transition-all shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale shrink-0" 
-                            disabled>
-                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                    </button>
-                 </form>
-              </div>
-           </div>
+               <!-- Header -->
+               <div id="staff-chat-header" class="hidden p-4 border-b flex items-center justify-between bg-white shadow-sm z-10 shrink-0">
+                  <div class="flex items-center gap-3">
+                     <!-- Avatar -->
+                     <div id="staff-chat-avatar" class="size-10 bg-gradient-to-br from-navy to-light-blue rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md animate-in zoom-in duration-300 uppercase">?</div>
+                     <div>
+                        <h3 id="staff-chat-name" class="font-bold text-gray-800 leading-tight">Staff Member</h3>
+                        <p id="staff-chat-role" class="text-[10px] font-bold text-light-blue uppercase tracking-tighter mt-0.5">Role</p>
+                     </div>
+                  </div>
+               </div>
+               
+               <!-- Messages -->
+               <div id="staff-chat-messages" class="hidden flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/20 custom-scrollbar scroll-smooth">
+                  <!-- JS Injected Messages -->
+               </div>
+
+               <!-- Input Area -->
+               <div id="staff-chat-input-area" class="hidden p-4 border-t bg-white shrink-0">
+                  <form id="staff-chat-form" class="flex gap-2 items-end">
+                     <input type="hidden" id="active-staff-id" value="">
+                     <div class="flex-1 relative">
+                        <textarea id="staff-chat-input" 
+                                  class="w-full flex min-h-[44px] max-h-32 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-light-blue focus:border-transparent outline-none text-sm transition-all resize-none bg-gray-50 whitespace-pre-wrap" 
+                                  placeholder="Write a message..." 
+                                  rows="1"></textarea>
+                     </div>
+                     <button type="submit" 
+                             class="bg-navy text-white size-11 flex items-center justify-center rounded-xl font-bold hover:bg-navy/90 transition-all shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                     </button>
+                  </form>
+               </div>
+            </div>
         </div>
       </div>
+
+    <!-- ─── Active Sessions Modal (Who's Online) ───────────────── -->
+    <div id="active-sessions-modal" class="hidden fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-in fade-in duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-white/20">
+            <div class="p-6 bg-gradient-to-br from-navy to-light-blue text-white flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Active Sessions
+                    </h3>
+                    <p class="text-xs text-white/80 mt-1 uppercase tracking-widest font-black">Real-Time User Activity (Last 5 Mins)</p>
+                </div>
+                <button onclick="document.getElementById('active-sessions-modal').classList.add('hidden')" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="max-h-[60vh] overflow-y-auto custom-scrollbar border rounded-2xl">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b sticky top-0 z-10">
+                            <tr>
+                                <th class="p-4 text-left font-bold text-gray-500 uppercase tracking-tighter text-[10px]">User</th>
+                                <th class="p-4 text-left font-bold text-gray-500 uppercase tracking-tighter text-[10px]">Role</th>
+                                <th class="p-4 text-left font-bold text-gray-500 uppercase tracking-tighter text-[10px]">Last Active</th>
+                                <th class="p-4 text-center font-bold text-gray-500 uppercase tracking-tighter text-[10px]">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-sessions-body" class="divide-y divide-gray-100">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Official Admin Notice Modal ───────────────────────── -->
+    <div id="official-notice-modal" class="hidden fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-in zoom-in duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/20">
+            <div class="p-6 bg-gradient-to-br from-red-600 to-navy text-white flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                        Send Official Notice
+                    </h3>
+                    <p class="text-xs text-white/80 mt-1 uppercase tracking-widest font-black">One-Way Administrative Alert</p>
+                </div>
+                <button onclick="document.getElementById('official-notice-modal').classList.add('hidden')" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Recipient</label>
+                    <div class="p-3 bg-gray-50 rounded-xl flex items-center gap-3 border border-gray-100">
+                        <div class="size-10 rounded-full bg-navy text-white flex items-center justify-center font-bold" id="notice-student-initials">S</div>
+                        <div>
+                            <p class="font-bold text-navy" id="notice-student-name">Student Name</p>
+                            <p class="text-xs text-gray-500">Notice will be marked as read-only</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Notice Message</label>
+                    <textarea id="notice-content" class="w-full h-32 p-4 border rounded-2xl focus:ring-2 focus:ring-red-500/20 focus:outline-none bg-gray-50 text-sm" placeholder="e.g., Please head to the Registrar to complete your deficiencies..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="document.getElementById('official-notice-modal').classList.add('hidden')" class="flex-1 h-12 rounded-xl border font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
+                    <button onclick="sendOfficialNotice()" class="flex-1 h-12 rounded-xl bg-navy text-white font-bold hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        Send Notice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
       <!-- Manage Advisers Tab -->
       <div class="tab-content hidden" id="tab-manage">
@@ -779,19 +865,11 @@
 {% block extra_scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Tab switching logic
+        // ─── Tab Switching Logic ──────────────────────────────────────────
         const triggers = document.querySelectorAll('.tab-trigger');
         const contents = document.querySelectorAll('.tab-content');
 
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', () => {
-                switchTab(trigger.dataset.tab);
-            });
-        });
-
         window.switchTab = function(tabName) {
-            const triggers = document.querySelectorAll('.tab-trigger');
-            const contents = document.querySelectorAll('.tab-content');
             const trigger = Array.from(triggers).find(t => t.dataset.tab === tabName);
             if (!trigger) return;
 
@@ -800,86 +878,62 @@
             // Reset all
             triggers.forEach(t => {
                 t.dataset.state = 'inactive';
-                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm');
+                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm', 'bg-navy', 'text-white');
             });
             contents.forEach(c => c.classList.add('hidden'));
 
             // Set active
             trigger.dataset.state = 'active';
-            trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
+            // Special styling for Staff Messaging which uses navy theme
+            if (tabName === 'staff-messaging') {
+                trigger.classList.add('bg-navy', 'text-white', 'shadow-md');
+            } else {
+                trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
+            }
+
             const target = document.getElementById(targetId);
             if (target) target.classList.remove('hidden');
 
-            // Scroll to tabs if on mobile
+            // Responsive: scroll to tabs on mobile
             if (window.innerWidth < 768) {
                 document.getElementById('dashboard-tabs').scrollIntoView({ behavior: 'smooth' });
             }
+
+            // Specific tab initializations
+            if (tabName === 'staff-messaging') {
+                loadStaffContacts();
+            }
         };
 
-        // Add Adviser Modal toggling
-        const addAdviserBtn = document.getElementById('add-adviser-btn');
-        const addAdviserModal = document.getElementById('add-adviser-modal');
-        const closeAdviserModalBtn = document.getElementById('close-adviser-modal');
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', () => switchTab(trigger.dataset.tab));
+        });
 
-        if(addAdviserBtn && addAdviserModal) {
-            addAdviserBtn.addEventListener('click', () => {
-                addAdviserModal.classList.toggle('hidden');
-            });
-        }
+        // ─── Modal Toggling setup ─────────────────────────────────────────
+        const toggleModal = (btnId, modalId, closeId) => {
+            const btn = document.getElementById(btnId);
+            const modal = document.getElementById(modalId);
+            const close = document.getElementById(closeId);
+            if (btn && modal) btn.onclick = () => modal.classList.toggle('hidden');
+            if (close && modal) close.onclick = () => modal.classList.add('hidden');
+        };
 
-        if(closeAdviserModalBtn && addAdviserModal) {
-            closeAdviserModalBtn.addEventListener('click', () => {
-                addAdviserModal.classList.add('hidden');
-            });
-        }
-        
-        // Add Admin Modal toggling
-        const addAdminBtn = document.getElementById('add-admin-btn');
-        const addAdminModal = document.getElementById('add-admin-modal');
-        const closeAdminModalBtn = document.getElementById('close-admin-modal');
+        toggleModal('add-adviser-btn', 'add-adviser-modal', 'close-adviser-modal');
+        toggleModal('add-admin-btn', 'add-admin-modal', 'close-admin-modal');
+        toggleModal('add-student-btn', 'add-student-modal', 'cancel-add-student');
 
-        if(addAdminBtn && addAdminModal) {
-            addAdminBtn.addEventListener('click', () => {
-                addAdminModal.classList.toggle('hidden');
-            });
-        }
-
-        if(closeAdminModalBtn && addAdminModal) {
-            closeAdminModalBtn.addEventListener('click', () => {
-                addAdminModal.classList.add('hidden');
-            });
-        }
-
-        // Add Student Modal toggling
-        const addStudentBtn = document.getElementById('add-student-btn');
-        const addStudentModal = document.getElementById('add-student-modal');
-        const cancelAddStudentBtn = document.getElementById('cancel-add-student');
-
-        if(addStudentBtn && addStudentModal) {
-            addStudentBtn.addEventListener('click', () => {
-                addStudentModal.classList.toggle('hidden');
-            });
-        }
-
-        if (cancelAddStudentBtn && addStudentModal) {
-            cancelAddStudentBtn.addEventListener('click', () => {
-                addStudentModal.classList.add('hidden');
-            });
-        }
-
-        // ── Notifications Logic ───────────────────────────────────────────
-        const msgBellBtn = document.getElementById('msg-bell-btn');
+        // ─── Notifications Polling ────────────────────────────────────────
         const notifDropdown = document.getElementById('notifications-dropdown');
         const notifList = document.getElementById('notifications-list');
         const msgBellBadge = document.getElementById('msg-bell-badge');
 
-        function updateNotifications() {
+        window.updateNotifications = function() {
             fetch('/api/notifications/system/')
                 .then(res => res.json())
                 .then(data => {
+                    if (!notifList) return;
                     notifList.innerHTML = '';
                     let unreadCount = 0;
-                    
                     if (data.notifications.length === 0) {
                         notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent notifications</div>';
                     } else {
@@ -895,272 +949,235 @@
                             notifList.appendChild(item);
                         });
                     }
-
-                    if (unreadCount > 0) {
-                        msgBellBadge.innerText = unreadCount;
-                        msgBellBadge.classList.remove('hidden');
-                    } else {
-                        msgBellBadge.classList.add('hidden');
+                    if (msgBellBadge) {
+                        if (unreadCount > 0) {
+                            msgBellBadge.innerText = unreadCount;
+                            msgBellBadge.classList.remove('hidden');
+                        } else {
+                            msgBellBadge.classList.add('hidden');
+                        }
                     }
                 });
-        }
+        };
 
-        if (msgBellBtn) {
-            msgBellBtn.addEventListener('click', (e) => {
+        const bellBtn = document.getElementById('msg-bell-btn');
+        if (bellBtn) {
+            bellBtn.onclick = (e) => {
                 e.stopPropagation();
                 notifDropdown.classList.toggle('hidden');
                 if (!notifDropdown.classList.contains('hidden')) {
-                    fetch('/api/notifications/mark-read/')
-                        .then(() => updateNotifications());
+                    fetch('/api/notifications/mark-read/').then(updateNotifications);
                 }
-            });
+            };
         }
-
-        document.addEventListener('click', () => {
-             if (notifDropdown) notifDropdown.classList.add('hidden');
-        });
-
-        setInterval(updateNotifications, 10000); // Update every 10s
+        document.onclick = () => notifDropdown?.classList.add('hidden');
+        setInterval(updateNotifications, 15000);
         updateNotifications();
 
-        // ── Analytics Sync Logic ──────────────────────────────────────────
-        function updateAnalytics() {
+        // ─── Real-Time Analytics Polling ───────────────────────────────────
+        window.updateAnalytics = function() {
             fetch('/api/analytics/sync/')
                 .then(res => res.json())
                 .then(data => {
-                    // Main Stats
-                    if(document.getElementById('stat-online-users')) 
-                        document.getElementById('stat-online-users').innerText = data.online_users;
-                    if(document.getElementById('stat-total-forms')) 
-                        document.getElementById('stat-total-forms').innerText = data.total_forms;
-                    if(document.getElementById('stat-total-appointments')) 
-                        document.getElementById('stat-total-appointments').innerText = data.total_appointments;
-                    if(document.getElementById('stat-total-pending')) 
-                        document.getElementById('stat-total-pending').innerText = data.total_pending;
-                    if(document.getElementById('stat-total-students-l')) 
-                        document.getElementById('stat-total-students-l').innerText = data.total_students;
-                    if(document.getElementById('stat-total-students-s')) 
-                        document.getElementById('stat-total-students-s').innerText = data.total_students;
-
-                    // Analytics Tab
-                    if(document.getElementById('ana-enrolled-count')) 
-                        document.getElementById('ana-enrolled-count').innerText = data.enrolled_count;
-                    if(document.getElementById('ana-pending-enrollment-count')) 
-                        document.getElementById('ana-pending-enrollment-count').innerText = data.pending_enrollment_count;
-                    if(document.getElementById('ana-not-enrolled-count')) 
-                        document.getElementById('ana-not-enrolled-count').innerText = data.not_enrolled_count;
-                    if(document.getElementById('ana-apt-pending')) 
-                        document.getElementById('ana-apt-pending').innerText = data.apt_pending;
-                    if(document.getElementById('ana-apt-confirmed')) 
-                        document.getElementById('ana-apt-confirmed').innerText = data.apt_confirmed;
-                    if(document.getElementById('ana-apt-completed')) 
-                        document.getElementById('ana-apt-completed').innerText = data.apt_completed;
-                    if(document.getElementById('ana-avg-response-time')) 
-                        document.getElementById('ana-avg-response-time').innerText = data.avg_response_time;
-                    if(document.getElementById('ana-form-pending')) 
-                        document.getElementById('ana-form-pending').innerText = data.form_pending;
-                });
-        }
-
-        setInterval(updateAnalytics, 30000); // Update every 30s
-        updateAnalytics();
-
-
-        // ── Staff Messaging Logic ──────────────────────────────────────────
-        const contactsList = document.getElementById('staff-contacts-list');
-        const chatMessages = document.getElementById('staff-chat-messages');
-        const chatForm = document.getElementById('staff-chat-form');
-        const chatInput = document.getElementById('staff-chat-input');
-        const receiverIdInput = document.getElementById('staff-receiver-id');
-        const chatContactName = document.getElementById('staff-chat-contact-name');
-        const chatContactRole = document.getElementById('staff-chat-contact-role');
-        const chatContactAvatar = document.getElementById('staff-chat-contact-avatar');
-        const chatWindow = document.getElementById('staff-chat-window');
-        const sidebar = document.getElementById('staff-contacts-sidebar');
-        const chatBackBtn = document.getElementById('staff-chat-back-btn');
-
-        let currentStaffMessagesJson = ""; // To prevent unnecessary re-renders
-
-        function loadStaffContacts() {
-            fetch('/api/staff/contacts/')
-                .then(res => res.json())
-                .then(data => {
-                    contactsList.innerHTML = '';
-                    if (data.contacts.length === 0) {
-                        contactsList.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No other staff members found.</div>';
-                        return;
-                    }
-                    data.contacts.forEach(c => {
-                        const item = document.createElement('div');
-                        item.className = 'p-4 hover:bg-white cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-light-blue group active:bg-gray-100';
-                        item.innerHTML = `
-                            <div class="flex items-center gap-3">
-                               <div class="size-10 rounded-full bg-navy/5 text-navy flex items-center justify-center font-bold text-sm group-hover:bg-light-blue group-hover:text-white transition-all shadow-sm">
-                                  ${c.name.charAt(0)}
-                               </div>
-                               <div class="flex-1 min-w-0">
-                                  <p class="font-bold text-gray-800 truncate text-sm">${c.name}</p>
-                                  <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black opacity-60">${c.role}</p>
-                               </div>
-                            </div>
-                        `;
-                        item.onclick = () => selectStaffContact(c);
-                        contactsList.appendChild(item);
+                    const map = {
+                        'stat-online-users': data.online_users,
+                        'stat-total-forms': data.total_forms,
+                        'stat-total-appointments': data.total_appointments,
+                        'stat-total-pending': data.total_pending,
+                        'stat-total-students-l': data.total_students,
+                        'stat-total-students-s': data.total_students,
+                        'ana-enrolled-count': data.enrolled_count,
+                        'ana-pending-enrollment-count': data.pending_enrollment_count,
+                        'ana-not-enrolled-count': data.not_enrolled_count,
+                        'ana-apt-pending': data.apt_pending,
+                        'ana-apt-confirmed': data.apt_confirmed,
+                        'ana-apt-completed': data.apt_completed,
+                        'ana-avg-response-time': data.avg_response_time,
+                        'ana-form-pending': data.form_pending
+                    };
+                    Object.entries(map).forEach(([id, val]) => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerText = val;
                     });
                 });
-        }
+        };
+        setInterval(updateAnalytics, 30000);
+        updateAnalytics();
 
-        function selectStaffContact(contact) {
-            receiverIdInput.value = contact.id;
-            chatContactName.innerText = contact.name;
-            chatContactRole.innerText = contact.role.toUpperCase();
-            chatContactAvatar.innerText = contact.name.charAt(0);
-            chatContactAvatar.classList.remove('hidden');
-            chatInput.disabled = false;
-            chatForm.querySelector('button').disabled = false;
-            chatInput.placeholder = `Message ${contact.name}...`;
+        // ─── Staff Messaging Submission ────────────────────────────────────
+        const staffChatForm = document.getElementById('staff-chat-form');
+        const staffChatInput = document.getElementById('staff-chat-input');
+        const activeStaffIdInp = document.getElementById('active-staff-id');
+        const staffChatMessages = document.getElementById('staff-chat-messages');
 
-            // Responsive: Toggle views on mobile
-            if (window.innerWidth < 1024) {
-                sidebar.classList.add('hidden');
-                chatWindow.classList.remove('hidden');
-                chatWindow.classList.add('flex');
-            }
-            
-            loadStaffConversation(contact.id, true);
-            
-            // Polling: Refresh every 3s
-            if (window.staffChatInterval) clearInterval(window.staffChatInterval);
-            window.staffChatInterval = setInterval(() => loadStaffConversation(contact.id), 3000);
+        if (staffChatForm) {
+            staffChatForm.onsubmit = (e) => {
+                e.preventDefault();
+                const id = activeStaffIdInp.value;
+                const content = staffChatInput.value.trim();
+                if (!content || !id) return;
 
-            // Responsive: Scroll to bottom
-            setTimeout(() => {
-                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-            }, 100);
-        }
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const formData = new URLSearchParams();
+                formData.append('receiver_id', id);
+                formData.append('content', content);
+                formData.append('csrfmiddlewaretoken', csrftoken);
 
-        if (chatBackBtn) {
-            chatBackBtn.onclick = () => {
-                sidebar.classList.remove('hidden');
-                chatWindow.classList.add('hidden');
-                chatWindow.classList.remove('flex');
-                if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+                staffChatInput.value = '';
+                fetch('/api/staff/send/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                }).then(() => loadStaffConversation(id, true));
             };
-        }
-
-        function loadStaffConversation(contactId, forceScroll = false) {
-            fetch(`/api/staff/conversation/${contactId}/`)
-                .then(res => res.json())
-                .then(data => {
-                    const messagesJson = JSON.stringify(data.messages);
-                    if (messagesJson === currentStaffMessagesJson) return; // Skip if no new data
-                    currentStaffMessagesJson = messagesJson;
-
-                    if (data.messages) {
-                        const isAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + 100;
-                        chatMessages.innerHTML = '';
-                        
-                        if (data.messages.length === 0) {
-                            chatMessages.innerHTML = `
-                                <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 py-10">
-                                   <div class="size-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-30"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                   </div>
-                                   <p class="text-xs font-bold">No messages yet. Send a greeting!</p>
-                                </div>`;
-                        }
-
-                        data.messages.forEach(m => {
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = `flex group ${m.is_me ? 'justify-end' : 'justify-start'} animate-in slide-in-from-${m.is_me ? 'right' : 'left'}-2 duration-300`;
-                            msgDiv.innerHTML = `
-                                <div class="max-w-[85%] sm:max-w-[70%]">
-                                   <div class="rounded-2xl px-4 py-2.5 shadow-sm ${m.is_me ? 'bg-gradient-to-br from-navy to-light-blue text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'}">
-                                      <p class="text-sm leading-relaxed">${m.content}</p>
-                                   </div>
-                                   <p class="text-[9px] mt-1.5 opacity-60 font-bold ${m.is_me ? 'text-right' : 'text-left'}">${m.sent_at}</p>
-                                </div>
-                            `;
-                            chatMessages.appendChild(msgDiv);
-                        });
-
-                        if (forceScroll || isAtBottom) {
-                            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: forceScroll ? 'auto' : 'smooth' });
-                        }
-                    }
-                });
-        }
-
-        // Auto-expanding textarea
-        chatInput.oninput = function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        };
-
-        chatForm.onsubmit = (e) => {
-            e.preventDefault();
-            const content = chatInput.value.trim();
-            const receiverId = receiverIdInput.value;
-            if (!content || !receiverId) return;
-
-            // Instant UI Append (Optimistic UI)
-            const tempId = 'temp-' + Date.now();
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'flex justify-end opacity-70 scale-95 transition-all';
-            msgDiv.id = tempId;
-            msgDiv.innerHTML = `
-                <div class="max-w-[85%] sm:max-w-[70%]">
-                   <div class="bg-gradient-to-br from-navy to-light-blue text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-sm">
-                      <p class="text-sm">${content}</p>
-                   </div>
-                   <p class="text-[9px] mt-1.5 text-right font-bold italic">Sending...</p>
-                </div>
-            `;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-
-            const formData = new FormData();
-            formData.append('receiver_id', receiverId);
-            formData.append('content', content);
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-            chatInput.value = '';
-            chatInput.style.height = 'auto';
-
-            fetch('/api/staff/send/', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        loadStaffConversation(receiverId);
-                    } else {
-                        document.getElementById(tempId).classList.add('text-red-500');
-                        document.getElementById(tempId).querySelector('p:last-child').innerText = 'Failed to send';
-                    }
-                });
-        };
-
-        // Initialize contacts when tab is clicked
-        const staffMsgTab = document.querySelector('[data-tab="staff-messaging"]');
-        if (staffMsgTab) {
-            staffMsgTab.addEventListener('click', () => {
-                loadStaffContacts();
-            });
-            // If already active on load, load contacts
-            if (staffMsgTab.dataset.state === 'active') {
-                loadStaffContacts();
-            }
         }
     });
 
-    // ─── Admin Curriculum & Grading Logic ────────────────────────────────
-    let currentModalStudentId = null;
+    // ─── Staff Messaging Hub Functions ──────────────────────────────
+    let staffPollTimer = null;
+    window.loadStaffContacts = function() {
+        const list = document.getElementById('staff-directory-list');
+        if (!list) return;
+        fetch('/api/staff/contacts/')
+            .then(r => r.json())
+            .then(data => {
+                list.innerHTML = '';
+                data.contacts.forEach(c => {
+                    const initials = c.name.substring(0,2).toUpperCase();
+                    const onlineStatus = c.online ? '<div class="size-2 rounded-full bg-green-500 border border-white absolute -bottom-0.5 -right-0.5 animate-pulse"></div>' : '';
+                    list.insertAdjacentHTML('beforeend', `
+                        <div onclick="selectStaffChat('${c.id}', '${c.name}', '${c.role}', '${initials}')" 
+                             class="staff-contact-item flex items-center gap-3 p-3 rounded-2xl hover:bg-white hover:shadow-md border border-transparent hover:border-light-blue/20 transition-all cursor-pointer group mb-1"
+                             data-id="${c.id}">
+                            <div class="relative">
+                                <div class="size-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-xs shadow-sm group-hover:bg-light-blue transition-colors">${initials}</div>
+                                ${onlineStatus}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-navy text-sm truncate uppercase tracking-tighter">${c.name}</h4>
+                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest opacity-60">${c.role}</p>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+    };
 
+    window.selectStaffChat = function(id, name, role, initials) {
+        document.getElementById('active-staff-id').value = id;
+        document.getElementById('staff-chat-name').innerText = name;
+        document.getElementById('staff-chat-role').innerText = role.toUpperCase();
+        document.getElementById('staff-chat-avatar').innerText = initials;
+
+        document.getElementById('staff-chat-empty')?.classList.add('hidden');
+        document.getElementById('staff-chat-header')?.classList.remove('hidden');
+        document.getElementById('staff-chat-messages')?.classList.remove('hidden');
+        document.getElementById('staff-chat-input-area')?.classList.remove('hidden');
+
+        document.querySelectorAll('.staff-contact-item').forEach(el => {
+            if (el.dataset.id === String(id)) el.classList.add('bg-white', 'shadow-md', 'border-light-blue/20');
+            else el.classList.remove('bg-white', 'shadow-md', 'border-light-blue/20');
+        });
+
+        loadStaffConversation(id, true);
+        if (staffPollTimer) clearInterval(staffPollTimer);
+        staffPollTimer = setInterval(() => loadStaffConversation(id, false), 3000);
+    };
+
+    window.loadStaffConversation = function(id, forceScroll) {
+        const box = document.getElementById('staff-chat-messages');
+        if (!box) return;
+        fetch(`/api/staff/conversation/${id}/`)
+            .then(r => r.json())
+            .then(data => {
+                const isAtBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 100;
+                let html = '';
+                data.messages.forEach(m => {
+                    const align = m.is_me ? 'justify-end' : 'justify-start';
+                    const theme = m.is_me ? 'bg-gradient-to-br from-navy to-light-blue text-white rounded-tr-none shadow-md' : 'bg-white border rounded-tl-none shadow-sm text-gray-800';
+                    const timeAlign = m.is_me ? 'text-right' : 'text-left';
+                    html += `
+                        <div class="flex ${align} mb-4 animate-in slide-in-from-${m.is_me ? 'right' : 'left'}-2 duration-300">
+                            <div class="max-w-[80%]">
+                                <div class="${theme} px-4 py-2.5 rounded-2xl text-sm leading-relaxed font-medium">${m.content}</div>
+                                <p class="text-[9px] text-gray-400 mt-1.5 font-bold uppercase tracking-widest ${timeAlign}">${m.sent_at}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                box.innerHTML = html || '<div class="h-full flex flex-col items-center justify-center text-gray-400 text-xs italic"><p>No messages yet. Send a greeting!</p></div>';
+                if (forceScroll || isAtBottom) {
+                    box.scrollTop = box.scrollHeight;
+                }
+            });
+    };
+
+    // ─── Active Sessions Modal (Who's Online) ─────────────────
+    window.openActiveSessionsModal = function() {
+        const modal = document.getElementById('active-sessions-modal');
+        const body = document.getElementById('active-sessions-body');
+        if (!modal || !body) return;
+        body.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400"><div class="animate-spin size-6 border-2 border-light-blue border-t-transparent rounded-full mx-auto mb-2"></div>Loading active sessions...</td></tr>';
+        modal.classList.remove('hidden');
+
+        fetch('/api/admin/active-sessions/')
+            .then(r => r.json())
+            .then(data => {
+                body.innerHTML = '';
+                if (data.active_sessions.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-gray-400">No other active sessions found.</td></tr>';
+                    return;
+                }
+                data.active_sessions.forEach(s => {
+                    body.insertAdjacentHTML('beforeend', `
+                        <tr class="hover:bg-gray-50 transition-colors border-b">
+                            <td class="p-4 font-bold text-navy">${s.name} ${s.is_me ? '<span class="text-[9px] bg-blue-100 text-light-blue px-1 rounded ml-1">YOU</span>' : ''}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${s.role === 'Admin' ? 'bg-navy text-white border-navy' : 'bg-gray-100 text-gray-600 border-gray-200'}">${s.role}</span></td>
+                            <td class="p-4 text-xs text-gray-500 font-mono">${s.last_active}</td>
+                            <td class="p-4 text-center"><div class="flex items-center justify-center"><div class="size-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div></div></td>
+                        </tr>
+                    `);
+                });
+            });
+    };
+
+    // ─── Official Admin Notice System ─────────────────────────
+    let targetedStudentId = null;
+    window.openOfficialNoticeModal = function(id, name) {
+        targetedStudentId = id;
+        document.getElementById('notice-student-name').innerText = name;
+        document.getElementById('notice-student-initials').innerText = name.substring(0,1).toUpperCase();
+        document.getElementById('notice-content').value = '';
+        document.getElementById('official-notice-modal').classList.remove('hidden');
+    };
+
+    window.sendOfficialNotice = function() {
+        const content = document.getElementById('notice-content').value.trim();
+        if (!content) { alert('Notice content cannot be empty.'); return; }
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch('/api/admin/send-official-notice/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ student_id: targetedStudentId, content: content })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Official notice sent successfully.');
+                document.getElementById('official-notice-modal').classList.add('hidden');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    };
+
+    // ─── Admin Curriculum & Grading Logic ───────────────────────
+    let currentModalStudentId = null;
     window.viewStudentCurriculum = function(studentId, studentName) {
         currentModalStudentId = studentId;
         const modal = document.getElementById('admin-curriculum-modal');
         const accordion = document.getElementById('admin-curriculum-accordion');
         const loading = document.getElementById('admin-curr-loading');
-        
         document.getElementById('admin-modal-student-name').innerText = studentName;
         modal.classList.remove('hidden');
         accordion.classList.add('hidden');
@@ -1172,7 +1189,6 @@
                 loading.classList.add('hidden');
                 accordion.classList.remove('hidden');
                 document.getElementById('admin-modal-student-info').innerText = `${data.student.student_id} • ${data.student.program}`;
-                
                 accordion.innerHTML = '';
                 const groups = {};
                 data.curriculum.forEach(subj => {
@@ -1180,7 +1196,6 @@
                     if (!groups[key]) groups[key] = [];
                     groups[key].push(subj);
                 });
-
                 Object.entries(groups).forEach(([groupName, subjects], idx) => {
                     const sectionId = `admin-curr-section-${idx}`;
                     accordion.insertAdjacentHTML('beforeend', `
@@ -1194,13 +1209,12 @@
                                 <table class="w-full text-sm">
                                     <tbody class="divide-y divide-gray-50">
                                         ${subjects.map(subj => {
-                                            const statusColors = {
-                                                'passed': 'text-green-600 bg-green-50 border-green-100',
-                                                'failed': 'text-red-600 bg-red-50 border-red-100',
-                                                'in_progress': 'text-blue-600 bg-blue-50 border-blue-100',
-                                                'not_taken': 'text-gray-400 bg-gray-50 border-gray-100'
-                                            }[subj.status] || 'text-gray-400 bg-gray-50';
-
+                                            const statusStyle = {
+                                                'passed': 'bg-green-500 text-white border-green-600',
+                                                'failed': 'bg-red-500 text-white border-red-600',
+                                                'in_progress': 'bg-blue-500 text-white border-blue-600',
+                                                'not_taken': 'bg-white text-gray-400 border-gray-200'
+                                            }[subj.status] || 'bg-white text-gray-400';
                                             return `
                                                 <tr class="hover:bg-blue-50/30 transition-colors">
                                                     <td class="p-4 w-24 font-mono text-[10px] font-bold text-navy">${subj.code}</td>
@@ -1211,17 +1225,11 @@
                                                     <td class="p-4 w-48 text-right">
                                                         <div class="flex flex-wrap gap-1 justify-end">
                                                             <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'passed')" 
-                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'passed' ? 'bg-green-500 text-white border-green-600' : 'bg-white text-green-600 border-green-200 hover:bg-green-50'}">
-                                                                Pass
-                                                            </button>
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'passed' ? 'bg-green-500 text-white border-green-600' : 'bg-white text-green-600 border-green-200 hover:bg-green-50'}">Pass</button>
                                                             <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'failed')" 
-                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'failed' ? 'bg-red-500 text-white border-red-600' : 'bg-white text-red-600 border-red-200 hover:bg-red-50'}">
-                                                                Fail
-                                                            </button>
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'failed' ? 'bg-red-500 text-white border-red-600' : 'bg-white text-red-600 border-red-200 hover:bg-red-50'}">Fail</button>
                                                             <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'not_taken')" 
-                                                                    class="px-2 py-1 rounded text-[9px] font-black border border-gray-200 uppercase bg-white text-gray-400 hover:bg-gray-100 transition-all">
-                                                                Clear
-                                                            </button>
+                                                                    class="px-2 py-1 rounded text-[9px] font-black border border-gray-200 uppercase bg-white text-gray-400 hover:bg-gray-100 transition-all">Clear</button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1233,9 +1241,6 @@
                         </div>
                     `);
                 });
-            })
-            .catch(err => {
-                accordion.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Failed to load curriculum.</div>`;
             });
     }
 

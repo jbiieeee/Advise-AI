@@ -34,6 +34,8 @@ urlpatterns = [
     path('api/staff/send/', views.staff_send_message, name='staff_send_message'),
     path('api/notifications/system/', views.api_get_notifications, name='api_get_notifications'),
     path('api/analytics/sync/', views.api_analytics_sync, name='api_analytics_sync'),
+    path('api/admin/active-sessions/', views.api_get_active_sessions, name='api_get_active_sessions'),
+    path('api/admin/send-official-notice/', views.api_send_official_notice, name='api_send_official_notice'),
 
     path('api/notifications/mark-read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
 ]

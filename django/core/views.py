@@ -150,23 +150,7 @@ from .models import (
     CurriculumSubject, StudentCurriculum, EnrollmentCode, TermEnrollment,
 )
 
-def get_recommended_subjects(user):
-    from .models import CurriculumSubject, StudentCurriculum
-    all_subjects = CurriculumSubject.objects.all().order_by('year_level', 'semester')
-    passed_subjects = set(StudentCurriculum.objects.filter(student=user, status='passed').values_list('subject__code', flat=True))
-    in_progress = set(StudentCurriculum.objects.filter(student=user, status='in_progress').values_list('subject__code', flat=True))
-    
-    recommended = []
-    for subj in all_subjects:
-        if subj.code in passed_subjects or subj.code in in_progress:
-            continue
-            
-        prereqs = [p.strip() for p in (subj.prerequisite_codes or '').split(',') if p.strip()]
-        if all(p in passed_subjects for p in prereqs):
-            recommended.append(subj)
-            if len(recommended) >= 5: # Limit to 5
-                break
-    return recommended
+# (Helper function shifted or consolidated below)
 
 @login_required(login_url='login')
 def student_dashboard(request):
@@ -702,6 +686,7 @@ def admin_dashboard(request):
             email = request.POST.get('email')
             password = request.POST.get('password')
             student_id = request.POST.get('student_id')
+            program = request.POST.get('program', 'BSIT')
             
             if not User.objects.filter(username=email).exists():
                 user = User.objects.create_user(username=email, email=email, password=password)
@@ -712,7 +697,7 @@ def admin_dashboard(request):
                         user.last_name = " ".join(parts[1:])
                 user.save()
                 
-                UserProfile.objects.create(user=user, role='student', student_id=student_id, enrollment_status='enrolled')
+                UserProfile.objects.create(user=user, role='student', student_id=student_id, program=program, enrollment_status='enrolled')
                 messages.success(request, 'Student account created successfully.')
             else:
                 messages.error(request, 'Email already registered.')
@@ -991,17 +976,20 @@ def staff_get_contacts(request):
     data = []
     for c in contacts:
         if c.user == request.user: continue
+        # Get last message for snippet/unread status if needed
         data.append({
             'id': c.user.id,
             'name': f"{c.user.first_name} {c.user.last_name}".strip() or c.user.username,
-            'role': c.role,
-            'email': c.user.email
+            'role': c.role.capitalize(),
+            'email': c.user.email,
+            'online': (timezone.now() - c.last_activity).total_seconds() < 300 if c.last_activity else False
         })
     return JsonResponse({'contacts': data})
 
 @login_required(login_url='login')
 def staff_get_conversation(request, contact_id):
-    """Returns conversation between current staff and another staff member."""
+    """Returns conversation between current staff and another staff member using StaffMessage model."""
+    from core.models import StaffMessage
     if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -1011,12 +999,12 @@ def staff_get_conversation(request, contact_id):
     except User.DoesNotExist:
         return JsonResponse({'error': 'Contact not found'}, status=404)
     
-    # Mark messages as read
-    Message.objects.filter(sender=contact, receiver=user, is_staff_only=True, is_read=False).update(is_read=True)
+    # Mark staff messages as read
+    StaffMessage.objects.filter(sender=contact, receiver=user, is_read=False).update(is_read=True)
     
-    msgs = Message.objects.filter(
-        (Q(sender=user, receiver=contact) | Q(sender=contact, receiver=user)),
-        is_staff_only=True
+    from django.db.models import Q
+    msgs = StaffMessage.objects.filter(
+        (Q(sender=user, receiver=contact) | Q(sender=contact, receiver=user))
     ).order_by('sent_at')
     
     data = []
@@ -1033,7 +1021,8 @@ def staff_get_conversation(request, contact_id):
 
 @login_required(login_url='login')
 def staff_send_message(request):
-    """Sends a staff-only message."""
+    """Sends a staff-only message using StaffMessage model."""
+    from core.models import StaffMessage
     if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -1046,16 +1035,105 @@ def staff_send_message(request):
         
         try:
             receiver = User.objects.get(id=receiver_id)
-            # Ensure receiver is also staff
-            is_staff = receiver.is_superuser or (hasattr(receiver, 'userprofile') and receiver.userprofile.role in ['admin', 'adviser'])
-            if not is_staff:
-                return JsonResponse({'error': 'Cannot send staff messages to students'}, status=400)
-                
-            msg = Message.objects.create(
+            StaffMessage.objects.create(
                 sender=request.user,
                 receiver=receiver,
-                content=content,
-                is_staff_only=True
+                content=content
+            )
+            return JsonResponse({'status': 'success'})
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Receiver not found'}, status=404)
+    return JsonResponse({'error': 'POST required'}, status=405)
+
+@login_required(login_url='login')
+def api_get_active_sessions(request):
+    """API for the Admin 'Who's Online' modal."""
+    if not (request.user.is_superuser or request.user.userprofile.role == 'admin'):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    from core.models import UserProfile
+    from django.utils import timezone
+    five_mins_ago = timezone.now() - timezone.timedelta(minutes=5)
+    
+    online_profiles = UserProfile.objects.filter(last_activity__gte=five_mins_ago).select_related('user')
+    
+    data = []
+    for p in online_profiles:
+        data.append({
+            'name': f"{p.user.first_name} {p.user.last_name}".strip() or p.user.username,
+            'role': p.role.capitalize(),
+            'email': p.user.email,
+            'last_active': p.last_activity.strftime('%I:%M %p'),
+            'is_me': p.user == request.user
+        })
+    
+    return JsonResponse({'active_sessions': data})
+
+@login_required(login_url='login')
+def api_send_official_notice(request):
+    """Admin-to-Student one-way official notice."""
+    if not (request.user.is_superuser or request.user.userprofile.role == 'admin'):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            student_id = data.get('student_id')
+            content = data.get('content', '').strip()
+            
+            if not student_id or not content:
+                return JsonResponse({'error': 'Missing student or message'}, status=400)
+            
+            student_user = User.objects.get(id=student_id)
+            
+            # Prefix with recognizable flag for the student UI to lock input
+            official_content = f"[OFFICIAL ADMIN NOTICE] {content}"
+            
+            from core.models import Message
+            Message.objects.create(
+                sender=request.user,
+                receiver=student_user,
+                content=official_content
+            )
+            
+            return JsonResponse({'status': 'success', 'message': 'Notice sent successfully'})
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Student not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    return JsonResponse({'error': 'POST required'}, status=405)
+
+@login_required(login_url='login')
+def api_send_staff_message(request):
+    """Messaging between staff members (Admins/Advisers)."""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            receiver_id = data.get('receiver_id')
+            content = data.get('content', '').strip()
+            
+            if not receiver_id or not content:
+                return JsonResponse({'error': 'Missing receiver or message'}, status=400)
+            
+            from django.contrib.auth.models import User
+            receiver = User.objects.get(id=receiver_id)
+            
+            # Verify both are staff
+            sender_profile = request.user.userprofile
+            receiver_profile = receiver.userprofile
+            
+            is_sender_staff = request.user.is_superuser or sender_profile.role in ['admin', 'adviser']
+            is_receiver_staff = receiver.is_superuser or receiver_profile.role in ['admin', 'adviser']
+            
+            if not (is_sender_staff and is_receiver_staff):
+                return JsonResponse({'error': 'Staff messaging only allowed between staff members'}, status=403)
+                
+            from core.models import StaffMessage
+            msg = StaffMessage.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                content=content
             )
             return JsonResponse({
                 'status': 'success',
@@ -1067,8 +1145,10 @@ def staff_send_message(request):
             })
         except User.DoesNotExist:
             return JsonResponse({'error': 'Receiver not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
             
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+    return JsonResponse({'error': 'POST required'}, status=405)
 
 @login_required(login_url='login')
 def api_get_notifications(request):
@@ -1157,10 +1237,25 @@ def get_latest_notifications(request):
 
 @login_required(login_url='login')
 def get_all_curriculum(request):
-    """Returns the full BSIT curriculum as JSON (for adviser subject picker)."""
-    subjects = CurriculumSubject.objects.all().values(
-        'id', 'code', 'title', 'units', 'year_level', 'semester', 'prerequisite_codes', 'track', 'subject_type'
-    )
+    """Returns the curriculum subjects filtered by program if specified."""
+    program = request.GET.get('program')
+    if not program:
+        # Fallback to user's program if student
+        try:
+            profile = request.user.userprofile
+            if profile.role == 'student':
+                program = profile.program
+        except UserProfile.DoesNotExist:
+            pass
+            
+    subjects_query = CurriculumSubject.objects.all()
+    if program:
+        subjects_query = subjects_query.filter(program=program)
+        
+    subjects = subjects_query.values(
+        'id', 'code', 'title', 'units', 'year_level', 'semester', 'prerequisite_codes', 'track', 'subject_type', 'program'
+    ).order_by('year_level', 'semester', 'code')
+    
     return JsonResponse({'subjects': list(subjects)})
 
 
@@ -1184,7 +1279,9 @@ def get_student_curriculum(request, student_id):
     except User.DoesNotExist:
         return JsonResponse({'error': 'Student not found'}, status=404)
 
-    all_subjects = CurriculumSubject.objects.all()
+    # Filter subjects by the student's program
+    student_program = getattr(student.userprofile, 'program', 'BSIT')
+    all_subjects = CurriculumSubject.objects.filter(program=student_program).order_by('year_level', 'semester', 'code')
     records = {r.subject_id: r for r in StudentCurriculum.objects.filter(student=student)}
 
     data = []
@@ -1200,6 +1297,7 @@ def get_student_curriculum(request, student_id):
             'prerequisite_codes': subj.prerequisite_codes,
             'track': subj.track,
             'subject_type': subj.subject_type,
+            'program': subj.program,
             'status': rec.status if rec else 'not_taken',
             'grade': rec.grade if rec else '',
             'term_taken': rec.term_taken if rec else '',
@@ -1218,8 +1316,10 @@ def get_student_curriculum(request, student_id):
 def get_my_curriculum(request):
     """Student's own curriculum checklist view with enhanced status tracking."""
     user = request.user
-    # Ensure consistent order by year, semester, and code
-    all_subjects = CurriculumSubject.objects.all().order_by('year_level', 'semester', 'code')
+    program = getattr(user.userprofile, 'program', 'BSIT')
+    
+    # Ensure consistent order by year, semester, and code, filtered by program
+    all_subjects = CurriculumSubject.objects.filter(program=program).order_by('year_level', 'semester', 'code')
     records = {r.subject_id: r for r in StudentCurriculum.objects.filter(student=user)}
     
     # Get subjects that are currently in TermEnrollment (pending/approved)
@@ -1248,6 +1348,7 @@ def get_my_curriculum(request):
             'prerequisite_codes': subj.prerequisite_codes,
             'track': subj.track,
             'subject_type': subj.subject_type,
+            'program': subj.program,
             'status': status,
             'grade': rec.grade if rec else '',
             'term_taken': rec.term_taken if rec else '',
@@ -1467,9 +1568,8 @@ def get_recommended_subjects(student_profile):
     Helper function to suggest subjects based on curriculum and prerequisites.
     Uses StudentCurriculum for accurate tracking.
     """
-    from core.models import CurriculumSubject, StudentCurriculum
-    
-    curriculum = CurriculumSubject.objects.all().order_by('year_level', 'semester')
+    program = getattr(student_profile, 'program', 'BSIT')
+    curriculum = CurriculumSubject.objects.filter(program=program).order_by('year_level', 'semester')
     
     # Get subjects already passed
     passed_subjects = set(StudentCurriculum.objects.filter(

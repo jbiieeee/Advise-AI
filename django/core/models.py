@@ -8,10 +8,14 @@ class UserProfile(models.Model):
         ('pending', 'Pending Approval'),
         ('enrolled', 'Enrolled'),
     )
+    PROGRAM_CHOICES = (
+        ('BSIT', 'BS Information Technology'),
+        ('BSCS', 'BS Computer Science'),
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     student_id = models.CharField(max_length=50, blank=True, null=True)
     institution = models.CharField(max_length=255, blank=True, null=True)
-    program = models.CharField(max_length=255, blank=True, null=True)
+    program = models.CharField(max_length=50, choices=PROGRAM_CHOICES, default='BSIT', blank=True, null=True)
     year_level = models.CharField(max_length=20, blank=True, null=True)
     role = models.CharField(max_length=20, default='student') # student, adviser, admin
     
@@ -19,6 +23,7 @@ class UserProfile(models.Model):
     enrollment_status = models.CharField(max_length=20, choices=ENROLLMENT_STATUS, default='not_enrolled')
     curriculum_code = models.CharField(max_length=50, blank=True, null=True)
     assigned_adviser = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='assigned_students', null=True, blank=True)
+    last_activity = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.user.username
@@ -87,6 +92,17 @@ class Message(models.Model):
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username} at {self.sent_at} ({'Staff' if self.is_staff_only else 'General'})"
 
+class StaffMessage(models.Model):
+    """Isolated messaging for Admins and Advisers."""
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_staff_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_staff_messages')
+    content = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Staff DM: {self.sender.username} -> {self.receiver.username} at {self.sent_at}"
+
 class Notification(models.Model):
     EVENT_TYPES = (
         ('new_student', 'New Student Account'),
@@ -108,15 +124,19 @@ class Notification(models.Model):
 # ─────────────────────────────────────────────────────────────
 
 class CurriculumSubject(models.Model):
-    """Master list of subjects in the BSIT curriculum."""
+    PROGRAM_CHOICES = (
+        ('BSIT', 'BS Information Technology'),
+        ('BSCS', 'BS Computer Science'),
+    )
     SEMESTER_CHOICES = (
         ('1st', '1st Semester'),
         ('2nd', '2nd Semester'),
         ('Summer', 'Summer'),
     )
-    code = models.CharField(max_length=30, unique=True)
+    code = models.CharField(max_length=30)
     title = models.CharField(max_length=200)
     units = models.IntegerField(default=3)
+    program = models.CharField(max_length=20, choices=PROGRAM_CHOICES, default='BSIT')
     year_level = models.IntegerField()          # 1, 2, 3, 4
     semester = models.CharField(max_length=10, choices=SEMESTER_CHOICES)
     prerequisite_codes = models.CharField(
@@ -134,9 +154,10 @@ class CurriculumSubject(models.Model):
 
     class Meta:
         ordering = ['year_level', 'semester', 'code']
+        unique_together = ('code', 'program')
 
     def __str__(self):
-        return f"{self.code} – {self.title}"
+        return f"[{self.program}] {self.code} – {self.title}"
 
 
 class StudentCurriculum(models.Model):
