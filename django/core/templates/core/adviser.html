@@ -579,7 +579,7 @@
                   <div class="relative shrink-0">
                     <div
                       class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow">
-                      {{ thread.profile.user.first_name|slice:":1"|upper }}{{ thread.profile.user.last_name|slice:":1"|upper }}
+                      {{ thread.profile.user.first_name|default:thread.profile.user.username|slice:":1"|upper }}{{ thread.profile.user.last_name|slice:":1"|upper }}
                     </div>
                     {% if thread.unread > 0 %}
                     <span class="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ thread.unread }}</span>
@@ -587,7 +587,7 @@
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
-                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.first_name|default:thread.profile.user.username }} {{ thread.profile.user.last_name|default:'' }} <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-navy/5 text-navy/60 border border-navy/10 font-bold uppercase">{{ thread.profile.program }}</span></p>
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ thread.profile.user.get_full_name|default:thread.profile.user.username }} <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-navy/5 text-navy/60 border border-navy/10 font-bold uppercase">{{ thread.profile.program }}</span></p>
                       <p class="text-[10px] text-gray-400 ml-1 shrink-0">{{ thread.last_msg.sent_at|timesince|truncatechars:8 }}</p>
                     </div>
                     <p class="text-xs text-gray-500 truncate mt-1 leading-relaxed">
@@ -628,8 +628,8 @@
               </div>
             </div>
 
-            <!-- Right panel: conversation view (66%) -->
-            <div class="flex-1 flex flex-col min-w-0 bg-white" id="chat-panel">
+            <!-- Right panel: conversation view: always responsive flex -->
+            <div class="flex-1 flex flex-col min-w-0 bg-white hidden lg:flex" id="chat-panel">
 
               <!-- Empty state -->
               <div id="chat-empty-state"
@@ -648,6 +648,10 @@
 
               <!-- Chat header (hidden until student selected) -->
               <div id="chat-header" class="hidden border-b p-4 bg-white flex items-center gap-3 shrink-0">
+                <!-- Mobile Back Button -->
+                <button id="student-chat-back-btn" class="lg:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
                 <div id="chat-avatar"
                   class="size-10 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow shrink-0">
                   ??</div>
@@ -1437,15 +1441,34 @@
         const avatar = document.getElementById('chat-avatar');
         const nameDisplay = document.getElementById('chat-student-name');
         const studentIdInput = document.getElementById('msg-student-id');
+        const sidebar = document.getElementById('message-sidebar');
+        const chatPanel = document.getElementById('chat-panel');
+
         if (avatar) avatar.textContent = initials || '??';
         if (nameDisplay) nameDisplay.textContent = studentName || 'Student';
         const programDisplay = document.getElementById('chat-student-program');
         if (programDisplay) programDisplay.textContent = program || '';
         if (studentIdInput) studentIdInput.value = studentId;
+        
         document.querySelectorAll('.student-item').forEach(b => {
           const active = b.dataset.studentId === String(studentId);
           b.classList.toggle('bg-blue-100', active);
         });
+
+        // Toggle visibility on mobile
+        if (window.innerWidth < 1024) {
+          if (sidebar) sidebar.classList.add('hidden');
+          if (chatPanel) {
+            chatPanel.classList.remove('hidden');
+            chatPanel.classList.add('flex');
+          }
+        } else {
+          if (chatPanel) {
+            chatPanel.classList.remove('hidden');
+            chatPanel.classList.add('flex');
+          }
+        }
+
         showChatState('loading');
       }
       fetch(`/adviser/conversation/${studentId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -1613,6 +1636,21 @@
             staffChatWindow.classList.add('hidden');
             staffChatWindow.classList.remove('flex');
             if (window.staffChatInterval) clearInterval(window.staffChatInterval);
+        };
+    }
+
+    const studentChatBackBtn = document.getElementById('student-chat-back-btn');
+    if (studentChatBackBtn) {
+        studentChatBackBtn.onclick = () => {
+            const sidebar = document.getElementById('message-sidebar');
+            const chatPanel = document.getElementById('chat-panel');
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (chatPanel) {
+                chatPanel.classList.add('hidden');
+                chatPanel.classList.remove('flex');
+            }
+            stopPolling();
+            activeStudentId = null;
         };
     }
 
