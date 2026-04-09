@@ -336,6 +336,9 @@ def student_dashboard(request):
     import json
     all_staff_ids_json = json.dumps(all_staff_ids)
 
+    from core.models import Notification
+    unread_notifications_count = Notification.objects.filter(user=user, is_read=False).count()
+
     context = {
         'profile': profile,
         'enrollment_status': enrollment_status,
@@ -345,6 +348,7 @@ def student_dashboard(request):
         'curriculum_status_map': curriculum_status_map,
         'recommended_subjects': recommended_subjects,
         'pending_approvals': pending_approvals,
+        'unread_notifications_count': unread_notifications_count,
         'appointments_count': appointments_count,
         'student_forms': student_forms,
         'student_appointments': student_appointments,
@@ -918,6 +922,13 @@ def profile_view(request):
                     messages.success(request, 'Password successfully updated.')
                 else:
                     messages.error(request, 'Passwords do not match.')
+
+            if role == 'student':
+                program = request.POST.get('program')
+                if program in ['BSIT', 'BSCS']:
+                    user.userprofile.program = program
+                    user.userprofile.save()
+                    messages.success(request, f'Degree program set to {program}.')
 
             return redirect('profile')
 

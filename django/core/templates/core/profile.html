@@ -68,11 +68,22 @@
             </div>
           </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium leading-none">Email Address</label>
-            <input type="email" name="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue" value="{{ user.email }}" required>
-            <p class="text-[12px] text-gray-500">Updating your email will also alter your login username.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none text-muted-foreground">Email Address</label>
+              <input type="email" name="email" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue" value="{{ user.email }}" required>
+            </div>
+            {% if role == 'student' %}
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">Degree Program</label>
+              <select name="program" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue" required>
+                <option value="BSIT" {% if user.userprofile.program == 'BSIT' %}selected{% endif %}>BS Information Technology</option>
+                <option value="BSCS" {% if user.userprofile.program == 'BSCS' %}selected{% endif %}>BS Computer Science</option>
+              </select>
+            </div>
+            {% endif %}
           </div>
+          <p class="text-[12px] text-gray-500 mt-1">Updating your email will also alter your login username.</p>
 
           <hr class="my-6">
 

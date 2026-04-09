@@ -1057,6 +1057,8 @@
                            'pending': '[PENDING APPROVAL]',
                            'not_taken': '[NOT TAKEN]'
                         }[subj.status] || subj.status.toUpperCase();
+                        
+                        return `
                           <tr class="curr-row hover:bg-blue-50/30 transition-colors" data-year="${subj.year_level}">
                             <td class="p-3 w-10">
                               <input type="checkbox" class="subject-checkbox size-4 rounded border-gray-300 text-light-blue focus:ring-light-blue" 
