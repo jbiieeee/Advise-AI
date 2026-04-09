@@ -769,8 +769,7 @@
             <button
               class="student-item w-full text-left px-3 py-4 hover:bg-blue-50 transition-all border-b border-gray-100 flex items-start gap-4 group relative z-10"
               data-student-id="{{ adv.id }}" data-student-name="{{ adv.get_full_name|default:adv.username }}"
-              data-student-initials="{{ adv.first_name|default:adv.username|slice:" :1"|upper }}{{
-              adv.last_name|slice:":1"|upper }}">
+              data-student-initials="{{ adv.first_name|default:adv.username|slice:":1"|upper }}{{ adv.last_name|slice:":1"|upper }}">
               <div class="relative shrink-0">
                 <div
                   class="size-11 rounded-full bg-gradient-to-br from-navy to-light-blue text-white flex items-center justify-center text-sm font-bold shadow-md group-hover:scale-105 transition-transform">
