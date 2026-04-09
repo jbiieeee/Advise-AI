@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -156,7 +156,21 @@ def student_dashboard(request):
     from core.models import StudentCurriculum, EnrollmentCode, TermEnrollment, FormSubmission, Appointment, Message
     
     user = request.user
-    profile = user.userprofile
+    
+    # Robust profile retrieval to prevent 500 error if profile is missing
+    try:
+        profile = user.userprofile
+    except UserProfile.DoesNotExist:
+        if user.is_superuser:
+            return redirect('admin_dashboard')
+        # Create a basic profile if missing for students
+        profile = UserProfile.objects.create(user=user, role='student')
+    
+    # Mission: Enforce Program Logic (BSIT/BSCS)
+    # If program is not set or invalid, redirect to profile completion
+    if profile.role == 'student' and profile.program not in ['BSIT', 'BSCS']:
+        messages.warning(request, "Please select your degree program (BSIT or BSCS) to access your dashboard.")
+        return redirect('profile')
 
     # Get curriculum status for tags early to avoid UnboundLocalError during POST
     curriculum_records = StudentCurriculum.objects.filter(student=user)
@@ -402,6 +416,16 @@ def student_get_conversation(request):
 def adviser_dashboard(request):
     user = request.user
     from django.db.models import Q
+    
+    # Robust profile retrieval
+    try:
+        profile = user.userprofile
+    except UserProfile.DoesNotExist:
+        if user.is_superuser:
+            role = 'admin'
+        else:
+            role = 'adviser'
+        profile = UserProfile.objects.create(user=user, role=role)
 
     # Get all adviser user IDs (shared inbox - all advisers see all student messages)
     adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))

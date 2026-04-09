@@ -971,6 +971,8 @@
   const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
   let activeStudentId = null;
   let pollTimer = null;
+  let triggers = [];
+  let contents = [];
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
@@ -982,8 +984,8 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // ─── Curriculum Logic ─────────────────────────────────────────────
-    const triggers = document.querySelectorAll('.tab-trigger');
-    const contents = document.querySelectorAll('.tab-content');
+    triggers = document.querySelectorAll('.tab-trigger');
+    contents = document.querySelectorAll('.tab-content');
     let selectedStudentId = null;
     let selectedSubjectIds = new Set();
 
