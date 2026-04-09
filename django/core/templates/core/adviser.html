@@ -531,36 +531,37 @@
 
       <!-- ============================= MESSAGES TAB ============================= -->
       <div class="tab-content hidden" id="tab-messages">
-        <div class="rounded-lg border shadow-sm bg-white overflow-hidden relative" style="height: 700px;">
-          <div class="flex h-full">
+        <div class="px-4 sm:px-6 lg:px-8 pb-8">
+          <div class="rounded-lg border shadow-sm bg-white overflow-hidden relative" style="height: 700px;">
+            <div class="flex h-full">
 
-            <!-- Left panel: student search and list (fixed width) -->
-            <div class="w-full lg:w-72 border-r flex flex-col bg-gray-50 shrink-0 transition-all duration-300 relative z-10" id="message-sidebar">
-              <div class="p-4 border-b bg-white">
-                <h3 class="font-semibold text-gray-900 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="text-light-blue">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                  Conversations
-                </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Direct messages with students</p>
-              </div>
-
-              <!-- Search -->
-              <div class="p-3 border-b bg-white">
-                <div class="relative">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                  </svg>
-                  <input id="student-search" type="text" placeholder="Search students..."
-                    class="w-full pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue bg-gray-50">
+              <!-- Left panel: student search and list (fixed width) -->
+              <div class="w-full lg:w-72 border-r flex flex-col bg-gray-50 shrink-0 transition-all duration-300 relative z-10" id="message-sidebar">
+                <div class="p-4 border-b bg-white">
+                  <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                      class="text-light-blue">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Advisers
+                  </h3>
+                  <p class="text-xs text-gray-500 mt-0.5">Live chat with your students</p>
                 </div>
-              </div>
+
+                <!-- Search -->
+                <div class="p-3 border-b bg-white">
+                  <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <input id="student-search" type="text" placeholder="Search students..."
+                      class="w-full pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-light-blue focus:border-light-blue bg-gray-50">
+                  </div>
+                </div>
 
               <!-- Student list: those with existing threads first, then all others -->
               <div class="flex-1 overflow-y-auto" id="student-thread-list">
@@ -609,12 +610,14 @@
                   data-student-name="{{ student.user.get_full_name|default:student.user.username }}"
                   data-student-initials="{{ student.user.first_name|default:student.user.username|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}"
                   data-student-program="{{ student.program }}">
-                  <div
-                    class="size-11 rounded-full bg-navy/5 text-navy flex items-center justify-center text-base font-bold shrink-0 shadow-sm transition-all group-hover:bg-navy group-hover:text-white">
-                    {{ student.user.first_name|default:student.user.username|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}
+                  <div class="relative shrink-0">
+                    <div
+                      class="size-11 rounded-full bg-navy/5 text-navy flex items-center justify-center text-sm font-bold shadow-sm transition-all group-hover:bg-navy group-hover:text-white">
+                      {{ student.user.first_name|default:student.user.username|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}
+                    </div>
                   </div>
                   <div class="flex-1 min-w-0 py-0.5">
-                    <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ student.user.first_name|default:student.user.username }} {{ student.user.last_name|default:'' }}</p>
+                    <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ student.user.get_full_name|default:student.user.username }}</p>
                     <p class="text-[11px] text-gray-500 truncate mt-1 opacity-80 leading-none">
                       {{ student.student_id|default:"—" }} · <span class="text-navy/60 font-medium">{{ student.program|default:"No program" }}</span>
                     </p>
@@ -712,7 +715,6 @@
                     </svg>
                   </button>
                 </form>
-              </div>
             </div>
           </div>
         </div>
@@ -957,6 +959,7 @@
   const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
   let activeStudentId = null;
   let pollTimer = null;
+  let lastMessageCount = 0;
   let triggers = [];
   let contents = [];
 
@@ -1387,6 +1390,10 @@
       const area = document.getElementById('chat-messages-area');
       if (!msgs || msgs.length === 0) { showChatState('no-messages'); return; }
 
+      // Performance Optimization: Skip re-render if count is same during polling
+      if (isPolling && msgs.length === lastMessageCount) return;
+      lastMessageCount = msgs.length;
+
       const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
       showChatState('messages');
       area.innerHTML = '';
@@ -1449,10 +1456,14 @@
         if (studentIdInput) studentIdInput.value = studentId;
         
         document.querySelectorAll('.student-item').forEach(b => {
-          const active = b.dataset.studentId === String(studentId);
-          b.classList.toggle('bg-blue-100', active);
+          if (b.dataset.studentId === String(studentId)) {
+            b.classList.add('bg-blue-50', 'border-l-4', 'border-l-light-blue');
+          } else {
+            b.classList.remove('bg-blue-50', 'border-l-4', 'border-l-light-blue', 'bg-blue-100');
+          }
         });
 
+        lastMessageCount = 0; // Reset count for fresh load
         // Toggle visibility on mobile
         if (window.innerWidth < 1024) {
           if (sidebar) sidebar.classList.add('hidden');
@@ -1502,6 +1513,15 @@
 
     const msgForm = document.getElementById('adviser-msg-form');
     const msgContent = document.getElementById('msg-content');
+
+    if (msgContent && msgForm) {
+      msgContent.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          msgForm.dispatchEvent(new Event('submit'));
+        }
+      });
+    }
 
     if (msgForm) {
       msgForm.addEventListener('submit', function (e) {
