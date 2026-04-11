@@ -14,6 +14,7 @@ from .models import (
     TermEnrollment, StudentCurriculum, EnrollmentCode,
     FormSubmission, Appointment, Message, Notification
 )
+import google.generativeai as genai
 
 def csrf_failure(request, reason=""):
     """Handle CSRF failures by redirecting back with a message instead of showing 403."""
@@ -1694,6 +1695,73 @@ def get_adviser_student_details(request, student_id):
             'active_subjects': active_list,
             'recommendations': rec_list
         })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
+
+@login_required(login_url='login')
+def chatbot_api(request):
+    """
+    Gemini 1.5 Flash Chatbot API.
+    Identity: Advise AI Virtual Assistant for TIP.
+    Data Awareness: BSIT/BSCS program, recommended subjects, rules on enrollment and grades.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        history = data.get('history', []) # Should be a list of {role: "user"|"model", parts: [text]}
+
+        if not user_message:
+            return JsonResponse({'error': 'Message required'}, status=400)
+
+        profile = request.user.userprofile
+        program = profile.program or "Not Assigned"
+        
+        # Get "Must-Take" courses
+        recommended = get_recommended_subjects(profile)
+        must_take_str = ", ".join([f"{s.code} ({s.title})" for s in recommended]) if recommended else "No specific recommendations at this time. Maintain your current pace."
+
+        # Configure Gemini
+        api_key = "AIzaSyAKHHn4d1Gd0qAPoe3Jdlh5EKCr0HeNAgE"
+        genai.configure(api_key=api_key)
+
+        # System Instruction
+        system_instruction = (
+            "You are the Advise AI Virtual Assistant for TIP (Technological Institute of the Philippines). "
+            f"The current student is in the {program} program. "
+            "Your tone is helpful, professional, and encouraging. "
+            "\n\nCONSTRAINTS & RULES:\n"
+            "1. Enrollment: If asked about enrollment, explain that students need a Code from an Adviser which they can redeem in the 'Enroll' tab or the 'Enrollment' section of the dashboard.\n"
+            "2. Grades: If asked about grades or status, explain that Admins are the only ones who can set 'Passed/Failed' status. You are an Adviser, not an Operator.\n"
+            f"3. Curriculum: Based on the student's progress, the current 'Must-Take' recommended courses are: {must_take_str}.\n"
+            "4. Handoff: If the student asks for a human adviser or a more personalized interaction, direct them to the 'Messages' tab to contact their specific Adviser or staff.\n"
+            "5. NO HALLUCINATIONS: Do not promise that you can change database records, set grades, or perform administrative actions. You only provide information and guidance.\n"
+            "6. Identity: Always identify as the Advise AI Virtual Assistant for TIP."
+        )
+
+        model = genai.GenerativeModel(
+            model_name="gemini-flash-latest",
+            system_instruction=system_instruction
+        )
+
+        # Convert history format if necessary
+        # History from frontend expected: [{role: "user", content: "..."}, {role: "bot", content: "..."}]
+        # Gemini expected: [{role: "user", parts: ["..."]}, {role: "model", parts: ["..."]}]
+        formatted_history = []
+        for h in history:
+            role = "user" if h.get('role') == 'user' else "model"
+            formatted_history.append({"role": role, "parts": [h.get('content', '')]})
+
+        chat = model.start_chat(history=formatted_history)
+        response = chat.send_message(user_message)
+
+        return JsonResponse({
+            'status': 'success',
+            'reply': response.text
+        })
+
     except Exception as e:
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
 

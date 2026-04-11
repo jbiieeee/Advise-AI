@@ -38,4 +38,5 @@ urlpatterns = [
     path('api/admin/send-official-notice/', views.api_send_official_notice, name='api_send_official_notice'),
 
     path('api/notifications/mark-read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
+    path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
 ]

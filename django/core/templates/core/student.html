@@ -1200,25 +1200,55 @@
     const chatForm = document.getElementById('chatbot-form');
     const chatInput = document.getElementById('chatbot-input');
     const chatMessages = document.getElementById('chatbot-messages');
+    let chatHistory = []; // Track conversation for Gemini context
 
     function toggleChat() {
       if (chatWindow.classList.contains('hidden')) {
         chatWindow.classList.remove('hidden');
         chatWindow.classList.add('flex');
+        checkOfficialNoticeLock(); // Safety check when opening
       } else {
         chatWindow.classList.add('hidden');
         chatWindow.classList.remove('flex');
       }
     }
 
+    function checkOfficialNoticeLock() {
+      // Scans all available messages in the DOM or via a quick check to see if we should lock
+      // For the chatbot, we'll check if any message in the messages area has the notice tag
+      // or if we can find it in the data we already have.
+      // But more robustly, we can check if the main msg-content is disabled.
+      const mainChatInput = document.getElementById('msg-content');
+      const chatbotInput = document.getElementById('chatbot-input');
+      const chatbotSubmit = chatForm.querySelector('button[type="submit"]');
+
+      // If the main adviser chat is locked, lock the chatbot too
+      // We'll also do a fetch to check for official notices if not already known
+      fetch('/student/conversation/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            let locked = false;
+            (data.messages || []).forEach(m => {
+                if (m.content && m.content.includes('[OFFICIAL ADMIN NOTICE]')) locked = true;
+            });
+
+            if (locked) {
+                chatbotInput.disabled = true;
+                chatbotInput.placeholder = "Replies Restricted by Notice";
+                chatbotInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                chatbotSubmit.disabled = true;
+                chatbotSubmit.classList.add('opacity-50', 'grayscale');
+            }
+        });
+    }
+
     chatToggle.addEventListener('click', toggleChat);
     chatClose.addEventListener('click', toggleChat);
-
 
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const message = chatInput.value.trim();
-      if (!message) return;
+      if (!message || chatInput.disabled) return;
 
       // Add user message
       const userHtml = `
@@ -1229,10 +1259,13 @@
               </div>
             `;
       chatMessages.insertAdjacentHTML('beforeend', userHtml);
+      const userMsgObj = { role: "user", content: message };
+      chatHistory.push(userMsgObj);
+      
       chatInput.value = '';
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Simulate AI typing indicator
+      // Show AI typing indicator
       const typingId = 'typing-' + Date.now();
       const typingHtml = `
               <div id="${typingId}" class="flex gap-2 w-5/6">
@@ -1249,19 +1282,24 @@
       chatMessages.insertAdjacentHTML('beforeend', typingHtml);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Simulate API response
-      setTimeout(() => {
+      // Fetch from Gemini API
+      fetch('/api/chatbot/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            message: message,
+            history: chatHistory.slice(-10) // Send last 10 messages for context
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
         document.getElementById(typingId).remove();
-        // Simple response logic
-        let reply = "I'm looking into that for you. For complex inquiries, you might want to consider booking an appointment with an adviser.";
-        const lowerMsg = message.toLowerCase();
-        if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-          reply = "Hello! How can I assist you with your academics today?";
-        } else if (lowerMsg.includes('enroll')) {
-          reply = "To enroll, make sure you enter your curriculum code in the Verify Enrollment section first. It might take some time for your adviser to review it.";
-        } else if (lowerMsg.includes('where is')) {
-          reply = "You can find most services right here on the dashboard. Use the navigation buttons above!";
-        }
+        
+        let reply = data.reply || "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later.";
+        chatHistory.push({ role: "model", content: reply });
 
         const botHtml = `
                   <div class="flex gap-2 w-5/6">
@@ -1275,7 +1313,11 @@
                 `;
         chatMessages.insertAdjacentHTML('beforeend', botHtml);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 1500);
+      })
+      .catch(err => {
+        document.getElementById(typingId).remove();
+        console.error('Chatbot error:', err);
+      });
     });
 
 
