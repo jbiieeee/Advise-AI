@@ -1,0 +1,340 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Messages | Advise AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .chat-container {
+        height: calc(100vh - 84px); /* Subtract header height */
+    }
+    .messages-viewport {
+        height: calc(100% - 80px); /* Subtract input area */
+    }
+    .glass-sidebar {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(229, 231, 235, 1);
+    }
+    .active-contact {
+        background: linear-gradient(to right, rgba(14, 42, 71, 0.05), rgba(74, 144, 226, 0.1));
+        border-left: 4px solid #0E2A47;
+    }
+    .message-bubble {
+        max-width: 85%;
+        padding: 0.85rem 1.25rem;
+        border-radius: 1.25rem;
+        position: relative;
+        line-height: 1.5;
+    }
+    .message-sent {
+        background: linear-gradient(135deg, #0E2A47 0%, #4A90E2 100%);
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+    .message-received {
+        background: #F3F4F6;
+        color: #1F2937;
+        border-bottom-left-radius: 0.25rem;
+    }
+    .staff-badge {
+        background: #FDF2F2;
+        color: #9B1C1C;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .student-badge {
+        background: #EBF5FF;
+        color: #1E429F;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    /* Hide scrollbar but keep functionality */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex chat-container overflow-hidden bg-gray-50">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-[30%] lg:w-[30%] glass-sidebar flex flex-col z-20 shrink-0">
+        <div class="p-6 border-b border-gray-100 flex-shrink-0">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Messages</h2>
+                <a href="{% if role == 'student' %}{% url 'student_dashboard' %}{% elif role == 'adviser' %}{% url 'adviser_dashboard' %}{% else %}{% url 'admin_dashboard' %}{% endif %}" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-navy text-[11px] font-bold rounded-lg transition-all uppercase tracking-wider">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                   Dashboard
+                </a>
+            </div>
+            
+            <!-- Search Wrapper -->
+            <div class="relative">
+                <input type="text" id="contact-search" placeholder="Search conversations..." 
+                       class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-light-blue transition-all">
+                <svg class="absolute left-3 top-2.5 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Contacts Scrollable Area -->
+        <div class="flex-grow overflow-y-auto no-scrollbar">
+            <!-- Staff Channel Toggle (Only for Staff/Admin) -->
+            {% if role != 'student' %}
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Communication Channels</p>
+                <div class="flex gap-2">
+                    <button onclick="setFilter('all')" class="channel-btn flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-navy text-white shadow-md transition-all">Inbox</button>
+                    <button onclick="setFilter('staff')" class="channel-btn flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-white shadow-sm border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">Staff Channel</button>
+                </div>
+            </div>
+            {% endif %}
+
+            <div id="contacts-list" class="divide-y divide-gray-50">
+                <!-- Contacts will be loaded via AJAX -->
+                <div class="p-8 text-center opacity-40">
+                    <p class="text-sm">Loading contacts...</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="flex-grow md:w-[70%] lg:w-[70%] flex flex-col bg-white relative">
+        <!-- Chat Header -->
+        <header id="chat-header" class="p-4 border-b border-gray-100 flex items-center justify-between z-10 bg-white/90 backdrop-blur-sm">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden p-2 text-gray-400 hover:text-navy">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <div class="size-10 rounded-full bg-navy text-white flex items-center justify-center font-bold" id="active-avatar">
+                   ?
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-gray-900" id="active-name">Select a conversation</h2>
+                    <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span class="size-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                        Active Now
+                    </p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Message List -->
+        <div id="messages-viewport" class="flex-grow overflow-y-auto p-6 space-y-4 no-scrollbar bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-opacity-5">
+            <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-40">
+                <div class="size-20 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <p class="text-sm font-medium">Select a contact to start messaging</p>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-4 border-t border-gray-100">
+            <form id="message-form" class="flex gap-2 items-end">
+                <div class="flex-grow relative">
+                    <textarea id="message-input" rows="1" placeholder="Type your message here..." 
+                              class="w-full pl-4 pr-12 py-3 bg-gray-50 border-gray-200 rounded-2xl text-sm focus:ring-navy focus:border-navy transition-all resize-none shadow-inner no-scrollbar"></textarea>
+                    <button type="button" class="absolute right-3 bottom-3 text-gray-400 hover:text-navy">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                </div>
+                <button type="submit" class="p-3 bg-navy text-white rounded-2xl shadow-lg hover:bg-light-blue hover:-translate-y-0.5 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentContactId = null;
+    let currentType = 'standard';
+    let currentFilterType = 'all'; // 'all' or 'staff'
+    let pollInterval = null;
+    let contactsPoll = null;
+
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const viewport = document.getElementById('messages-viewport');
+    const contactsList = document.getElementById('contacts-list');
+    const activeName = document.getElementById('active-name');
+    const activeAvatar = document.getElementById('active-avatar');
+    const emptyState = document.getElementById('empty-state');
+
+    // Auto-expand textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Handle form submission
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        if (!content || !currentContactId) return;
+
+        fetch('/api/messages/send/', {
+            method: 'POST',
+            body: JSON.stringify({
+                receiver_id: currentContactId,
+                content: content,
+                type: currentType
+            }),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                loadConversation(currentContactId, currentType, activeName.textContent, true);
+                loadContacts(); // Update sidebar immediately
+            } else {
+                alert('Error: ' + (data.error || 'Failed to send message'));
+            }
+        });
+    });
+
+    function loadContacts() {
+        fetch('/api/messages/v2/list/')
+        .then(r => r.json())
+        .then(data => {
+            let html = '';
+            const filtered = data.contacts.filter(c => {
+                if (currentFilterType === 'staff') return c.type === 'staff';
+                return c.type === 'standard';
+            });
+
+            if (filtered.length === 0) {
+                html = '<div class="p-8 text-center"><p class="text-sm text-gray-400">No conversations found.</p></div>';
+            } else {
+                filtered.forEach(c => {
+                    const isActive = currentContactId == c.user_id && currentType == c.type;
+                    html += `
+                        <div class="contact-card p-4 flex gap-4 cursor-pointer hover:bg-gray-50 transition-all ${isActive ? 'active-contact' : ''}" 
+                             onclick="loadConversation(${c.user_id}, '${c.type}', '${c.name.replace(/'/g, "\\'")}')">
+                            <div class="relative flex-shrink-0">
+                                <div class="size-12 rounded-full bg-gradient-to-br from-navy/10 to-light-blue/10 flex items-center justify-center text-navy font-bold text-lg overflow-hidden border border-navy/5">
+                                    ${c.name.charAt(0)}
+                                </div>
+                                ${c.unread_count > 0 ? `
+                                <span class="absolute -top-1 -right-1 size-5 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white flex items-center justify-center animate-bounce">
+                                    ${c.unread_count}
+                                </span>` : ''}
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex justify-between items-baseline mb-1">
+                                    <h3 class="text-sm font-bold text-gray-900 truncate">${c.name}</h3>
+                                    <span class="text-[10px] text-gray-400">${c.last_message_time || ''}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    ${c.type === 'staff' ? '<span class="staff-badge">Internal</span>' : (c.is_staff ? '<span class="staff-badge">Staff</span>' : '<span class="student-badge">Student</span>')}
+                                    <p class="text-xs text-gray-500 truncate">${c.last_message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            contactsList.innerHTML = html;
+        });
+    }
+
+    function loadConversation(contactId, type, name, appendOnly = false) {
+        currentContactId = contactId;
+        currentType = type;
+        activeName.textContent = name;
+        activeAvatar.textContent = name.charAt(0);
+        if (emptyState) emptyState.remove();
+
+        // Update active class immediately for UI responsiveness
+        document.querySelectorAll('.contact-card').forEach(c => c.classList.remove('active-contact'));
+        
+        fetch(`/api/messages/thread/${contactId}/?type=${type}`)
+        .then(r => r.json())
+        .then(data => {
+            const messages = data.messages;
+            let html = '';
+            
+            if (messages.length === 0) {
+                html = `
+                    <div class="flex flex-col items-center justify-center h-full text-center opacity-40">
+                        <p class="text-sm">No message history yet.</p>
+                    </div>
+                `;
+            } else {
+                messages.forEach(m => {
+                    html += `
+                        <div class="flex ${m.is_me ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div class="message-bubble ${m.is_me ? 'message-sent' : 'message-received'} shadow-sm">
+                                <p class="text-sm">${m.content}</p>
+                                <span class="text-[9px] block text-right mt-1 ${m.is_me ? 'text-white/70' : 'text-gray-400'}">${m.sent_at}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (!appendOnly || viewport.innerHTML.includes('No message history')) {
+                viewport.innerHTML = html;
+                viewport.scrollTop = viewport.scrollHeight;
+            } else {
+                // Leaner update: check if we have new messages
+                // For simplicity in this shell, we refetch whole thread but a real app would use last_id
+                viewport.innerHTML = html;
+            }
+        });
+
+        // Setup polling for the active conversation
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            loadConversation(currentContactId, currentType, activeName.textContent, true);
+        }, 5000);
+    }
+
+    function setFilter(type) {
+        currentFilterType = type;
+        const buttons = document.querySelectorAll('.channel-btn');
+        buttons.forEach(b => {
+            b.classList.remove('bg-navy', 'text-white', 'shadow-md');
+            b.classList.add('bg-white', 'text-gray-600');
+        });
+        const activeBtn = event.target;
+        activeBtn.classList.add('bg-navy', 'text-white', 'shadow-md');
+        activeBtn.classList.remove('bg-white', 'text-gray-600');
+        loadContacts();
+    }
+
+    // Initial Load
+    loadContacts();
+    contactsPoll = setInterval(loadContacts, 10000);
+
+    // Search functionality
+    document.getElementById('contact-search').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.contact-card').forEach(card => {
+            const name = card.querySelector('h3').textContent.toLowerCase();
+            card.style.display = name.includes(query) ? 'flex' : 'none';
+        });
+    });
+</script>
+{% endblock %}

@@ -21,4 +21,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('core.urls')),
-]
+] # URL RELOAD TRIGGER: 2026-04-12 15:48

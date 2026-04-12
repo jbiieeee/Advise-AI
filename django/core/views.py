@@ -12,7 +12,7 @@ from django.db.models import Q
 from .models import (
     UserProfile, CurriculumSubject, 
     TermEnrollment, StudentCurriculum, EnrollmentCode,
-    FormSubmission, Appointment, Message, Notification
+    FormSubmission, Appointment, Message, StaffMessage, Notification
 )
 import google.generativeai as genai
 
@@ -134,6 +134,176 @@ def register_page(request):
         return redirect('login')
         
     return render(request, 'core/register.html')
+
+@login_required(login_url='login')
+def api_messages_list(request):
+    """Returns contact list with last message and unread count. High performance."""
+    user = request.user
+    from django.db.models import Max, Q, F
+    from core.models import UserProfile, Message, StaffMessage
+    from datetime import datetime
+    from django.utils import timezone
+    
+    role = getattr(user, 'userprofile', None)
+    role_str = role.role if role else ('admin' if user.is_superuser else 'student')
+    
+    contacts = []
+    
+    # 1. Standard Messaging Partners (Students <-> Advisers/Admins)
+    if role_str == 'student':
+        assigned = role.assigned_adviser if role else None
+        if assigned:
+            std_candidates = User.objects.filter(id=assigned.id)
+        else:
+            std_candidates = User.objects.filter(Q(userprofile__role__in=['adviser', 'admin']) | Q(is_superuser=True)).exclude(id=user.id)
+    else:
+        # Staff see all students
+        std_candidates = User.objects.filter(userprofile__role='student')
+
+    for c_user in std_candidates:
+        last_msg = Message.objects.filter(
+            (Q(sender=user, receiver=c_user) | Q(sender=c_user, receiver=user))
+        ).order_by('-sent_at').first()
+        unread = Message.objects.filter(sender=c_user, receiver=user, is_read=False).count()
+        contacts.append({
+            'user_id': c_user.id,
+            'name': f"{c_user.first_name} {c_user.last_name}".strip() or c_user.username,
+            'last_message': last_msg.content if last_msg else "No messages yet.",
+            'last_message_time': last_msg.sent_at if last_msg else None,
+            'unread_count': unread,
+            'type': 'standard',
+            'is_staff': c_user.is_superuser or (hasattr(c_user, 'userprofile') and c_user.userprofile.role in ['adviser', 'admin'])
+        })
+
+    # 2. Staff Messaging Partners (Staff <-> Staff)
+    if role_str != 'student':
+        staff_candidates = User.objects.filter(Q(userprofile__role__in=['adviser', 'admin']) | Q(is_superuser=True)).exclude(id=user.id)
+        for s_user in staff_candidates:
+            last_msg = StaffMessage.objects.filter(
+                (Q(sender=user, receiver=s_user) | Q(sender=s_user, receiver=user))
+            ).order_by('-sent_at').first()
+            unread = StaffMessage.objects.filter(sender=s_user, receiver=user, is_read=False).count()
+            contacts.append({
+                'user_id': s_user.id,
+                'name': f"{s_user.first_name} {s_user.last_name}".strip() or s_user.username,
+                'last_message': last_msg.content if last_msg else "No staff messages yet.",
+                'last_message_time': last_msg.sent_at if last_msg else None,
+                'unread_count': unread,
+                'type': 'staff',
+                'is_staff': True
+            })
+
+    # Sort by time
+    def get_time(x): return x['last_message_time'] if x['last_message_time'] else timezone.make_aware(datetime.min)
+    contacts.sort(key=get_time, reverse=True)
+    
+    # Format for JSON
+    for c in contacts:
+        if c['last_message_time']:
+            c['last_message_time'] = timezone.localtime(c['last_message_time']).strftime('%b %d, %H:%M')
+
+    return JsonResponse({'contacts': contacts})
+
+@login_required(login_url='login')
+def api_messages_thread(request, contact_id):
+    """Returns conversation history for a specific contact and type."""
+    from django.db.models import Q
+    from core.models import Message, StaffMessage
+    user = request.user
+    msg_type = request.GET.get('type', 'standard')
+    
+    # Security: Students cannot access staff threads
+    role = getattr(user, 'userprofile', None)
+    role_str = role.role if role else ('admin' if user.is_superuser else 'student')
+    if msg_type == 'staff' and role_str == 'student':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    try:
+        contact = User.objects.get(id=contact_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    if msg_type == 'staff':
+        thread = StaffMessage.objects.filter(
+            (Q(sender=user, receiver=contact) | Q(sender=contact, receiver=user))
+        ).order_by('sent_at')
+        # Mark as read
+        StaffMessage.objects.filter(sender=contact, receiver=user, is_read=False).update(is_read=True)
+    else:
+        thread = Message.objects.filter(
+            (Q(sender=user, receiver=contact) | Q(sender=contact, receiver=user))
+        ).order_by('sent_at')
+        # Mark as read
+        Message.objects.filter(sender=contact, receiver=user, is_read=False).update(is_read=True)
+
+    data = []
+    for m in thread:
+        data.append({
+            'content': m.content,
+            'sent_at': timezone.localtime(m.sent_at).strftime('%b %d, %I:%M %p'),
+            'is_me': m.sender == user
+        })
+    return JsonResponse({'messages': data})
+
+@login_required(login_url='login')
+def api_messages_send(request):
+    """Unified API for sending messages."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    import json as _json
+    from core.models import Message, StaffMessage
+    try:
+        data = _json.loads(request.body)
+    except:
+        data = request.POST
+        
+    receiver_id = data.get('receiver_id')
+    content = data.get('content', '').strip()
+    msg_type = data.get('type', 'standard')
+    
+    if not receiver_id or not content:
+        return JsonResponse({'error': 'Missing receiver or content'}, status=400)
+    
+    try:
+        receiver = User.objects.get(id=receiver_id)
+        user = request.user
+        role = getattr(user, 'userprofile', None)
+        role_str = role.role if role else ('admin' if user.is_superuser else 'student')
+        
+        # Security Checks
+        if msg_type == 'staff':
+            if role_str == 'student':
+                return JsonResponse({'error': 'Students cannot send staff messages'}, status=403)
+            # Ensure receiver is also staff
+            rev_role = getattr(receiver, 'userprofile', None)
+            rev_role_str = rev_role.role if rev_role else ('admin' if receiver.is_superuser else 'student')
+            if rev_role_str == 'student':
+                return JsonResponse({'error': 'Cannot send staff messages to students'}, status=400)
+            
+            m = StaffMessage.objects.create(sender=user, receiver=receiver, content=content)
+        else:
+            # Standard Message
+            # Security: Students cannot message other students
+            rev_role = getattr(receiver, 'userprofile', None)
+            rev_role_str = rev_role.role if rev_role else ('admin' if receiver.is_superuser else 'student')
+            if role_str == 'student' and rev_role_str == 'student':
+                return JsonResponse({'error': 'Students cannot message other students'}, status=403)
+                
+            m = Message.objects.create(sender=user, receiver=receiver, content=content)
+            
+        return JsonResponse({
+            'status': 'success',
+            'message': {
+                'content': m.content,
+                'sent_at': timezone.localtime(m.sent_at).strftime('%b %d, %I:%M %p'),
+                'is_me': True
+            }
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Receiver not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def logout_user(request):
     logout(request)
@@ -571,7 +741,63 @@ def adviser_dashboard(request):
     }
     return render(request, 'core/adviser.html', context)
 
+@login_required(login_url='login')
+def messages_page(request):
+    """Shell view for the dedicated messaging page. Initial content loaded via AJAX."""
+    user = request.user
+    role = getattr(user, 'userprofile', None)
+    role_str = role.role if role else ('admin' if user.is_superuser else 'student')
+    
+    context = {
+        'role': role_str,
+        'user_name': f"{user.first_name} {user.last_name}".strip() or user.username,
+    }
+    return render(request, 'core/messages.html', context)
 
+
+
+@login_required(login_url='login')
+def api_send_message(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    import json as _json
+    try:
+        body = _json.loads(request.body)
+    except Exception:
+        body = request.POST
+        
+    receiver_id = body.get('receiver_id')
+    content = body.get('content', '').strip()
+    
+    if not receiver_id or not content:
+        return JsonResponse({'error': 'receiver_id and content are required'}, status=400)
+    
+    try:
+        receiver = User.objects.get(id=receiver_id)
+        # Security: Students cannot message other students
+        try:
+            sender_profile = request.user.userprofile
+            receiver_profile = receiver.userprofile
+            
+            if sender_profile.role == 'student' and receiver_profile.role == 'student':
+                 return JsonResponse({'error': 'Students cannot message other students.'}, status=403)
+        except UserProfile.DoesNotExist:
+            pass # Superusers might not have profile
+            
+        m = Message.objects.create(sender=request.user, receiver=receiver, content=content, is_read=False)
+        return JsonResponse({
+            'status': 'success',
+            'message': {
+                'id': m.id,
+                'content': m.content,
+                'sent_at': localtime(m.sent_at).strftime('%b %d, %Y %I:%M %p')
+            }
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Receiver not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required(login_url='login')
 def get_conversation(request, student_id):
@@ -1064,14 +1290,20 @@ def staff_get_conversation(request, contact_id):
 
 @login_required(login_url='login')
 def staff_send_message(request):
-    """Sends a staff-only message using StaffMessage model."""
+    """Sends a staff-only message using StaffMessage model. Supports JSON and POST."""
     from core.models import StaffMessage
     if not (request.user.is_superuser or request.user.userprofile.role in ['admin', 'adviser']):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     if request.method == 'POST':
-        receiver_id = request.POST.get('receiver_id')
-        content = request.POST.get('content', '').strip()
+        import json as _json
+        try:
+            body = _json.loads(request.body)
+        except Exception:
+            body = request.POST
+            
+        receiver_id = body.get('receiver_id')
+        content = body.get('content', '').strip()
         
         if not receiver_id or not content:
             return JsonResponse({'error': 'Missing fields'}, status=400)

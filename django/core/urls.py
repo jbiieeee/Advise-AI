@@ -28,10 +28,10 @@ urlpatterns = [
     path('api/enrollment/generate-code/', views.generate_enrollment_code, name='generate_enrollment_code'),
     path('api/enrollment/request-subject/', views.request_subject_enrollment, name='request_subject_enrollment'),
     path('api/enrollment/process/', views.process_enrollment_request, name='process_enrollment_request'),
-    # ── Staff Messaging & Notifications ───────────────────────
-    path('api/staff/contacts/', views.staff_get_contacts, name='staff_get_contacts'),
-    path('api/staff/conversation/<int:contact_id>/', views.staff_get_conversation, name='staff_get_conversation'),
-    path('api/staff/send/', views.staff_send_message, name='staff_send_message'),
+    # ── Unified Messaging APIs ───────────────────────
+    path('api/messages/v2/list/', views.api_messages_list, name='api_messages_list_v2'),
+    path('api/messages/thread/<int:contact_id>/', views.api_messages_thread, name='api_messages_thread'),
+    path('api/messages/send/', views.api_messages_send, name='api_messages_send'),
     path('api/notifications/system/', views.api_get_notifications, name='api_get_notifications'),
     path('api/analytics/sync/', views.api_analytics_sync, name='api_analytics_sync'),
     path('api/admin/active-sessions/', views.api_get_active_sessions, name='api_get_active_sessions'),
@@ -39,4 +39,5 @@ urlpatterns = [
 
     path('api/notifications/mark-read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
     path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
+    path('messages/', views.messages_page, name='messages_page'),
 ]

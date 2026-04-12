@@ -9,10 +9,21 @@
                 <p class="text-xs text-gray-600">AI Advising system</p>
             </div>
         </div>
-        <div class="flex gap-3">
-            <a href="{% url 'about' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">About</a>
-            <a href="{% url 'login' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">Login</a>
-            <a href="{% url 'register' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 shadow-md text-white">Get Started</a>
+        <div class="flex gap-3 items-center">
+            {% if user.is_authenticated %}
+                <span class="text-sm font-medium text-gray-700 hidden md:block">Hello, {{ user.first_name|default:user.username }}</span>
+                <a href="{% if user.userprofile.role == 'student' %}{% url 'student_dashboard' %}{% elif user.userprofile.role == 'adviser' %}{% url 'adviser_dashboard' %}{% else %}{% url 'admin_dashboard' %}{% endif %}" 
+                   class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">Dashboard</a>
+                <a href="{% url 'profile' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">Profile</a>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'about' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">About</a>
+                <a href="{% url 'login' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 hover:text-light-blue">Login</a>
+                <a href="{% url 'register' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 shadow-md text-white">Get Started</a>
+            {% endif %}
         </div>
     </div>
 </header>
