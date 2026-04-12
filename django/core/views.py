@@ -881,6 +881,8 @@ def admin_dashboard(request):
                         )
                     
                 messages.success(request, f"Approved enrollment for {enr.student.first_name} - {enr.subject.code}")
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'message': f"Approved: {enr.subject.code}"})
             except TermEnrollment.DoesNotExist:
                 messages.error(request, "Enrollment request not found.")
                 
@@ -899,8 +901,71 @@ def admin_dashboard(request):
                     p.save()
                     
                 messages.warning(request, f"Declined enrollment for {enr.student.first_name} - {enr.subject.code}")
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'message': f"Declined: {enr.subject.code}"})
             except TermEnrollment.DoesNotExist:
                 messages.error(request, "Enrollment request not found.")
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'error', 'message': "Request not found."})
+
+        elif action == 'admin_approve_enrollment_bulk':
+            code_id = request.POST.get('enrollment_code_id')
+            from .models import TermEnrollment, StudentCurriculum
+            try:
+                pending_batch = TermEnrollment.objects.filter(enrollment_code_id=code_id, status='pending')
+                if not pending_batch.exists():
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'status': 'error', 'message': "No pending requests for this code."})
+                
+                count = 0
+                student_profile = None
+                for enr in pending_batch:
+                    enr.status = 'approved'
+                    enr.save()
+                    StudentCurriculum.objects.update_or_create(
+                        student=enr.student, subject=enr.subject,
+                        defaults={'status': 'in_progress', 'term_taken': enr.term_label}
+                    )
+                    student_profile = enr.student.userprofile
+                    count += 1
+                
+                if student_profile and not TermEnrollment.objects.filter(student=student_profile.user, status='pending').exists():
+                    student_profile.enrollment_status = 'enrolled'
+                    student_profile.save()
+                    
+                msg = f"Successfully approved {count} subjects."
+                messages.success(request, msg)
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'message': msg})
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'error', 'message': str(e)})
+                messages.error(request, str(e))
+
+        elif action == 'admin_decline_enrollment_bulk':
+            code_id = request.POST.get('enrollment_code_id')
+            from .models import TermEnrollment
+            try:
+                pending_batch = TermEnrollment.objects.filter(enrollment_code_id=code_id, status='pending')
+                count = pending_batch.count()
+                pending_batch.update(status='declined')
+                
+                # Update profile if no more pending
+                for enr in pending_batch:
+                    if not TermEnrollment.objects.filter(student=enr.student, status='pending').exists():
+                        p = enr.student.userprofile
+                        p.enrollment_status = 'not_enrolled'
+                        p.save()
+                    break # Only need to check once per batch/student
+                    
+                msg = f"Declined {count} enrollment requests."
+                messages.warning(request, msg)
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'message': msg})
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'error', 'message': str(e)})
+                messages.error(request, str(e))
 
         elif action == 'add_staff':
             name = request.POST.get('name')
@@ -1011,20 +1076,36 @@ def admin_dashboard(request):
     admins = staff_users.filter(role='admin')
     students = UserProfile.objects.filter(role='student')
     from .models import TermEnrollment
-    pending_requests = TermEnrollment.objects.filter(status='pending').select_related('student', 'subject', 'enrollment_code')
+    all_pending = TermEnrollment.objects.filter(status='pending').select_related('student', 'subject', 'enrollment_code')
     
+    # Grouping pending requests by code
+    grouped_pending = {}
+    for req in all_pending:
+        code_id = req.enrollment_code.id if req.enrollment_code else 'manual'
+        if code_id not in grouped_pending:
+            grouped_pending[code_id] = {
+                'code': req.enrollment_code,
+                'student': req.student,
+                'term': req.term_label,
+                'requests': []
+            }
+        grouped_pending[code_id]['requests'].append(req)
+    
+    pending_groups = list(grouped_pending.values())
+
     context = {
         'staff_users': staff_users,
         'advisers': advisers,
         'admins': admins,
         'students': students,
-        'pending_requests': pending_requests,
+        'pending_requests': all_pending,
+        'pending_groups': pending_groups,
         'total_students': students.count(),
         'total_staff': staff_users.count(),
         'online_users': User.objects.filter(is_active=True).count(),
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
-        'total_pending': pending_requests.count(),
+        'total_pending': all_pending.count(),
         'avg_response_time': calculate_avg_response_time(),
         
         # New Analytics Data
