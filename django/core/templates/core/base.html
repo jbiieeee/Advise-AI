@@ -79,14 +79,29 @@
                           }
                           notifList.innerHTML = '';
                           data.notifications.forEach(n => {
+                              // Determine link based on content or type
+                              let link = "{% url 'messages_page' %}";
+                              if (n.title.toLowerCase().includes('enrollment')) {
+                                  link = "{% url 'admin_dashboard' %}?tab=enrollments";
+                              } else if (n.title.toLowerCase().includes('help') || n.title.toLowerCase().includes('response')) {
+                                  {% if role == 'student' %}
+                                  link = "{% url 'messages_page' %}";
+                                  if (n.sender_id) link += `?select_id=${n.sender_id}`;
+                                  {% else %}
+                                  link = "{% url 'admin_dashboard' %}?tab=help-forms";
+                                  {% endif %}
+                              } else if (n.sender_id) {
+                                  link += `?select_id=${n.sender_id}`;
+                              }
+
                               notifList.insertAdjacentHTML('beforeend', `
-                                  <div class="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 border-light-blue cursor-default">
+                                  <a href="${link}" class="block p-3 hover:bg-gray-100 transition-colors border-l-4 border-light-blue no-underline text-inherit">
                                       <div class="flex justify-between items-start mb-1">
-                                          <p class="text-sm font-semibold text-gray-900">${n.title}</p>
-                                          <span class="text-[10px] text-gray-400">${n.time}</span>
+                                          <p class="text-sm font-bold text-navy">${n.title}</p>
+                                          <span class="text-[9px] text-gray-400 font-medium">${n.time}</span>
                                       </div>
-                                      <p class="text-xs text-gray-600 truncate">${n.content}</p>
-                                  </div>
+                                      <p class="text-[11px] text-gray-600 truncate">${n.content}</p>
+                                  </a>
                               `);
                           });
                       })

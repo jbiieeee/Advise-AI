@@ -56,7 +56,8 @@ class FormSubmission(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    adviser_notes = models.TextField(blank=True, null=True)
+    adviser_notes = models.TextField(blank=True, null=True, help_text='Internal notes')
+    admin_response = models.TextField(blank=True, null=True, help_text='Official response seen by student')
     submitted_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -108,6 +109,7 @@ class Notification(models.Model):
         ('new_student', 'New Student Account'),
         ('enrollment_code_redeemed', 'Enrollment Code Redeemed'),
         ('enrollment_approved', 'Enrollment Approved'),
+        ('help_response', 'Help/Report Responded'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)

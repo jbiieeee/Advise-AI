@@ -158,19 +158,22 @@
         </div>
 
         <!-- Chat Input -->
-        <div class="p-4 border-t border-gray-100">
+        <div id="chat-input-area" class="p-4 border-t border-gray-100">
             <form id="message-form" class="flex gap-2 items-end">
                 <div class="flex-grow relative">
                     <textarea id="message-input" rows="1" placeholder="Type your message here..." 
-                              class="w-full pl-4 pr-12 py-3 bg-white rounded-2xl text-sm transition-all resize-none shadow-sm no-scrollbar"></textarea>
+                               class="w-full pl-4 pr-12 py-3 bg-white rounded-2xl text-sm transition-all resize-none shadow-sm no-scrollbar"></textarea>
                     <button type="button" class="absolute right-3 bottom-3" style="color: #0E2A47; opacity: 0.4;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                     </button>
                 </div>
-                <button type="submit" class="send-btn-custom p-3.5 flex items-center justify-center transition-all">
+                <button type="submit" id="send-button" class="send-btn-custom p-3.5 flex items-center justify-center transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
             </form>
+            <div id="restriction-notice" class="hidden p-3 bg-red-50 border border-red-100 rounded-xl text-[11px] text-red-600 font-bold text-center uppercase tracking-widest animate-pulse">
+                One-Way Channel: Replies are restricted for official Admin notices.
+            </div>
         </div>
     </main>
 </div>
@@ -178,6 +181,7 @@
 
 {% block extra_scripts %}
 <script>
+    const userRole = '{{ role }}';
     let currentContactId = null;
     let currentType = 'standard';
     let currentFilterType = 'all'; // 'all' or 'staff'
@@ -191,6 +195,7 @@
     const activeName = document.getElementById('active-name');
     const activeAvatar = document.getElementById('active-avatar');
     const emptyState = document.getElementById('empty-state');
+    let hasAutoSelected = false;
 
     // Auto-expand textarea
     messageInput.addEventListener('input', function() {
@@ -247,7 +252,7 @@
                     const isActive = currentContactId == c.user_id && currentType == c.type;
                     html += `
                         <div class="contact-card p-4 flex gap-4 cursor-pointer hover:bg-gray-50 transition-all ${isActive ? 'active-contact' : ''}" 
-                             onclick="loadConversation(${c.user_id}, '${c.type}', '${c.name.replace(/'/g, "\\'")}')">
+                             onclick="loadConversation(${c.user_id}, '${c.type}', '${c.name.replace(/'/g, "\\'")}', false, ${c.is_admin || false})">
                             <div class="relative flex-shrink-0">
                                 <div class="size-12 rounded-full bg-gradient-to-br from-navy/10 to-light-blue/10 flex items-center justify-center text-navy font-bold text-lg overflow-hidden border border-navy/5">
                                     ${c.name.charAt(0)}
@@ -263,7 +268,7 @@
                                     <span class="text-[10px] text-gray-400">${c.last_message_time || ''}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    ${c.type === 'staff' ? '<span class="staff-badge">Internal</span>' : (c.is_staff ? '<span class="staff-badge">Staff</span>' : '<span class="student-badge">Student</span>')}
+                                    ${c.type === 'staff' ? '<span class="staff-badge">Internal</span>' : (c.is_admin ? '<span class="staff-badge" style="background:#EEF2FF; color:#4338CA;">Admin</span>' : (c.is_staff ? '<span class="staff-badge">Staff</span>' : '<span class="student-badge">Student</span>'))}
                                     <p class="text-xs text-gray-500 truncate">${c.last_message}</p>
                                 </div>
                             </div>
@@ -272,15 +277,44 @@
                 });
             }
             contactsList.innerHTML = html;
+            
+            // Handle deep-linking via select_id
+            if (!hasAutoSelected) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const selectId = urlParams.get('select_id');
+                if (selectId) {
+                    const target = data.contacts.find(c => c.user_id == selectId);
+                    if (target) {
+                        hasAutoSelected = true; // Mark as selected to avoid recursion
+                        // Switch to the correct channel if needed
+                        if (target.type === 'staff' && currentFilterType !== 'staff') {
+                            setFilter('staff');
+                        } else {
+                            loadConversation(target.user_id, target.type, target.name);
+                        }
+                    }
+                }
+            }
         });
     }
 
-    function loadConversation(contactId, type, name, appendOnly = false) {
+    function loadConversation(contactId, type, name, appendOnly = false, isAdminContact = false) {
         currentContactId = contactId;
         currentType = type;
         activeName.textContent = name;
         activeAvatar.textContent = name.charAt(0);
         if (emptyState) emptyState.remove();
+
+        // Handle restriction for students messaging admins
+        const form = document.getElementById('message-form');
+        const notice = document.getElementById('restriction-notice');
+        if (userRole === 'student' && isAdminContact) {
+            form.classList.add('hidden');
+            notice.classList.remove('hidden');
+        } else {
+            form.classList.remove('hidden');
+            if (notice) notice.classList.add('hidden');
+        }
 
         // Update active class immediately for UI responsiveness
         document.querySelectorAll('.contact-card').forEach(c => c.classList.remove('active-contact'));
@@ -326,7 +360,6 @@
             loadConversation(currentContactId, currentType, activeName.textContent, true);
         }, 5000);
     }
-
     function setFilter(type) {
         currentFilterType = type;
         const buttons = document.querySelectorAll('.channel-btn');
@@ -334,9 +367,12 @@
             b.classList.remove('bg-navy', 'text-white', 'shadow-md');
             b.classList.add('bg-white', 'text-gray-600');
         });
-        const activeBtn = event.target;
-        activeBtn.classList.add('bg-navy', 'text-white', 'shadow-md');
-        activeBtn.classList.remove('bg-white', 'text-gray-600');
+        // Find the button (handle programmatic selection if event is missing)
+        const activeBtn = (window.event && window.event.target) || document.querySelector(`.channel-btn[onclick*="'${type}'"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-navy', 'text-white', 'shadow-md');
+            activeBtn.classList.remove('bg-white', 'text-gray-600');
+        }
         loadContacts();
     }
 

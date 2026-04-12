@@ -151,11 +151,21 @@ def api_messages_list(request):
     
     # 1. Standard Messaging Partners (Students <-> Advisers/Admins)
     if role_str == 'student':
-        assigned = role.assigned_adviser if role else None
-        if assigned:
-            std_candidates = User.objects.filter(id=assigned.id)
-        else:
+        # Broaden candidates: assigned adviser PLUS anyone they have message history with
+        assigned_id = role.assigned_adviser_id if role and role.assigned_adviser else None
+        
+        # Get unique IDs of everyone they've had a conversation with
+        msg_partners = set(Message.objects.filter(sender=user).values_list('receiver_id', flat=True)) | \
+                       set(Message.objects.filter(receiver=user).values_list('sender_id', flat=True))
+        
+        if assigned_id:
+            msg_partners.add(assigned_id)
+        
+        if not msg_partners:
+            # Fallback to admins/advisers if no history and no adviser (e.g. brand new student)
             std_candidates = User.objects.filter(Q(userprofile__role__in=['adviser', 'admin']) | Q(is_superuser=True)).exclude(id=user.id)
+        else:
+            std_candidates = User.objects.filter(id__in=msg_partners)
     else:
         # Staff see all students
         std_candidates = User.objects.filter(userprofile__role='student')
@@ -165,6 +175,7 @@ def api_messages_list(request):
             (Q(sender=user, receiver=c_user) | Q(sender=c_user, receiver=user))
         ).order_by('-sent_at').first()
         unread = Message.objects.filter(sender=c_user, receiver=user, is_read=False).count()
+        is_admin = c_user.is_superuser or (hasattr(c_user, 'userprofile') and c_user.userprofile.role == 'admin')
         contacts.append({
             'user_id': c_user.id,
             'name': f"{c_user.first_name} {c_user.last_name}".strip() or c_user.username,
@@ -172,7 +183,8 @@ def api_messages_list(request):
             'last_message_time': last_msg.sent_at if last_msg else None,
             'unread_count': unread,
             'type': 'standard',
-            'is_staff': c_user.is_superuser or (hasattr(c_user, 'userprofile') and c_user.userprofile.role in ['adviser', 'admin'])
+            'is_staff': c_user.is_superuser or (hasattr(c_user, 'userprofile') and c_user.userprofile.role in ['adviser', 'admin']),
+            'is_admin': is_admin
         })
 
     # 2. Staff Messaging Partners (Staff <-> Staff)
@@ -282,13 +294,17 @@ def api_messages_send(request):
                 return JsonResponse({'error': 'Cannot send staff messages to students'}, status=400)
             
             m = StaffMessage.objects.create(sender=user, receiver=receiver, content=content)
-        else:
             # Standard Message
             # Security: Students cannot message other students
             rev_role = getattr(receiver, 'userprofile', None)
             rev_role_str = rev_role.role if rev_role else ('admin' if receiver.is_superuser else 'student')
+            
             if role_str == 'student' and rev_role_str == 'student':
                 return JsonResponse({'error': 'Students cannot message other students'}, status=403)
+            
+            # Security: Admin -> Student is one-way. Student cannot message Admin.
+            if role_str == 'student' and rev_role_str == 'admin':
+                return JsonResponse({'error': 'Replies restricted: This is a one-way notice channel. Please use the Help/Report form for inquiries.'}, status=403)
                 
             m = Message.objects.create(sender=user, receiver=receiver, content=content)
             
@@ -605,23 +621,7 @@ def adviser_dashboard(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'update_form':
-            form_id = request.POST.get('form_id')
-            status = request.POST.get('status')
-            adviser_notes = request.POST.get('adviser_notes')
-            if form_id and status:
-                try:
-                    form = FormSubmission.objects.get(id=form_id)
-                    form.status = status
-                    if adviser_notes:
-                        form.adviser_notes = adviser_notes
-                        Message.objects.create(sender=user, receiver=form.student, content=f"Response to '{form.title}': {adviser_notes}")
-                    form.save()
-                    messages.success(request, f'Form {status} successfully.')
-                except FormSubmission.DoesNotExist:
-                    messages.error(request, 'Form not found.')
-                    
-        elif action == 'update_appointment':
+        if action == 'update_appointment':
             apt_id = request.POST.get('apt_id')
             status = request.POST.get('status')
             adviser_notes = request.POST.get('adviser_notes')
@@ -675,7 +675,6 @@ def adviser_dashboard(request):
                     
         return redirect('adviser_dashboard')
 
-    pending_forms = FormSubmission.objects.filter(status__in=['pending', 'pending-review']).order_by('-submitted_at')
     pending_appointments = Appointment.objects.filter(status='pending').order_by('date_time')
     confirmed_appointments = Appointment.objects.filter(status='confirmed', adviser=user).order_by('date_time')
     my_students = UserProfile.objects.filter(Q(role='student') & (Q(assigned_adviser__isnull=True) | Q(assigned_adviser=user)))
@@ -723,12 +722,10 @@ def adviser_dashboard(request):
     staff_list = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True)).exclude(id=user.id)
 
     context = {
-        'forms': pending_forms,
         'pending_appointments': pending_appointments,
         'confirmed_appointments': confirmed_appointments,
         'my_students': my_students,
         'total_advisees': my_students.count(),
-        'pending_inquiries': pending_forms.count(),
         'appointments_today': pending_appointments.count(),
         'student_threads': student_threads,
         'total_unread': total_unread,
@@ -846,6 +843,7 @@ def get_conversation(request, student_id):
 
 @login_required(login_url='login')
 def admin_dashboard(request):
+    user = request.user
     if not request.user.is_superuser and request.user.userprofile.role != 'admin':
         messages.error(request, "Access denied.")
         return redirect('landing')
@@ -974,19 +972,19 @@ def admin_dashboard(request):
             role = request.POST.get('role') # admin or adviser
             
             if not User.objects.filter(username=email).exists():
-                user = User.objects.create_user(username=email, email=email, password=password)
+                new_user = User.objects.create_user(username=email, email=email, password=password)
                 if name:
                     parts = name.split()
-                    user.first_name = parts[0]
+                    new_user.first_name = parts[0]
                     if len(parts) > 1:
-                        user.last_name = " ".join(parts[1:])
+                        new_user.last_name = " ".join(parts[1:])
                 
                 if role == 'admin':
-                    user.is_superuser = True
-                    user.is_staff = True
-                user.save()
+                    new_user.is_superuser = True
+                    new_user.is_staff = True
+                new_user.save()
                 
-                UserProfile.objects.create(user=user, role=role)
+                UserProfile.objects.create(user=new_user, role=role)
                 messages.success(request, f'{role.capitalize()} account created successfully.')
             else:
                 messages.error(request, 'Email already registered.')
@@ -999,15 +997,15 @@ def admin_dashboard(request):
             program = request.POST.get('program', 'BSIT')
             
             if not User.objects.filter(username=email).exists():
-                user = User.objects.create_user(username=email, email=email, password=password)
+                new_user = User.objects.create_user(username=email, email=email, password=password)
                 if name:
                     parts = name.split()
-                    user.first_name = parts[0]
+                    new_user.first_name = parts[0]
                     if len(parts) > 1:
-                        user.last_name = " ".join(parts[1:])
-                user.save()
+                        new_user.last_name = " ".join(parts[1:])
+                new_user.save()
                 
-                UserProfile.objects.create(user=user, role='student', student_id=student_id, program=program, enrollment_status='enrolled')
+                UserProfile.objects.create(user=new_user, role='student', student_id=student_id, program=program, enrollment_status='enrolled')
                 messages.success(request, 'Student account created successfully.')
             else:
                 messages.error(request, 'Email already registered.')
@@ -1066,8 +1064,36 @@ def admin_dashboard(request):
                 ]
                 Notification.objects.bulk_create(notifs)
                 messages.success(request, f'Broadcast sent to {all_users.count()} users.')
-            else:
-                messages.error(request, 'Broadcast message cannot be empty.')
+        
+        elif action == 'admin_respond_form':
+            form_id = request.POST.get('form_id')
+            status = request.POST.get('status')
+            admin_response = request.POST.get('admin_response', '').strip()
+            if form_id and status:
+                try:
+                    form = FormSubmission.objects.get(id=form_id)
+                    form.status = status
+                    form.admin_response = admin_response
+                    form.save()
+                    
+                    # Auto-message to student
+                    if admin_response:
+                        Message.objects.create(
+                            sender=user, 
+                            receiver=form.student, 
+                            content=f"[RESPONSE TO YOUR {form.title.upper()}]: {admin_response}"
+                        )
+                    
+                    # Notification to student
+                    Notification.objects.create(
+                        user=form.student,
+                        event_type='help_response',
+                        message=f'Admin has responded to your request: "{form.title}".'
+                    )
+                    
+                    messages.success(request, f'Form {status} successfully.')
+                except FormSubmission.DoesNotExist:
+                    messages.error(request, 'Form not found.')
                 
         return redirect('admin_dashboard')
 
@@ -1106,6 +1132,7 @@ def admin_dashboard(request):
         'total_forms': FormSubmission.objects.count(),
         'total_appointments': Appointment.objects.count(),
         'total_pending': all_pending.count(),
+        'pending_forms': FormSubmission.objects.filter(status='pending').order_by('-submitted_at'),
         'avg_response_time': calculate_avg_response_time(),
         
         # New Analytics Data
@@ -1557,17 +1584,36 @@ def get_latest_notifications(request):
     notifications = []
     
     if role == 'student':
-        staff = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True)) + \
+        # 1. Real Notifications from the Notification model
+        from core.models import Notification
+        notifs = Notification.objects.filter(user=user, is_read=False, event_type='help_response').order_by('-created_at')[:5]
+        for n in notifs:
+            # Try to find the last admin message to get a sender_id
+            last_reply = Message.objects.filter(receiver=user, content__icontains="RESPONSE TO YOUR").order_by('-sent_at').first()
+            sender_id = last_reply.sender_id if last_reply else None
+            notifications.append({
+                'id': f"notif_{n.id}",
+                'title': 'Help/Report Responded',
+                'content': n.message,
+                'time': n.created_at.strftime('%b %d, %H:%M'),
+                'sender_id': sender_id
+            })
+
+        # 2. Unread Messages acting as notifications
+        staff = list(UserProfile.objects.filter(role__in=['adviser', 'admin']).values_list('user_id', flat=True)) + \
                 list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
+        
         msgs = Message.objects.filter(receiver=user, sender__in=staff, is_read=False).order_by('-sent_at')[:5]
         for m in msgs:
+            is_response = "RESPONSE TO YOUR" in m.content.upper()
             notifications.append({
-                'id': m.id,
-                'title': f'New message from Adviser {m.sender.first_name or m.sender.username}',
+                'id': f"msg_{m.id}",
+                'title': 'Form Response Received' if is_response else f'Message from {m.sender.first_name or m.sender.username}',
                 'content': m.content[:50] + ('...' if len(m.content) > 50 else ''),
-                'time': m.sent_at.strftime('%b %d, %H:%M')
+                'time': m.sent_at.strftime('%b %d, %H:%M'),
+                'sender_id': m.sender_id
             })
-            
+    
     elif role in ['adviser', 'admin']:
         staff = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True)) + \
                 list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
@@ -1817,6 +1863,13 @@ def generate_enrollment_code(request):
         term_label=term_label,
     )
     enc.approved_subjects.set(filtered_subjects)
+
+    # Auto-Send to Student via Message
+    Message.objects.create(
+        sender=request.user,
+        receiver=student,
+        content=f"Hello! I have generated your Enrollment Code for {term_label}: {enc.code}. You can now use this to redeem your subjects in your dashboard."
+    )
 
     resp = {
         'status': 'success',

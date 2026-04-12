@@ -139,8 +139,8 @@
               </svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_inquiries|default:"0" }}</h3>
-          <p class="text-sm text-gray-600 font-medium">Pending Inquiries</p>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_appointments.count|default:"0" }}</h3>
+          <p class="text-sm text-gray-600 font-medium">Pending Appointments</p>
         </div>
       </button>
 
@@ -176,7 +176,7 @@
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
             <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
           </svg>
-          Student Inquiries
+          Student Appointments
         </button>
         
         <!-- Staff Messaging (Staff Management) - MOVED HIGHER -->
@@ -249,27 +249,24 @@
 
         <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Student Inquiries &amp; Problems</h3>
-            <p class="text-sm text-muted-foreground">Respond to student questions and resolve their concerns</p>
+            <h3 class="font-semibold leading-none tracking-tight text-2xl">Pending Student Appointments</h3>
+            <p class="text-sm text-muted-foreground">Manage and respond to student advising requests</p>
           </div>
           <div class="p-6 pt-0">
             <div class="space-y-4">
 
-              {% for form in forms %}
-              <!-- Inquiry -->
+              {% for apt in pending_appointments %}
+              <!-- Appointment Request -->
               <div
                 class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
                 <div class="p-6 pt-6">
                   <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
-                        <h4 class="font-semibold text-lg">{{ form.title }}</h4>
+                        <h4 class="font-semibold text-lg">{{ apt.purpose }}</h4>
                         <div
                           class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">
-                          medium</div>
-                        <div
-                          class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-100">
-                          {{ form.status }}</div>
+                          Appointment</div>
                       </div>
                       <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
                         <span class="flex items-center gap-1">
@@ -279,7 +276,7 @@
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                             <circle cx="12" cy="7" r="4" />
                           </svg>
-                          {{ form.student.get_full_name|default:form.student.username }} ({{ form.student.userprofile.student_id|default:"-" }})
+                          {{ apt.student.get_full_name|default:apt.student.username }} ({{ apt.student.userprofile.student_id|default:"-" }})
                         </span>
                         <span class="flex items-center gap-1">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -288,54 +285,25 @@
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
                           </svg>
-                          {{ form.submitted_at|date:"Y-m-d h:i A" }}
+                          {{ apt.date_time|date:"F j, Y, h:i A" }}
                         </span>
                       </div>
-                      <p class="text-gray-700 mb-4 p-3 bg-light-gray rounded-lg">
-                        {{ form.description }}
-                      </p>
 
-                      <!-- JS Control Section -->
-                      <div class="inquiry-controls" data-id="INQ-{{ form.id }}">
-                        <div class="flex gap-2 default-actions">
-                          <button
-                            class="respond-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-9 px-3 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">Respond</button>
-                          <!-- Quick message link to this student -->
-                          <button
-                            class="open-chat-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-light-blue text-light-blue hover:bg-blue-50"
-                            data-student-id="{{ form.student.id }}"
-                            data-student-name="{{ form.student.first_name }} {{ form.student.last_name }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round" class="size-3.5 mr-1.5">
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                            Message Student
-                          </button>
-                        </div>
-                        <form
-                          class="response-area hidden space-y-3 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200"
-                          method="POST" action="{% url 'adviser_dashboard' %}">
+                      <!-- Control Section -->
+                      <div class="appointment-controls" data-id="APT-{{ apt.id }}">
+                        <form method="POST" action="{% url 'adviser_dashboard' %}" class="space-y-3">
                           {% csrf_token %}
-                          <input type="hidden" name="action" value="update_form">
-                          <input type="hidden" name="form_id" value="{{ form.id }}">
-                          <input type="hidden" name="status" value="approved">
-                          <textarea name="adviser_notes"
-                            class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="Type your response to the student..." rows="4"></textarea>
+                          <input type="hidden" name="action" value="update_appointment">
+                          <input type="hidden" name="apt_id" value="{{ apt.id }}">
+                          <input type="hidden" name="status" value="confirmed">
+                          
                           <div class="flex gap-2">
+                            <input type="text" name="adviser_notes" placeholder="Meeting link or additional notes..."
+                              class="flex-1 min-h-[40px] rounded-md border border-input bg-gray-50 px-3 py-2 text-sm">
                             <button type="submit"
-                              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 px-4 py-2 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 text-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="size-4 mr-2">
-                                <path d="m22 2-7 20-4-9-9-4Z" />
-                                <path d="M22 2 11 13" />
-                              </svg>
-                              Send Response &amp; Mark Resolved
+                              class="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-11 px-6 bg-gradient-to-r from-navy to-light-blue text-white hover:opacity-90 shadow-md">
+                              Approve &amp; Notify
                             </button>
-                            <button type="button"
-                              class="cancel-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-white h-10 px-4 py-2 text-black hover:bg-light-gray">Cancel</button>
                           </div>
                         </form>
                       </div>
@@ -345,7 +313,7 @@
                 </div>
               </div>
               {% empty %}
-              <div class="p-8 text-center text-gray-500">No pending inquiries at the moment.</div>
+              <div class="p-8 text-center text-gray-500">No pending appointments at the moment.</div>
               {% endfor %}
 
             </div>
