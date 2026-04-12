@@ -2090,8 +2090,8 @@ def chatbot_api(request):
         must_take_str = ", ".join([f"{s.code} ({s.title})" for s in recommended]) if recommended else "No specific recommendations at this time. Maintain your current pace."
 
         # Configure Gemini
-        api_key = "AIzaSyAKHHn4d1Gd0qAPoe3Jdlh5EKCr0HeNAgE"
-        genai.configure(api_key=api_key)
+        from django.conf import settings
+        genai.configure(api_key=settings.GEMINI_API_KEY)
 
         # System Instruction
         system_instruction = (
