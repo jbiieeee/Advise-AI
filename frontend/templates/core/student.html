@@ -700,24 +700,46 @@
           <div class="p-6 pt-0 space-y-3">
             {% for apt in student_appointments %}
             {% if apt.status == 'pending' or apt.status == 'confirmed' %}
-            <div class="p-3 border rounded-lg bg-light-gray flex items-start gap-3">
-              <div class="bg-white p-2 rounded-full border shadow-sm shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  class="size-4 text-light-blue">
-                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                  <line x1="16" x2="16" y1="2" y2="6" />
-                  <line x1="8" x2="8" y1="2" y2="6" />
-                  <line x1="3" x2="21" y1="10" y2="10" />
-                </svg>
+            <div class="p-3 border rounded-lg bg-light-gray flex flex-col gap-3">
+              <div class="flex items-start gap-3">
+                <div class="bg-white p-2 rounded-full border shadow-sm shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    class="size-4 text-light-blue">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="font-semibold text-sm text-gray-900 leading-tight">{{ apt.purpose }}</p>
+                  <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
+                  <span
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                    {{ apt.status }}
+                  </span>
+                </div>
               </div>
-              <div>
-                <p class="font-semibold text-sm text-gray-900">{{ apt.purpose }}</p>
-                <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
-                <span
-                  class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                  {{ apt.status }}
-                </span>
+              
+              {% if apt.status == 'confirmed' %}
+              <div class="flex flex-col gap-2 pt-2 border-t border-gray-200/50">
+                {% if apt.meeting_link %}
+                <a href="{{ apt.meeting_link }}" target="_blank" class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-light-blue/20 text-xs font-bold text-light-blue hover:bg-blue-50 transition-all shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                  Join Google Meet
+                </a>
+                {% endif %}
+                <button onclick="addToGoogleCalendar({
+                  purpose: '{{ apt.purpose|escapejs }}',
+                  date_time: '{{ apt.date_time|date:"c" }}',
+                  meeting_link: '{{ apt.meeting_link|default:''|escapejs }}',
+                  notes: '{{ apt.adviser_notes|default:''|escapejs }}'
+                })" class="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-500 hover:text-navy transition-colors uppercase tracking-wider">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Z"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="m9 16 2 2 4-4"/></svg>
+                  Sync to Calendar
+                </button>
               </div>
+              {% endif %}
             </div>
             {% endif %}
             {% empty %}
@@ -862,18 +884,40 @@
                 </span>
               </div>
 
-              {% if apt.adviser_notes %}
+              {% if apt.adviser_notes or apt.meeting_link %}
               <div
-                class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex gap-2 items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="size-5 shrink-0 text-blue-500">
-                  <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
-                </svg>
-                <div>
-                  <p class="font-semibold text-blue-900 mb-1">Adviser's Message:</p>
-                  <p>{{ apt.adviser_notes }}</p>
+                class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded text-sm text-gray-700 flex flex-col gap-3">
+                <div class="flex gap-2 items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-5 shrink-0 text-blue-500">
+                    <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+                  </svg>
+                  <div>
+                    <p class="font-semibold text-blue-900 mb-1">Adviser's Message:</p>
+                    <p>{{ apt.adviser_notes|default:"Appointment confirmed. Please see details below." }}</p>
+                  </div>
                 </div>
+
+                {% if apt.meeting_link %}
+                <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                   <div class="p-2 bg-green-100 rounded-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-700"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                   </div>
+                   <div class="flex-1 min-w-0">
+                      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Meeting Link</p>
+                      <a href="{{ apt.meeting_link }}" target="_blank" class="text-sm font-bold text-light-blue truncate block hover:underline">{{ apt.meeting_link }}</a>
+                   </div>
+                   <button onclick="addToGoogleCalendar({
+                      purpose: '{{ apt.purpose|escapejs }}',
+                      date_time: '{{ apt.date_time|date:"c" }}',
+                      meeting_link: '{{ apt.meeting_link|default:''|escapejs }}',
+                      notes: '{{ apt.adviser_notes|default:''|escapejs }}'
+                   })" class="p-2 hover:bg-gray-100 rounded-full transition-colors" title="Sync to Google Calendar">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Z"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="m9 16 2 2 4-4"/></svg>
+                   </button>
+                </div>
+                {% endif %}
               </div>
               {% endif %}
             </div>
@@ -1328,6 +1372,22 @@
 
     // Load curriculum on start
     loadMyCurriculum();
+
+    window.addToGoogleCalendar = function(apt) {
+        const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
+        const title = encodeURIComponent(`Advising Session: ${apt.purpose}`);
+        
+        const start = new Date(apt.date_time).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const end = new Date(new Date(apt.date_time).getTime() + 30*60*1000).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        
+        // Make the link ultra-prominent in the description
+        const joinLink = apt.meeting_link ? `\n\n🔴 JOIN MEETING HERE: ${apt.meeting_link}` : '';
+        const details = encodeURIComponent(`Advising Appointment${joinLink}\n\nTopic: ${apt.purpose}\n\nNotes: ${apt.notes || 'None'}`);
+        const location = encodeURIComponent(apt.meeting_link || 'Online / Google Meet');
+        
+        const url = `${baseUrl}&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+        window.open(url, '_blank');
+    }
 
   });
 </script>

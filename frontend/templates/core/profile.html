@@ -82,6 +82,15 @@
               </select>
             </div>
             {% endif %}
+
+            {% if role == 'adviser' %}
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">Default Meeting Link (GMeet)</label>
+              <input type="url" name="meeting_link" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-light-blue" 
+                     value="{{ user.userprofile.meeting_link|default:'' }}" 
+                     placeholder="https://meet.google.com/xxx-xxxx-xxx">
+            </div>
+            {% endif %}
           </div>
           <p class="text-[12px] text-gray-500 mt-1">Updating your email will also alter your login username.</p>
 

@@ -638,7 +638,19 @@ def adviser_dashboard(request):
                             sp.save()
                     if adviser_notes:
                         apt.adviser_notes = adviser_notes
-                        Message.objects.create(sender=user, receiver=apt.student, content=f"Appointment Update ({apt.purpose}): {adviser_notes}")
+                    
+                    meeting_link = request.POST.get('meeting_link')
+                    if meeting_link:
+                        apt.meeting_link = meeting_link
+                        
+                    if adviser_notes or meeting_link:
+                        msg_content = f"Appointment Update ({apt.purpose}): "
+                        if adviser_notes:
+                            msg_content += f"{adviser_notes} "
+                        if meeting_link:
+                            msg_content += f"\n\nMeeting link: {meeting_link}"
+                        Message.objects.create(sender=user, receiver=apt.student, content=msg_content.strip())
+                        
                     apt.save()
                     messages.success(request, f'Appointment {status} successfully.')
                 except Appointment.DoesNotExist:
@@ -1259,6 +1271,12 @@ def profile_view(request):
                     user.userprofile.program = program
                     user.userprofile.save()
                     messages.success(request, f'Degree program set to {program}.')
+            
+            if role == 'adviser':
+                meeting_link = request.POST.get('meeting_link')
+                user.userprofile.meeting_link = meeting_link
+                user.userprofile.save()
+                messages.success(request, 'Profile meeting link updated.')
 
             return redirect('profile')
 

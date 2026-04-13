@@ -297,13 +297,38 @@
                           <input type="hidden" name="apt_id" value="{{ apt.id }}">
                           <input type="hidden" name="status" value="confirmed">
                           
-                          <div class="flex gap-2">
-                            <input type="text" name="adviser_notes" placeholder="Meeting link or additional notes..."
-                              class="flex-1 min-h-[40px] rounded-md border border-input bg-gray-50 px-3 py-2 text-sm">
-                            <button type="submit"
-                              class="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-11 px-6 bg-gradient-to-r from-navy to-light-blue text-white hover:opacity-90 shadow-md">
-                              Approve &amp; Notify
-                            </button>
+                          <div class="space-y-4 pt-4 border-t">
+                            <div class="relative group">
+                              <div class="absolute -top-2 left-4 px-2 bg-white text-[10px] font-black text-navy uppercase tracking-widest z-10">Adviser Comment / Message</div>
+                              <textarea name="adviser_notes" placeholder="e.g. Please be on time. I have reviewed your records."
+                                class="w-full min-h-[80px] p-4 pt-5 rounded-xl border border-gray-200 focus:border-light-blue outline-none transition-all text-sm bg-gray-50/30"></textarea>
+                            </div>
+
+                            <div class="relative group">
+                              <div class="absolute -top-2 left-4 px-2 bg-white text-[10px] font-black text-light-blue uppercase tracking-widest z-10">Meeting Link (Google Meet)</div>
+                              <div class="flex gap-2">
+                                <input type="url" name="meeting_link" id="magic-link-{{ apt.id }}" placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                                       value="{{ user.userprofile.meeting_link|default:'' }}"
+                                       class="flex-1 h-11 rounded-xl border border-gray-200 focus:border-light-blue outline-none px-4 text-sm bg-gray-50/30">
+                                <button type="button" onclick="useProfileLink('magic-link-{{ apt.id }}', '{{ user.userprofile.meeting_link|default:''|escapejs }}')"
+                                        class="px-4 py-2 bg-white border border-light-blue text-light-blue rounded-xl text-xs font-bold hover:bg-blue-50 transition-all flex items-center gap-2 shadow-sm whitespace-nowrap">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                  My Link
+                                </button>
+                                <a href="https://meet.google.com/new" target="_blank"
+                                   class="p-2.5 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl hover:text-navy hover:bg-gray-100 transition-all shadow-sm"
+                                   title="Create New Meeting on Google">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                </a>
+                              </div>
+                            </div>
+                            
+                            <div class="flex justify-end pt-2">
+                              <button type="submit"
+                                class="inline-flex items-center justify-center rounded-xl text-sm font-bold transition-all h-11 px-8 bg-gradient-to-r from-navy to-light-blue text-white hover:shadow-lg hover:-translate-y-0.5 shadow-md">
+                                Approve & Notify Student
+                              </button>
+                            </div>
                           </div>
                         </form>
                       </div>
@@ -402,17 +427,23 @@
                         {{ apt.status }}</div>
                     </td>
                     <td class="p-4 align-middle">
-                      <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="update_appointment">
-                        <input type="hidden" name="apt_id" value="{{ apt.id }}">
-                        <input type="text" name="adviser_notes" placeholder="Update details..."
-                          value="{{ apt.adviser_notes|default:'' }}" class="border rounded px-2 py-1 text-xs">
-                        <div class="flex gap-2">
-                          <button name="status" value="completed" type="submit"
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border h-8 px-2 bg-white hover:bg-light-gray">Complete</button>
-                        </div>
-                      </form>
+                      <div class="flex flex-col gap-2">
+                         {% if apt.meeting_link %}
+                         <a href="{{ apt.meeting_link }}" target="_blank" class="text-xs font-bold text-light-blue hover:underline flex items-center gap-1">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 8 5 4-5 4V8z"/></svg>
+                           Join Call
+                         </a>
+                         {% endif %}
+                         <button onclick="addToGoogleCalendar({
+                            purpose: '{{ apt.purpose|escapejs }}',
+                            date_time: '{{ apt.date_time|date:"c" }}',
+                            meeting_link: '{{ apt.meeting_link|default:''|escapejs }}',
+                            notes: '{{ apt.adviser_notes|default:''|escapejs }}'
+                         })" class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-navy transition-colors flex items-center gap-1">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Z"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="m9 16 2 2 4-4"/></svg>
+                           Sync to Calendar
+                         </button>
+                      </div>
                     </td>
                   </tr>
                   {% endfor %}
@@ -1047,6 +1078,33 @@
       if (respondBtn) respondBtn.addEventListener('click', () => { defaultAct.classList.add('hidden'); responseArea.classList.remove('hidden'); });
       if (cancelBtn) cancelBtn.addEventListener('click', () => { responseArea.classList.add('hidden'); defaultAct.classList.remove('hidden'); if (textarea) textarea.value = ''; });
     });
+
+    window.useProfileLink = function(inputId, profileLink) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        if (profileLink && profileLink.trim() !== '') {
+            input.value = profileLink;
+        } else {
+            alert("No permanent link found in your profile. Please go to your Profile Settings to save one, or create a new one on Google.");
+        }
+    }
+
+    window.addToGoogleCalendar = function(apt) {
+        const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
+        const title = encodeURIComponent(`Advising Session: ${apt.purpose}`);
+        
+        const start = new Date(apt.date_time).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const end = new Date(new Date(apt.date_time).getTime() + 30*60*1000).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        
+        // Make the link ultra-prominent in the description
+        const joinLink = apt.meeting_link ? `\n\n🔴 JOIN MEETING HERE: ${apt.meeting_link}` : '';
+        const details = encodeURIComponent(`Advising Appointment${joinLink}\n\nTopic: ${apt.purpose}\n\nNotes: ${apt.notes || 'None'}`);
+        const location = encodeURIComponent(apt.meeting_link || 'Online / Google Meet');
+        
+        const url = `${baseUrl}&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+        window.open(url, '_blank');
+    }
 
   }); // end DOMContentLoaded
 </script>

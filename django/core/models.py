@@ -23,6 +23,7 @@ class UserProfile(models.Model):
     enrollment_status = models.CharField(max_length=20, choices=ENROLLMENT_STATUS, default='not_enrolled')
     curriculum_code = models.CharField(max_length=50, blank=True, null=True)
     assigned_adviser = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='assigned_students', null=True, blank=True)
+    meeting_link = models.URLField(max_length=500, blank=True, null=True, help_text="Adviser's default meeting room link")
     last_activity = models.DateTimeField(auto_now=True)
     
     def __str__(self):
@@ -76,6 +77,7 @@ class Appointment(models.Model):
     purpose = models.CharField(max_length=200)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     adviser_notes = models.TextField(blank=True, null=True)
+    meeting_link = models.URLField(max_length=500, blank=True, null=True)
     
     def __str__(self):
         if self.adviser:
