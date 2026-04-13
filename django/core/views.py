@@ -485,16 +485,17 @@ def student_dashboard(request):
 
     # Fetch data for dashboard
     enrollment_status = profile.enrollment_status
-    # Get term enrollments grouped by status
-    approved_enrollments = profile.user.term_enrollments.filter(status='approved').select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
-    pending_enrollments = profile.user.term_enrollments.filter(status='pending').select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
+    # Get curriculum status for tags early to identify passed subjects
+    curriculum_records = StudentCurriculum.objects.filter(student=user)
+    curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
+    passed_subject_ids = [r.subject_id for r in curriculum_records if r.status == 'passed']
+
+    # Get term enrollments grouped by status, excluding subjects already passed
+    approved_enrollments = profile.user.term_enrollments.filter(status='approved').exclude(subject_id__in=passed_subject_ids).select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
+    pending_enrollments = profile.user.term_enrollments.filter(status='pending').exclude(subject_id__in=passed_subject_ids).select_related('subject').order_by('subject__year_level', 'subject__semester', 'subject__code')
     
     active_term_label = approved_enrollments.values_list('term_label', flat=True).first() or pending_enrollments.values_list('term_label', flat=True).first()
 
-    # Get curriculum status for tags
-    curriculum_records = StudentCurriculum.objects.filter(student=user)
-    curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
-    
     # Recommendations
     recommended_subjects = get_recommended_subjects(profile)
 
