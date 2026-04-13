@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tailwind:build": "npx tailwindcss -i ./core/static/css/input.css -o ./core/static/css/output.css",
-    "tailwind:watch": "npx tailwindcss -i ./core/static/css/input.css -o ./core/static/css/output.css --watch"
+    "tailwind:build": "npx tailwindcss -i ../django/core/static/css/input.css -o ../django/core/static/css/output.css",
+    "tailwind:watch": "npx tailwindcss -i ../django/core/static/css/input.css -o ../django/core/static/css/output.css --watch"
   },
   "keywords": [],
   "author": "",

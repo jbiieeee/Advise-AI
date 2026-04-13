@@ -84,7 +84,7 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR.parent / 'frontend' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -197,5 +197,5 @@ import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 
 # AI Assistant Settings
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDMAC9BLU92fYP4nOBKbeOSAGN8UiB3aDU')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyD4Lm45Crh7qa0DuhDAlGLVohQ23H2RTls')
 
