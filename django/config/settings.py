@@ -197,5 +197,5 @@ import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 
 # AI Assistant Settings
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyD4Lm45Crh7qa0DuhDAlGLVohQ23H2RTls')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'add a new one')
 
