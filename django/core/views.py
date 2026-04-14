@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django_ratelimit.decorators import ratelimit
+from .decorators import student_required, adviser_required, admin_required
 from django.db.models import Q
 from .models import (
     UserProfile, CurriculumSubject, 
@@ -24,6 +26,7 @@ def csrf_failure(request, reason=""):
 def landing_page(request):
     return render(request, 'core/landing.html')
 
+@ratelimit(key='ip', rate='5/5m', method='POST', block=True)
 def login_page(request):
     if request.method == 'POST':
         role = request.POST.get('role', 'student')
@@ -81,6 +84,7 @@ def login_page(request):
             
     return render(request, 'core/login.html')
 
+@ratelimit(key='ip', rate='3/1h', method='POST', block=True)
 def register_page(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -258,6 +262,7 @@ def api_messages_thread(request, contact_id):
     return JsonResponse({'messages': data})
 
 @login_required(login_url='login')
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 def api_messages_send(request):
     """Unified API for sending messages."""
     if request.method != 'POST':
@@ -335,7 +340,7 @@ from .models import (
     FormSubmission, Appointment, Message, Notification
 )
 
-@login_required(login_url='login')
+@student_required
 def student_dashboard(request):
     user = request.user
     
@@ -539,13 +544,14 @@ def student_dashboard(request):
     }
     return render(request, 'core/student.html', context)
 
-@login_required(login_url='login')
+@student_required
 def student_get_conversation(request):
     """
     Returns the real-time conversation between the current student and a specific adviser.
     Accepts optional ?adviser_id= GET param to filter by adviser.
     """
-    if request.user.userprofile.role != 'student':
+    # Role check handled by @student_required decorator
+    if not hasattr(request.user, 'userprofile'):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     user = request.user
@@ -598,7 +604,7 @@ def student_get_conversation(request):
     return JsonResponse({'messages': data})
 
 
-@login_required(login_url='login')
+@adviser_required
 def adviser_dashboard(request):
     user = request.user
     from django.db.models import Q
@@ -854,12 +860,9 @@ def get_conversation(request, student_id):
     return JsonResponse({'messages': data})
 
 
-@login_required(login_url='login')
+@admin_required
 def admin_dashboard(request):
     user = request.user
-    if not request.user.is_superuser and request.user.userprofile.role != 'admin':
-        messages.error(request, "Access denied.")
-        return redirect('landing')
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -2084,6 +2087,7 @@ def get_adviser_student_details(request, student_id):
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
 
 @login_required(login_url='login')
+@ratelimit(key='user', rate='5/m', method='POST', block=True)
 def chatbot_api(request):
     """
     Gemini 1.5 Flash Chatbot API.

@@ -39,6 +39,22 @@ else:
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
+# Cache backend (used for rate limiting via django-ratelimit)
+# LocMemCache is per-process and works on Render's standard single-worker deployment.
+# NOTE: If you scale to multiple workers/dynos on Render, upgrade to Redis:
+#   CACHES = {'default': {'BACKEND': 'django.core.cache.backends.redis.RedisCache', 'LOCATION': os.environ.get('REDIS_URL')}}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'advise-ai-ratelimit',
+    }
+}
+RATELIMIT_USE_CACHE = 'default'
+
+# Silence django_ratelimit warnings for LocMemCache — valid for single-worker deployments.
+# Remove this when upgrading to Redis for multi-worker scaling.
+SILENCED_SYSTEM_CHECKS = ['django_ratelimit.W001', 'django_ratelimit.E003']
+
 
 # Application definition
 
@@ -57,6 +73,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.facebook',
+    'django_ratelimit',
 ]
 
 MIDDLEWARE = [

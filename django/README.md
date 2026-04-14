@@ -65,3 +65,44 @@ If you are just deploying to production or don't need the watch command, you can
 ```bash
 npm run tailwind:build
 ```
+
+---
+
+## Recent Security & Architecture Changes
+
+### 1. Application-Level Rate Limiting
+To protect against brute-force attacks and API abuse, we have implemented rate limiting using `django-ratelimit`.
+
+**Rate-Limited Endpoints:**
+- **Login**: 5 attempts per 5 minutes per IP.
+- **Registration**: 3 attempts per hour per IP.
+- **Messaging (API)**: 10 messages per minute per user.
+- **AI Chatbot**: 5 requests per minute per user.
+
+### 2. Role-Based Access Control (RBAC) Decorators
+The application has transitioned from inconsistent `if-else` logic inside views to centralized security decorators in `core/decorators.py`.
+
+- `@student_required`: Restricts access to student tools.
+- `@adviser_required`: Restricts access to advising dashboards.
+- `@admin_required`: Restricts access to administrative panels.
+- **Support Bypass**: Administrators (superusers) are granted bypass access to Student and Adviser views to provide tech support.
+
+### 3. Cache & Production Deployment on Render
+Rate limiting requires a cache backend. The system is currently configured to use **Local Memory Cache (LocMemCache)**.
+
+**Configuring for Render:**
+On Render, use a single-worker deployment by default. If you scale to multiple workers or instances, you **must** upgrade to a shared cache (Redis) to ensure rate limits are synchronized.
+
+**Upgrade Steps for Redis on Render:**
+1. Provision a **Render Redis** instance.
+2. Add the `REDIS_URL` to your Render Environment Variables.
+3. Update `django/config/settings.py` to use the Redis backend:
+   ```python
+   CACHES = {
+       'default': {
+           'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+           'LOCATION': os.environ.get('REDIS_URL'),
+       }
+   }
+   ```
+4. Remove `django_ratelimit.W001` and `django_ratelimit.E003` from `SILENCED_SYSTEM_CHECKS` in `settings.py`.

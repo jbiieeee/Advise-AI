@@ -2,6 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import site
+
+# Include user site-packages so that packages installed with --user are available.
+# This is needed when running with a system Python (no virtual environment).
+user_site = site.getusersitepackages()
+if user_site not in sys.path:
+    sys.path.insert(0, user_site)
 
 
 def main():

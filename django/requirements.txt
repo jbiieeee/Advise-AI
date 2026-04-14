@@ -11,3 +11,4 @@ pyjwt
 cryptography
 django-allauth
 google-generativeai
+django-ratelimit
