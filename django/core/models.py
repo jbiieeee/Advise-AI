@@ -26,6 +26,11 @@ class UserProfile(models.Model):
     meeting_link = models.URLField(max_length=500, blank=True, null=True, help_text="Adviser's default meeting room link")
     last_activity = models.DateTimeField(auto_now=True)
     
+    # New fields for Adviser OTP Verification
+    is_email_verified = models.BooleanField(default=False)
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_expiry = models.DateTimeField(blank=True, null=True)
+    
     def __str__(self):
         return self.user.username
 
@@ -232,3 +237,15 @@ class TermEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.student.username} – {self.subject.code} ({self.term_label})"
+
+class ActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=100)
+    details = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user.username if self.user else 'System'} - {self.action} at {self.timestamp}"

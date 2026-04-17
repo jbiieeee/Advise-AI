@@ -40,4 +40,9 @@ urlpatterns = [
     path('api/notifications/mark-read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
     path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
     path('messages/', views.messages_page, name='messages_page'),
+    path('video-call/<str:room_name>/', views.video_call_session, name='video_call_session'),
+    
+    # ── Universal Account OTP Verification ──
+    path('auth/send-otp/', views.send_verification_otp, name='send_verification_otp'),
+    path('auth/verify-otp/', views.verify_account_otp, name='verify_account_otp'),
 ]

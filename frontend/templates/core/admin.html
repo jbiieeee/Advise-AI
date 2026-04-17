@@ -172,6 +172,10 @@
         <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage-admins" data-state="inactive">
           Manage Admins
         </button>
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="logs" data-state="inactive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Activity Logs
+        </button>
         <a href="{% url 'messages_page' %}?type=staff"
            class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 text-gray-600 hover:text-navy hover:bg-white"
            data-tab="staff-messaging">
@@ -647,7 +651,7 @@
           <div id="add-adviser-modal" class="hidden rounded-lg border-2 border-light-blue bg-card text-card-foreground bg-white">
             <div class="flex flex-col space-y-1.5 p-6 bg-gradient-to-r from-navy to-light-blue text-white rounded-t-lg">
               <h3 class="font-semibold leading-none tracking-tight text-2xl">Create New Adviser Account</h3>
-              <p class="text-sm text-white/90">Fill in the details to create a new adviser account</p>
+              <p class="text-sm text-white/90">Must use a legitimate <b>@gmail.com</b> address for security verification.</p>
             </div>
             <div class="p-6 pt-6">
               <form class="space-y-4" method="POST" action="{% url 'admin_dashboard' %}">
@@ -722,6 +726,7 @@
                        <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
                        <th class="h-12 px-4 text-left font-medium text-muted-foreground">Department</th>
                        <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
+                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Identity</th>
                        <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
                      </tr>
                    </thead>
@@ -733,6 +738,19 @@
                         <td class="p-4 align-middle">{{ adviser.user.email }}</td>
                         <td class="p-4 align-middle">
                            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if adviser.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if adviser.user.is_active %}active{% else %}inactive{% endif %}</div>
+                        </td>
+                        <td class="p-4 align-middle">
+                           {% if adviser.is_email_verified %}
+                           <div class="inline-flex items-center gap-1.5 text-emerald-600 font-bold text-xs uppercase tracking-tight">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                             Verified
+                           </div>
+                           {% else %}
+                           <div class="inline-flex items-center gap-1.5 text-gray-400 font-bold text-xs uppercase tracking-tight">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                             Pending
+                           </div>
+                           {% endif %}
                         </td>
                         <td class="p-4 align-middle">
                            <div class="flex gap-2">
@@ -815,58 +833,65 @@
                 <div class="flex gap-3 pt-2">
                   <button type="submit" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-gray-900 hover:opacity-90 shadow-md text-white">Create Admin Account</button>
                   <button type="button" id="close-admin-modal" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white text-black">Cancel</button>
-                </div>
-              </form>
+                         <div class="rounded-lg border bg-card text-card-foreground bg-white shadow-md">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+               <h3 class="font-bold text-2xl text-navy">Manage System Administrators</h3>
             </div>
-          </div>
-
-          <div class="rounded-lg border bg-card text-card-foreground bg-white">
-            <div class="flex flex-col space-y-1.5 p-6">
-               <h3 class="font-semibold leading-none tracking-tight text-2xl">System Administrators</h3>
-            </div>
-            <div class="p-6 pt-0">
+            <div class="p-6">
                <div class="relative w-full overflow-auto">
-                 <table class="w-full caption-bottom text-sm">
-                   <thead class="[&_tr]:border-b">
-                     <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Admin ID</th>
-                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Name</th>
-                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Email</th>
-                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Status</th>
-                       <th class="h-12 px-4 text-left font-medium text-muted-foreground">Actions</th>
+                 <table class="w-full text-sm">
+                   <thead>
+                     <tr class="border-b bg-gray-50/50">
+                       <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px]">Admin Details</th>
+                       <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px]">Access Level</th>
+                       <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px]">Status</th>
+                       <th class="h-12 px-4 text-center font-bold text-navy uppercase tracking-widest text-[10px]">Dashboard Actions</th>
                      </tr>
                    </thead>
-                   <tbody class="[&_tr:last-child]:border-0">
+                   <tbody>
                      {% for admin in admins %}
-                     <tr class="border-b transition-colors hover:bg-light-gray">
-                       <td class="p-4 align-middle font-medium">{{ admin.user.id }}</td>
-                       <td class="p-4 align-middle">{{ admin.user.first_name }} {{ admin.user.last_name }}</td>
-                       <td class="p-4 align-middle">{{ admin.user.email }}</td>
-                       <td class="p-4 align-middle">
-                          <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if admin.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if admin.user.is_active %}active{% else %}inactive{% endif %}</div>
+                     <tr class="border-b transition-all hover:bg-blue-50/30">
+                       <td class="p-4">
+                          <div class="font-bold text-gray-900">{{ admin.user.get_full_name|default:admin.user.username }}</div>
+                          <div class="text-xs text-gray-400">{{ admin.user.email }}</div>
                        </td>
-                       <td class="p-4 align-middle">
-                         <div class="flex gap-2">
+                       <td class="p-4">
+                          <span class="px-2 py-0.5 rounded text-[10px] font-black bg-navy text-white">Full Access</span>
+                       </td>
+                       <td class="p-4">
+                          <div class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-bold {% if admin.user.is_active %}bg-green-50 text-green-700 border-green-200{% else %}bg-red-50 text-red-700 border-red-200{% endif %}">
+                            <span class="size-1.5 rounded-full {% if admin.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %}"></span>
+                            {% if admin.user.is_active %}Active{% else %}Inactive{% endif %}
+                          </div>
+                       </td>
+                       <td class="p-4">
+                         <div class="flex gap-2 justify-center">
                            <button type="button" onclick="openResetPasswordModal('{{ admin.user.id }}', '{{ admin.user.get_full_name|default:admin.user.username|escapejs }}')" 
-                                   class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-yellow-500 hover:bg-yellow-50 text-yellow-600 h-9 px-3 bg-white" title="Reset Password">
-                               Reset
+                                   class="size-9 flex items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all shadow-sm" title="Reset Password">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>
                            </button>
                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
                              {% csrf_token %}
                              <input type="hidden" name="action" value="toggle_user_status">
                              <input type="hidden" name="user_id" value="{{ admin.user.id }}">
-                             <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white">
-                               {% if admin.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                             <button type="submit" class="size-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition-all shadow-sm" title="{% if admin.user.is_active %}Deactivate{% else %}Activate{% endif %}">
+                               {% if admin.user.is_active %}
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                               {% else %}
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                               {% endif %}
                              </button>
                            </form>
-                           <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Admin account? This action cannot be undone.');">
+                           {% if admin.user.id != user.id %}
+                           <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Delete this Admin permanently?');">
                              {% csrf_token %}
                              <input type="hidden" name="action" value="delete_user">
                              <input type="hidden" name="user_id" value="{{ admin.user.id }}">
-                             <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-red-500 hover:bg-red-50 text-red-600 h-9 px-3 bg-white">
-                               Delete
+                             <button type="submit" class="size-9 flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Delete Account">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                              </button>
                            </form>
+                           {% endif %}
                          </div>
                        </td>
                      </tr>
@@ -874,6 +899,73 @@
                    </tbody>
                  </table>
                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Logs Tab -->
+      <div class="tab-content hidden" id="tab-logs">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-navy bg-white">
+          <div class="flex flex-col space-y-1.5 p-6 border-b">
+            <h3 class="text-2xl font-bold text-navy flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              System Activity Monitoring
+            </h3>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">Admin Only Access • Secure Audit Trail</p>
+          </div>
+          <div class="p-6">
+            <div class="relative w-full overflow-auto max-h-[600px] custom-scrollbar">
+              <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-gray-50 z-10">
+                  <tr class="border-b">
+                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-48">Timestamp</th>
+                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-40">Administrator</th>
+                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-48">Action</th>
+                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px]">Technical Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for log in activity_logs %}
+                  <tr class="border-b hover:bg-blue-50/20 transition-colors">
+                    <td class="p-4 font-mono text-[11px] text-gray-500">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                    <td class="p-4">
+                      <div class="font-bold text-navy">
+                        {% if log.user %}
+                          {{ log.user.get_full_name|default:log.user.username }}
+                        {% else %}
+                          System / Deleted User
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td class="p-4">
+                      <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tight 
+                        {% if 'Approved' in log.action or 'Added' in log.action %}bg-green-100 text-green-700
+                        {% elif 'Declined' in log.action or 'Deleted' in log.action %}bg-red-100 text-red-700
+                        {% elif 'Reset' in log.action %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {{ log.action }}
+                      </span>
+                    </td>
+                    <td class="p-4 text-xs text-gray-600 italic">
+                      {{ log.details }}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="p-20 text-center text-gray-400">
+                      <p class="font-bold">No activity logs recorded yet.</p>
+                      <p class="text-xs">All administrative actions will be automatically tracked here.</p>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
             </div>
           </div>
 
@@ -1306,10 +1398,9 @@
         }
     }
 
-    // ─── Password Reset Modal Logic ──────────────────────────────
     window.openResetPasswordModal = function(userId, userName) {
-        document.getElementById('reset-modal-user-id').value = userId;
-        document.getElementById('reset-modal-user-name').innerText = userName;
+        document.getElementById('reset-user-id-input').value = userId;
+        document.getElementById('reset-user-display-name').innerText = userName;
         document.getElementById('reset-password-modal').classList.remove('hidden');
     }
 

@@ -7,6 +7,74 @@
 {% block content %}
 <div class="min-h-screen bg-light-gray">
 
+  {% if not is_verified %}
+  <!-- ─────────────────────────────────────────────────────────────
+       HARD VERIFICATION WALL: Blocks EVERYTHING until verified
+  ───────────────────────────────────────────────────────────── -->
+  <div class="fixed inset-0 z-[9999] bg-navy/20 backdrop-blur-xl flex items-center justify-center p-6 text-center">
+    <div class="bg-white p-12 rounded-[40px] shadow-2xl border border-gray-100 max-w-lg w-full animate-in fade-in zoom-in duration-700 relative overflow-hidden">
+      <!-- Decorative background accent -->
+      <div class="absolute -top-24 -right-24 size-48 bg-yellow-400/10 rounded-full blur-3xl"></div>
+      
+      <div class="size-24 bg-yellow-50 text-yellow-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner rotate-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      
+      <h2 class="text-4xl font-black text-navy mb-4 tracking-tight">Identity Verification</h2>
+      <p class="text-gray-500 text-lg mb-10 leading-relaxed px-4">
+        Advisers must verify their <b>@gmail.com</b> address to access student records and advising tools.
+      </p>
+
+      <div class="space-y-4 max-w-sm mx-auto">
+        <form method="POST" action="{% url 'send_verification_otp' %}">
+          {% csrf_token %}
+          <button type="submit" class="w-full flex items-center justify-center h-16 bg-navy text-white rounded-2xl font-bold text-xl hover:shadow-2xl hover:-translate-y-1 transition-all gap-3 group">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:translate-x-1 transition-transform"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            Send Verification Code
+          </button>
+        </form>
+        
+        <button onclick="document.getElementById('otp-modal').classList.remove('hidden')" class="w-full h-14 bg-white border-2 border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 hover:text-navy transition-all">
+          Already have a code?
+        </button>
+
+        <a href="{% url 'logout' %}" class="block text-xs font-bold text-gray-300 hover:text-red-500 transition-colors pt-4">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTP Input Modal -->
+  <div id="otp-modal" class="fixed inset-0 z-[10000] bg-navy/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+      <div class="p-10 text-center">
+        <div class="text-navy font-black text-3xl mb-3">Verification Code</div>
+        <p class="text-sm text-gray-400 mb-10 uppercase tracking-widest font-bold">Sent to {{ adviser_user.email }}</p>
+        
+        <form method="POST" action="{% url 'verify_account_otp' %}" class="space-y-8">
+          {% csrf_token %}
+          <div class="relative">
+            <input type="text" name="otp_code" maxlength="6" autofocus placeholder="000000"
+              class="w-full h-24 text-center text-5xl font-mono font-black tracking-[1.5rem] border-4 border-gray-100 rounded-[30px] focus:border-navy focus:bg-white bg-gray-50 outline-none transition-all uppercase px-4 shadow-inner">
+          </div>
+          
+          <div class="flex gap-4">
+            <button type="submit" class="flex-1 h-16 bg-navy text-white rounded-[25px] font-bold text-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+              Unlock Dashboard
+            </button>
+            <button type="button" onclick="document.getElementById('otp-modal').classList.add('hidden')" class="px-6 h-16 bg-gray-50 text-gray-400 rounded-[25px] font-bold hover:bg-gray-100 transition-all">
+              Back
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ─────────────────────────────────────────────────────────────
+       FULL DASHBOARD: Only rendered when verified
+  ───────────────────────────────────────────────────────────── -->
+
   <header class="bg-gradient-to-r from-navy to-light-blue border-b sticky top-0 z-50 shadow-lg">
     <div class="px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex justify-between items-center">
@@ -91,29 +159,8 @@
     </div>
   </header>
 
-  <!-- Django Flash Messages -->
-  {% if messages %}
-  <div class="px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
-    {% for message in messages %}
-    <div class="p-4 rounded-xl text-sm font-bold flex items-center gap-3 shadow-md border animate-in slide-in-from-top-2 duration-300
-      {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-100{% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-100{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-600 border-yellow-200{% else %}bg-blue-50 text-blue-600 border-blue-100{% endif %}">
-      {% if message.tags == 'error' %}
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      {% elif message.tags == 'success' %}
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      {% elif message.tags == 'warning' %}
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      {% else %}
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      {% endif %}
-      <span>{{ message }}</span>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-
   <div class="px-4 sm:px-6 lg:px-8 py-8">
-    {% csrf_token %}
+{% csrf_token %}
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -697,10 +744,12 @@
 
     </div>
   </div>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{% if is_verified %}
 <script>
   // All adviser+admin user IDs — messages from these are shown on the RIGHT (blue)
   const ALL_ADVISER_IDS = new Set({{ all_adviser_ids_json|default:"[]"|safe }});
@@ -1135,4 +1184,5 @@
 
   }); // end DOMContentLoaded
 </script>
+{% endif %}
 {% endblock %}

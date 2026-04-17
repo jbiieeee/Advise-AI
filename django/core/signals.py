@@ -42,7 +42,12 @@ def social_login_profile_sync(request, user, **kwargs):
         # All social signups are Students (Security enforcement)
         if created or not profile.role:
             profile.role = 'student'
-            profile.save()
+        
+        # Auto-verify email if social provider says so
+        if sociallogin.account.extra_data.get('email_verified') or sociallogin.account.extra_data.get('verified'):
+            profile.is_email_verified = True
+            
+        profile.save()
             
         messages.success(request, f"Welcome to Advise-AI, {user.first_name or user.username}! Your student account is ready.")
     else:

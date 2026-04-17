@@ -14,7 +14,7 @@ from django.db.models import Q
 from .models import (
     UserProfile, CurriculumSubject, 
     TermEnrollment, StudentCurriculum, EnrollmentCode,
-    FormSubmission, Appointment, Message, StaffMessage, Notification
+    FormSubmission, Appointment, Message, StaffMessage, Notification, ActivityLog
 )
 import google.generativeai as genai
 
@@ -22,6 +22,11 @@ def csrf_failure(request, reason=""):
     """Handle CSRF failures by redirecting back with a message instead of showing 403."""
     messages.error(request, "Security check failed (CSRF). Please refresh the page and try again.")
     return redirect(request.META.get('HTTP_REFERER', 'landing'))
+
+def log_activity(user, action, details):
+    """Utility to log system activities for Admin review."""
+    from .models import ActivityLog
+    ActivityLog.objects.create(user=user, action=action, details=details)
 
 def get_total_unread_count(user):
     """Calculates combined unread count from Notifications, Messages, and StaffMessages."""
@@ -107,6 +112,7 @@ def login_page(request):
             if role == 'admin' and user.is_superuser:
                 request.session['login_fails'] = 0
                 login(request, user)
+                log_activity(user, "Login", "Admin logged in successfully.")
                 return redirect('admin_dashboard')
             
             # Ensure profile exists using get_or_create to prevent 500 on first login
@@ -122,6 +128,7 @@ def login_page(request):
             # Reset fails on success
             request.session['login_fails'] = 0
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            log_activity(user, "Login", f"{role.capitalize()} logged in successfully.")
             if role == 'student' or profile.role == 'student':
                 return redirect('student_dashboard')
             elif role == 'adviser' or profile.role == 'adviser':
@@ -200,6 +207,7 @@ def register_page(request):
                 message=f'New student account created: {name} ({email})'
             )
         
+        log_activity(user, "Registration", f"New student account created: {name} ({email})")
         return redirect('login')
         
     return render(request, 'core/register.html')
@@ -231,8 +239,8 @@ def api_messages_list(request):
             msg_partners.add(assigned_id)
         
         if not msg_partners:
-            # Fallback to admins/advisers if no history and no adviser (e.g. brand new student)
-            std_candidates = User.objects.filter(Q(userprofile__role__in=['adviser', 'admin']) | Q(is_superuser=True)).exclude(id=user.id)
+            # Fallback for brand-new students: Only show Advisers (NOT Admins)
+            std_candidates = User.objects.filter(userprofile__role='adviser').exclude(id=user.id)
         else:
             std_candidates = User.objects.filter(id__in=msg_partners)
     else:
@@ -374,8 +382,8 @@ def api_messages_send(request):
                 return JsonResponse({'error': 'Students cannot message other students'}, status=403)
             
             # Security: Admin -> Student is one-way. Student cannot message Admin.
-            if role_str == 'student' and rev_role_str == 'admin':
-                return JsonResponse({'error': 'Replies restricted: This is a one-way notice channel. Please use the Help/Report form for inquiries.'}, status=403)
+            if role_str == 'student' and (rev_role_str == 'admin' or receiver.is_superuser):
+                return JsonResponse({'error': 'Admins do not receive direct messages. Please use the Help/Report form for official inquiries.'}, status=403)
                 
             m = Message.objects.create(sender=user, receiver=receiver, content=content)
             
@@ -564,8 +572,35 @@ def student_dashboard(request):
                 try:
                     dt_str = f"{date_str} {time_str}"
                     dt_obj = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-                    Appointment.objects.create(student=user, date_time=dt_obj, purpose=purpose)
-                    messages.success(request, 'Appointment scheduled successfully.')
+                    # Make aware to avoid naive vs aware comparison errors
+                    dt_aware = timezone.make_aware(dt_obj, timezone.get_current_timezone())
+                    
+                    # 1. Past Date/Time Check
+                    if dt_aware < timezone.now():
+                        messages.error(request, 'Cannot schedule an appointment in the past.')
+                        return redirect('student_dashboard')
+
+                    # 2. Student Double-Booking Check
+                    if Appointment.objects.filter(student=user, date_time=dt_aware).exclude(status='cancelled').exists():
+                        messages.error(request, 'You already have an appointment scheduled for this exact time.')
+                        return redirect('student_dashboard')
+
+                    # 3. Adviser Availability Check
+                    adviser = profile.assigned_adviser
+                    if adviser:
+                        if Appointment.objects.filter(adviser=adviser, date_time=dt_aware, status='confirmed').exists():
+                            messages.error(request, f'Your assigned adviser ({adviser.get_full_name() or adviser.username}) is already booked for this time. Please select another slot.')
+                            return redirect('student_dashboard')
+                    
+                    # Store appointment with adviser if available
+                    Appointment.objects.create(
+                        student=user, 
+                        adviser=adviser,
+                        date_time=dt_aware, 
+                        purpose=purpose
+                    )
+                    messages.success(request, 'Appointment scheduled successfully!')
+                    log_activity(user, "Appointment Scheduled", f"Scheduled for {dt_str} regarding {purpose}")
                 except ValueError:
                     messages.error(request, 'Invalid date/time format.')
             else:
@@ -656,6 +691,18 @@ def student_dashboard(request):
     from core.models import Notification
     unread_notifications_count = get_total_unread_count(user)
 
+    # Persistent Verification Check (One-Time Only)
+    is_verified = profile.is_email_verified or user.is_superuser
+    if not is_verified:
+        try:
+            from allauth.account.models import EmailAddress
+            if EmailAddress.objects.filter(user=user, verified=True).exists():
+                is_verified = True
+                profile.is_email_verified = True
+                profile.save(update_fields=['is_email_verified'])
+        except Exception:
+            pass
+
     context = {
         'profile': profile,
         'enrollment_status': enrollment_status,
@@ -671,6 +718,7 @@ def student_dashboard(request):
         'student_appointments': student_appointments,
         'advisers_list': advisers_list,
         'all_staff_ids_json': all_staff_ids_json,
+        'is_verified': is_verified,
     }
     return render(request, 'core/student.html', context)
 
@@ -870,7 +918,20 @@ def adviser_dashboard(request):
     # For Peer-to-Peer Staff Messaging
     staff_list = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True)).exclude(id=user.id)
 
+    # Persistent Verification Check (One-Time Only)
+    is_verified = profile.is_email_verified or user.is_superuser
+    if not is_verified:
+        try:
+            from allauth.account.models import EmailAddress
+            if EmailAddress.objects.filter(user=user, verified=True).exists():
+                is_verified = True
+                profile.is_email_verified = True
+                profile.save(update_fields=['is_email_verified'])
+        except ImportWarning:
+            pass
+
     context = {
+        'is_verified': is_verified,
         'pending_appointments': pending_appointments,
         'confirmed_appointments': confirmed_appointments,
         'my_students': my_students,
@@ -1025,6 +1086,7 @@ def admin_dashboard(request):
                         )
                     
                 messages.success(request, f"Approved enrollment for {enr.student.first_name} - {enr.subject.code}")
+                log_activity(user, "Enrollment Approved", f"Approved {enr.subject.code} for {enr.student.get_full_name() or enr.student.username}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({'status': 'success', 'message': f"Approved: {enr.subject.code}"})
             except TermEnrollment.DoesNotExist:
@@ -1045,6 +1107,7 @@ def admin_dashboard(request):
                     p.save()
                     
                 messages.warning(request, f"Declined enrollment for {enr.student.first_name} - {enr.subject.code}")
+                log_activity(user, "Enrollment Declined", f"Declined {enr.subject.code} for {enr.student.get_full_name() or enr.student.username}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({'status': 'success', 'message': f"Declined: {enr.subject.code}"})
             except TermEnrollment.DoesNotExist:
@@ -1079,6 +1142,7 @@ def admin_dashboard(request):
                     
                 msg = f"Successfully approved {count} subjects."
                 messages.success(request, msg)
+                log_activity(user, "Bulk Enrollment Approved", f"Approved {count} subjects for code {code_id}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({'status': 'success', 'message': msg})
             except Exception as e:
@@ -1104,6 +1168,7 @@ def admin_dashboard(request):
                     
                 msg = f"Declined {count} enrollment requests."
                 messages.warning(request, msg)
+                log_activity(user, "Bulk Enrollment Declined", f"Declined {count} subjects for code {code_id}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({'status': 'success', 'message': msg})
             except Exception as e:
@@ -1116,7 +1181,11 @@ def admin_dashboard(request):
             email = request.POST.get('email')
             password = request.POST.get('password')
             role = request.POST.get('role') # admin or adviser
-            
+
+            if role == 'adviser' and not email.lower().endswith('@gmail.com'):
+                messages.error(request, 'Adviser accounts must use a legitimate @gmail.com address.')
+                return redirect('admin_dashboard')
+
             if not User.objects.filter(username=email).exists():
                 new_user = User.objects.create_user(username=email, email=email, password=password)
                 if name:
@@ -1132,6 +1201,7 @@ def admin_dashboard(request):
                 
                 UserProfile.objects.create(user=new_user, role=role)
                 messages.success(request, f'{role.capitalize()} account created successfully.')
+                log_activity(user, "Staff Added", f"Created {role} account for {email}")
             else:
                 messages.error(request, 'Email already registered.')
                 
@@ -1153,6 +1223,7 @@ def admin_dashboard(request):
                 
                 UserProfile.objects.create(user=new_user, role='student', student_id=student_id, program=program, enrollment_status='enrolled')
                 messages.success(request, 'Student account created successfully.')
+                log_activity(user, "Student Added", f"Created student account for {email} ({program})")
             else:
                 messages.error(request, 'Email already registered.')
                 
@@ -1165,9 +1236,9 @@ def admin_dashboard(request):
                     profile.enrollment_status = status
                     profile.save()
                     messages.success(request, f'Enrollment {status} successfully.')
+                    log_activity(user, "Enrollment Updated", f"Updated {profile.user.username} enrollment status to {status}")
                 except UserProfile.DoesNotExist:
                     messages.error(request, 'Student profile not found.')
-                    
         elif action == 'toggle_user_status':
             target_user_id = request.POST.get('user_id')
             if target_user_id:
@@ -1178,6 +1249,7 @@ def admin_dashboard(request):
                         target_user.save()
                         status_str = "activated" if target_user.is_active else "deactivated"
                         messages.success(request, f'Account successfully {status_str}.')
+                        log_activity(user, "User Status Toggled", f"{status_str.capitalize()} account for {target_user.username}")
                     else:
                         messages.error(request, 'You cannot deactivate your own account.')
                 except User.DoesNotExist:
@@ -1189,8 +1261,10 @@ def admin_dashboard(request):
                 try:
                     target_user = User.objects.get(id=target_user_id)
                     if target_user != request.user:
+                        uname = target_user.username
                         target_user.delete()
                         messages.success(request, 'Account successfully deleted.')
+                        log_activity(user, "User Deleted", f"Deleted account for {uname}")
                     else:
                         messages.error(request, 'You cannot delete your own account.')
                 except User.DoesNotExist:
@@ -1210,6 +1284,7 @@ def admin_dashboard(request):
                 ]
                 Notification.objects.bulk_create(notifs)
                 messages.success(request, f'Broadcast sent to {all_users.count()} users.')
+                log_activity(user, "System Broadcast", f"Sent broadcast pulse: {message_text[:50]}...")
         
         elif action == 'admin_respond_form':
             form_id = request.POST.get('form_id')
@@ -1237,7 +1312,9 @@ def admin_dashboard(request):
                         message=f'Admin has responded to your request: "{form.title}".'
                     )
                     
+                    
                     messages.success(request, f'Form {status} successfully.')
+                    log_activity(user, "Form Responded", f"Responded to {form.student.username}'s form: {form.title}")
                 except FormSubmission.DoesNotExist:
                     messages.error(request, 'Form not found.')
 
@@ -1255,6 +1332,7 @@ def admin_dashboard(request):
                         target_user.set_password(new_password)
                         target_user.save()
                         messages.success(request, f'Password for {target_user.get_full_name() or target_user.username} has been reset.')
+                        log_activity(user, "Password Reset", f"Reset password for {target_user.get_full_name() or target_user.username}")
                     except User.DoesNotExist:
                         messages.error(request, 'User not found.')
                 
@@ -1308,6 +1386,7 @@ def admin_dashboard(request):
         'form_pending': FormSubmission.objects.filter(status='pending').count(),
         'form_approved': FormSubmission.objects.filter(status='approved').count(),
         'unread_notifications_count': get_total_unread_count(user),
+        'activity_logs': ActivityLog.objects.all()[:100],
     }
     return render(request, 'core/admin.html', context)
 
@@ -2237,7 +2316,7 @@ def chatbot_api(request):
 
         # System Instruction
         system_instruction = (
-            "You are the Advise AI Virtual Assistant for TIP (Technological Institute of the Philippines). "
+            "You are the Advise AI Virtual Assistant."
             f"The current student is in the {program} program. "
             "Your tone is helpful, professional, and encouraging. "
             "\n\nCONSTRAINTS & RULES:\n"
@@ -2246,7 +2325,7 @@ def chatbot_api(request):
             f"3. Curriculum: Based on the student's progress, the current 'Must-Take' recommended courses are: {must_take_str}.\n"
             "4. Handoff: If the student asks for a human adviser or a more personalized interaction, direct them to the 'Messages' tab to contact their specific Adviser or staff.\n"
             "5. NO HALLUCINATIONS: Do not promise that you can change database records, set grades, or perform administrative actions. You only provide information and guidance.\n"
-            "6. Identity: Always identify as the Advise AI Virtual Assistant for TIP."
+            "6. Identity: Always identify as the Advise AI Virtual Assistant"
         )
 
         model = genai.GenerativeModel(
@@ -2273,3 +2352,96 @@ def chatbot_api(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
 
+@login_required
+def video_call_session(request, room_name):
+    """
+    Renders a standalone, professional video conference page for the given room name.
+    """
+    profile = request.user.userprofile
+    context = {
+        'room_name': room_name,
+        'role': profile.role,
+        'display_name': request.user.get_full_name() or request.user.username,
+    }
+    return render(request, 'core/video_conference.html', context)
+
+
+# ─────────────────────────────────────────────────────────────
+#  UNIVERSAL ACCOUNT OTP VERIFICATION SYSTEM
+# ─────────────────────────────────────────────────────────────
+from django.core.mail import send_mail
+import random
+import string
+
+@login_required(login_url='login')
+def send_verification_otp(request):
+    """Generates and sends a 6-digit OTP to the user's registered email."""
+    user = request.user
+    profile = getattr(user, 'userprofile', None)
+    
+    if not profile:
+        messages.error(request, "User profile not found.")
+        return redirect('login')
+        
+    # Superuser bypass
+    if user.is_superuser:
+        profile.is_email_verified = True
+        profile.save()
+        return redirect('admin_dashboard')
+
+    # Role-based validation
+    if profile.role == 'adviser' and not user.email.endswith('@gmail.com'):
+        messages.error(request, "Adviser accounts must use a @gmail.com address. Please contact Admin.")
+        return redirect('adviser_dashboard')
+
+    # Generate 6-digit code
+    otp = ''.join(random.choices(string.digits, k=6))
+    profile.otp_code = otp
+    profile.otp_expiry = timezone.now() + timedelta(minutes=10)
+    profile.save()
+    
+    # Send Email
+    subject = "Advise AI | Account Verification Code"
+    message = f"Hello {user.first_name or user.username},\n\nYour One-Time Password (OTP) for Advise AI is: {otp}\n\nThis code will expire in 10 minutes. Please enter it on your dashboard to verify your account.\n\nBest regards,\nAdvise AI Security Team"
+    
+    try:
+        send_mail(
+            subject,
+            message,
+            None, # Uses DEFAULT_FROM_EMAIL from settings
+            [user.email],
+            fail_silently=False,
+        )
+        messages.success(request, f"Verification code sent to {user.email}")
+    except Exception as e:
+        messages.error(request, f"Failed to send email: {str(e)}. Please check your SMTP settings.")
+        
+    if profile.role == 'adviser':
+        return redirect('adviser_dashboard')
+    return redirect('student_dashboard')
+
+@login_required(login_url='login')
+def verify_account_otp(request):
+    """Checks the submitted OTP and marks the user as verified."""
+    if request.method == 'POST':
+        user = request.user
+        profile = user.userprofile
+        otp_input = request.POST.get('otp_code', '').strip()
+        
+        if not profile.otp_code or not profile.otp_expiry:
+            messages.error(request, "Please request a new code first.")
+        elif timezone.now() > profile.otp_expiry:
+            messages.error(request, "Your code has expired. Please request a new one.")
+        elif otp_input == profile.otp_code:
+            profile.is_email_verified = True
+            profile.otp_code = None # Clear after use
+            profile.otp_expiry = None
+            profile.save()
+            messages.success(request, "Account verified successfully! You now have full access.")
+            log_activity(user, "Identity Verified", f"{profile.role.capitalize()} completed email OTP verification.")
+        else:
+            messages.error(request, "Invalid verification code.")
+            
+    if user.userprofile.role == 'adviser':
+        return redirect('adviser_dashboard')
+    return redirect('student_dashboard')

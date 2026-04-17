@@ -4,6 +4,7 @@
 {% block title %}Messages | Advise AI{% endblock %}
 
 {% block extra_head %}
+<script src="https://meet.jit.si/external_api.js"></script>
 <style>
     .chat-container {
         height: calc(100vh - 84px); /* Subtract header height */
@@ -72,6 +73,14 @@
     /* Hide scrollbar but keep functionality */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Fix Jitsi Iframe Visibility */
+    #jitsi-container iframe {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        display: block !important;
+    }
 </style>
 {% endblock %}
 
@@ -141,6 +150,9 @@
                 </div>
             </div>
             <div class="flex gap-2">
+                <button id="start-call-btn" class="hidden p-2 text-navy hover:bg-blue-50 rounded-full transition-all border border-blue-100 shadow-sm" title="Start Video Call">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                </button>
                 <button class="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </button>
@@ -175,7 +187,23 @@
                 One-Way Channel: Replies are restricted for official Admin notices.
             </div>
         </div>
-    </main>
+
+    <!-- Invite Adviser Modal -->
+    <div id="invite-adviser-modal" class="fixed inset-0 bg-black/60 z-[310] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+            <div class="p-6 border-b bg-gray-50">
+                <h4 class="font-bold text-navy">Invite another Adviser</h4>
+                <p class="text-xs text-gray-500">Add a specialist to the current video call.</p>
+            </div>
+            <div id="adviser-invite-list" class="max-h-[300px] overflow-y-auto divide-y">
+                <!-- Loaded via JS -->
+                <div class="p-8 text-center text-gray-400 text-xs">Loading colleagues...</div>
+            </div>
+            <div class="p-4 border-t bg-gray-50 flex justify-end">
+                <button onclick="document.getElementById('invite-adviser-modal').classList.add('hidden')" class="text-xs font-bold text-gray-500 hover:text-navy px-4 py-2">Cancel</button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -187,6 +215,7 @@
     let currentFilterType = 'all'; // 'all' or 'staff'
     let pollInterval = null;
     let contactsPoll = null;
+    let jitsiAPI = null;
 
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message-input');
@@ -305,6 +334,16 @@
         activeAvatar.textContent = name.charAt(0);
         if (emptyState) emptyState.remove();
 
+        // Show call button for staff/admins in standard chats
+        const callBtn = document.getElementById('start-call-btn');
+        if (callBtn) {
+            if (userRole !== 'student' && type === 'standard') {
+                callBtn.classList.remove('hidden');
+            } else {
+                callBtn.classList.add('hidden');
+            }
+        }
+
         // Handle restriction for students messaging admins
         const form = document.getElementById('message-form');
         const notice = document.getElementById('restriction-notice');
@@ -388,5 +427,164 @@
             card.style.display = name.includes(query) ? 'flex' : 'none';
         });
     });
+
+    // ─── Video Call Logic (Jitsi) ─────────────────────────────
+    const startCallBtn = document.getElementById('start-call-btn');
+    const inviteAdviserBtn = document.getElementById('invite-adviser-btn');
+
+    window.activeRoomName = null;
+
+    if (startCallBtn) {
+        startCallBtn.onclick = () => {
+            const roomName = `advise-ai-session-${Math.random().toString(36).substring(7)}-${currentContactId}`;
+            window.activeRoomName = roomName;
+            initiateCall(roomName);
+        };
+    }
+    if (inviteAdviserBtn) {
+        inviteAdviserBtn.onclick = () => showInviteModal();
+    }
+
+    function initiateCall(targetRoom = null) {
+        const roomName = targetRoom || `advise-ai-session-${Math.random().toString(36).substring(7)}-${currentContactId}`;
+        const callUrl = `/video-call/${roomName}/`;
+
+        // If we are the initiator (targetRoom is null), send invite message
+        if (!targetRoom) {
+            const inviteMsg = `[VIDEO CALL STARTED] Click to join: JOIN_CALL:${roomName}`;
+            messageInput.value = inviteMsg;
+            messageForm.dispatchEvent(new Event('submit'));
+        }
+
+        // Open the standalone conference page in a new professional window/tab
+        window.open(callUrl, '_blank');
+    }
+
+    function showInviteModal() {
+        const modal = document.getElementById('invite-adviser-modal');
+        const list = document.getElementById('adviser-invite-list');
+        modal.classList.remove('hidden');
+        list.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs animate-pulse">Scanning for colleagues...</div>';
+        
+        fetch('/api/messages/v2/list/')
+        .then(r => r.json())
+        .then(data => {
+            const staff = data.contacts.filter(c => c.type === 'staff' || c.is_admin);
+            list.innerHTML = '';
+            staff.forEach(s => {
+                if (s.user_id == {{ request.user.id }}) return;
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="p-4 hover:bg-blue-50 cursor-pointer flex justify-between items-center transition-all group" 
+                         onclick="inviteToCall(${s.user_id}, '${s.name.replace(/'/g, "\\'")}')">
+                        <div>
+                            <p class="text-sm font-bold text-navy group-hover:text-blue-600">${s.name}</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-black">${s.is_admin ? 'Admin' : 'Adviser'}</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-300 group-hover:text-blue-500"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </div>
+                `);
+            });
+            if (list.innerHTML === '') list.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No other staff online.</div>';
+        });
+    }
+
+    function inviteToCall(adviserId, name) {
+        // Since we are in standalone mode, the room name needs to be extracted from current context or passed.
+        // For simplicity, we assume the adviser can be invited via the link in the message thread.
+        // If this is called from within the conference page, it would need a different logic.
+        // However, the invite modal is still in the messages portal.
+        // We'll use a placeholder or simply direct them to send the link manually if needed.
+        // Actually, we can just send the JOIN_CALL message to the invited person.
+        
+        // This logic remains in messages.html, so we need to know WHICH room we are currently in.
+        // We can store the 'activeRoomName' globally when starting a call.
+        if (!window.activeRoomName) {
+            alert("No active conference session found to invite to.");
+            return;
+        }
+
+        const roomName = window.activeRoomName;
+        
+        fetch('/api/messages/send/', {
+            method: 'POST',
+            body: JSON.stringify({
+                receiver_id: adviserId,
+                content: `[URGENT: JOIN VIDEO CALL] I need your assistance in a call with a student. Room: JOIN_CALL:${roomName}`,
+                type: 'staff'
+            }),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Invite sent to ' + name);
+                document.getElementById('invite-adviser-modal').classList.add('hidden');
+            }
+        });
+    }
+
+    // Intercept "JOIN_CALL" messages to show a button
+    const originalLoadConversation = loadConversation;
+    window.loadConversation = function(contactId, type, name, appendOnly = false, isAdminContact = false) {
+        currentContactId = contactId;
+        currentType = type;
+        activeName.textContent = name;
+        activeAvatar.textContent = name.charAt(0);
+        if (emptyState) emptyState.remove();
+
+        const callBtn = document.getElementById('start-call-btn');
+        if (callBtn) {
+            if (userRole !== 'student' && type === 'standard') {
+                callBtn.classList.remove('hidden');
+            } else {
+                callBtn.classList.add('hidden');
+            }
+        }
+
+        document.querySelectorAll('.contact-card').forEach(c => c.classList.remove('active-contact'));
+        
+        fetch(`/api/messages/thread/${contactId}/?type=${type}`)
+        .then(r => r.json())
+        .then(data => {
+            const messages = data.messages;
+            let html = '';
+            
+            if (messages.length === 0) {
+                html = `<div class="p-20 text-center opacity-40"><p class="text-sm">No message history yet.</p></div>`;
+            } else {
+                messages.forEach(m => {
+                    let content = m.content;
+                    if (content.includes('JOIN_CALL:')) {
+                        const room = content.split('JOIN_CALL:')[1].trim();
+                        content = `
+                            <div class="bg-navy text-white p-4 rounded-xl shadow-lg border-2 border-light-blue/20">
+                                <p class="text-xs font-black uppercase tracking-widest mb-3 opacity-80">Incoming Video Call</p>
+                                <button onclick="initiateCall('${room}')" class="w-full py-2 bg-light-blue hover:bg-white hover:text-navy text-white rounded font-bold text-xs transition-all uppercase tracking-widest shadow-md active:scale-95">Join Meeting</button>
+                            </div>
+                        `;
+                    }
+                    html += `
+                        <div class="flex ${m.is_me ? 'justify-end' : 'justify-start'}">
+                            <div class="message-bubble ${m.is_me ? 'message-sent' : 'message-received'} shadow-sm">
+                                <div class="text-sm">${content}</div>
+                                <span class="text-[9px] block text-right mt-1 ${m.is_me ? 'text-white/70' : 'text-gray-400'}">${m.sent_at}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            viewport.innerHTML = html;
+            if (!appendOnly) viewport.scrollTop = viewport.scrollHeight;
+        });
+
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            loadConversation(currentContactId, currentType, activeName.textContent, true);
+        }, 5000);
+    };
 </script>
 {% endblock %}

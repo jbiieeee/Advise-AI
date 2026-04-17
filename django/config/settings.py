@@ -17,6 +17,15 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env file manually if it exists (for local testing)
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    with open(env_path) as f:
+        for line in f:
+            if '=' in line and not line.startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -27,7 +36,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-yfcjc+ig3hw8#v3yom%8%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -136,9 +145,19 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+        'APP': {
+            'client_id': os.environ.get('SOCIAL_AUTH_GOOGLE_CLIENT_ID'),
+            'secret': os.environ.get('SOCIAL_AUTH_GOOGLE_SECRET'),
+            'key': ''
+        }
     },
     'github': {
         'SCOPE': ['user', 'repo', 'read:org'],
+        'APP': {
+            'client_id': os.environ.get('SOCIAL_AUTH_GITHUB_CLIENT_ID'),
+            'secret': os.environ.get('SOCIAL_AUTH_GITHUB_SECRET'),
+            'key': ''
+        }
     }
 }
 
@@ -209,4 +228,16 @@ mimetypes.add_type("text/css", ".css", True)
 
 # AI Assistant Settings
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'add a new one')
+
+# Email / SMTP Configuration (REQUIRED for Adviser OTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False
+EMAIL_TIMEOUT = 10  # 10 second timeout
+# Load from Render Environment Variables
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = f"Advise AI Security <{EMAIL_HOST_USER}>"
 

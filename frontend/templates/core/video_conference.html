@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advise AI | Video Conference</title>
+    <!-- Standard Jitsi External API -->
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <style>
+        :root {
+            --bg-dark: #202124;
+            --navy: #0E2A47;
+            --blue: #4A90E2;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        #conference-container {
+            height: 100vh;
+            width: 100vw;
+        }
+        #conference-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+        }
+        /* Top Navigation Overlay */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+            transition: opacity 0.3s;
+            pointer-events: none; /* Let clicks pass through to video unless on buttons */
+        }
+        .top-nav:hover {
+            opacity: 1;
+        }
+        .nav-brand {
+            display: flex;
+            items-center: center;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--navy);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .brand-text {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .btn-exit {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-exit:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-safe-launch {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+        .btn-safe-launch:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="top-nav">
+        <div class="nav-brand">
+            <div class="brand-logo">ADV</div>
+            <div class="brand-text">Academic Advising Conference</div>
+        </div>
+        <div class="nav-actions">
+            <!-- Safe Launch Fallback -->
+            <a href="https://meet.jit.si/{{ room_name }}" target="_blank" class="btn-safe-launch" id="safe-launch-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Launch Native Mode
+            </a>
+            <a href="{% url 'messages_page' %}" class="btn-exit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                Exit Session
+            </a>
+        </div>
+    </div>
+
+    <div id="conference-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: "{{ room_name|escapejs }}",
+                width: '100%',
+                height: '100%',
+                parentNode: document.getElementById('conference-container'),
+                userInfo: {
+                    displayName: "{{ display_name|escapejs }}"
+                },
+                configOverwrite: {
+                    prejoinPageEnabled: false,
+                    disableDeepLinking: true,
+                    disableThirdPartyRequests: true,
+                    doNotStoreRoom: true,
+                    startWithAudioMuted: false,
+                    startWithVideoMuted: false,
+                    defaultRemoteDisplayName: 'Participant',
+                    enableWelcomePage: false,
+                    p2p: {
+                        enabled: true
+                    }
+                },
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_BRAND_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    HIDE_DEEP_LINKING_LOGO: true,
+                    SHOW_POWERED_BY: false,
+                    MOBILE_APP_PROMO: false,
+                    DEFAULT_REMOTE_DISPLAY_NAME: 'Participant',
+                    TILE_VIEW_MAX_COLUMNS: 2,
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                        'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                        'security'
+                    ],
+                }
+            };
+
+            const api = new JitsiMeetExternalAPI(domain, options);
+            
+            api.addEventListener('readyToClose', () => {
+                window.location.href = "{% url 'messages_page' %}";
+            });
+        });
+    </script>
+</body>
+</html>
