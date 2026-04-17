@@ -95,8 +95,17 @@
   {% if messages %}
   <div class="px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
     {% for message in messages %}
-    <div
-      class="p-3 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %} flex justify-between items-start shadow-sm">
+    <div class="p-4 rounded-xl text-sm font-bold flex items-center gap-3 shadow-md border animate-in slide-in-from-top-2 duration-300
+      {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-100{% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-100{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-600 border-yellow-200{% else %}bg-blue-50 text-blue-600 border-blue-100{% endif %}">
+      {% if message.tags == 'error' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      {% elif message.tags == 'success' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      {% elif message.tags == 'warning' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      {% else %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      {% endif %}
       <span>{{ message }}</span>
     </div>
     {% endfor %}
@@ -104,6 +113,7 @@
   {% endif %}
 
   <div class="px-4 sm:px-6 lg:px-8 py-8">
+    {% csrf_token %}
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -286,6 +296,9 @@
                             <polyline points="12 6 12 12 16 14" />
                           </svg>
                           {{ apt.date_time|date:"F j, Y, h:i A" }}
+                        </span>
+                        <span class="flex items-center gap-1 text-[10px] bg-navy/5 text-navy/40 px-2 py-0.5 rounded font-black uppercase">
+                          Requested: {{ apt.created_at|date:"M j, P" }}
                         </span>
                       </div>
 
@@ -948,7 +961,12 @@
 
     window.generateEnrollmentCode = function() {
       const term = document.getElementById('term-label-input').value.trim();
-      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const csrftokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+      if (!csrftokenEl) {
+        alert('Security token missing. Please refresh the page.');
+        return;
+      }
+      const csrftoken = csrftokenEl.value;
       if (!term) { alert('Please enter a term label.'); return; }
       if (!selectedStudentId) { alert('Please select a student first.'); return; }
       if (selectedSubjectIds.size === 0) { alert('Please select at least one subject.'); return; }
@@ -1040,11 +1058,14 @@
                     });
                 }
 
-                if (unreadCount > 0) {
-                    msgBellBadge.innerText = unreadCount;
-                    msgBellBadge.classList.remove('hidden');
-                } else {
-                    msgBellBadge.classList.add('hidden');
+                const totalUnread = data.unread_count;
+                if (msgBellBadge) {
+                    if (totalUnread > 0) {
+                        msgBellBadge.innerText = totalUnread;
+                        msgBellBadge.classList.remove('hidden');
+                    } else {
+                        msgBellBadge.classList.add('hidden');
+                    }
                 }
             });
     }
@@ -1094,8 +1115,14 @@
         const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
         const title = encodeURIComponent(`Advising Session: ${apt.purpose}`);
         
-        const start = new Date(apt.date_time).toISOString().replace(/-|:|\.\d\d\d/g, "");
-        const end = new Date(new Date(apt.date_time).getTime() + 30*60*1000).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const d = new Date(apt.date_time);
+        const pad = n => n.toString().padStart(2, '0');
+        const formatGCal = (date) => {
+            return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+        };
+
+        const start = formatGCal(d);
+        const end = formatGCal(new Date(d.getTime() + 30*60*1000));
         
         // Make the link ultra-prominent in the description
         const joinLink = apt.meeting_link ? `\n\n🔴 JOIN MEETING HERE: ${apt.meeting_link}` : '';

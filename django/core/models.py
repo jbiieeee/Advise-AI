@@ -78,6 +78,7 @@ class Appointment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     adviser_notes = models.TextField(blank=True, null=True)
     meeting_link = models.URLField(max_length=500, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):
         if self.adviser:

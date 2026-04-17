@@ -56,6 +56,27 @@
       </div>
     </div>
   </header>
+  
+  <!-- Django Flash Messages -->
+  {% if messages %}
+  <div class="px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
+    {% for message in messages %}
+    <div class="p-4 rounded-xl text-sm font-bold flex items-center gap-3 shadow-md border animate-in slide-in-from-top-2 duration-300
+      {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-100{% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-100{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-600 border-yellow-200{% else %}bg-blue-50 text-blue-600 border-blue-100{% endif %}">
+      {% if message.tags == 'error' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      {% elif message.tags == 'success' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      {% elif message.tags == 'warning' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      {% else %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      {% endif %}
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <div class="px-4 sm:px-6 lg:px-8 py-8">
     <!-- Real-time Metrics Banner -->
@@ -382,6 +403,7 @@
                       <div class="flex flex-col">
                         <span class="text-[10px] font-bold text-light-blue">{{ group.code.code|default:"MANUAL" }}</span>
                         <span class="text-[10px] text-gray-400 font-medium">{{ group.term }}</span>
+                        <span class="text-[9px] text-navy/40 font-black uppercase mt-1">Requested: {{ group.requests.0.enrolled_at|date:"M j, P" }}</span>
                       </div>
                     </td>
                     <td class="p-4 align-middle text-center">
@@ -535,14 +557,18 @@
                                      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-navy/20 hover:bg-navy/5 h-9 px-3 bg-white text-navy" title="View Curriculum & Set Grades">
                                  Curriculum
                              </button>
-                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
-                              {% csrf_token %}
-                              <input type="hidden" name="action" value="toggle_user_status">
-                              <input type="hidden" name="user_id" value="{{ student.user.id }}">
-                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white" title="Toggle Account Status">
-                                {% if student.user.is_active %}Deactivate{% else %}Activate{% endif %}
-                              </button>
-                            </form>
+                             <button type="button" onclick="openResetPasswordModal('{{ student.user.id }}', '{{ student.user.get_full_name|default:student.user.username|escapejs }}')" 
+                                     class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-yellow-500 hover:bg-yellow-50 text-yellow-600 h-9 px-3 bg-white" title="Reset Password">
+                                 Reset
+                             </button>
+                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                               {% csrf_token %}
+                               <input type="hidden" name="action" value="toggle_user_status">
+                               <input type="hidden" name="user_id" value="{{ student.user.id }}">
+                               <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white" title="Toggle Account Status">
+                                 {% if student.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                               </button>
+                             </form>
                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Student account? This action cannot be undone.');">
                               {% csrf_token %}
                               <input type="hidden" name="action" value="delete_user">
@@ -650,6 +676,38 @@
             </div>
           </div>
 
+          <!-- Reset Password Modal -->
+          <div id="reset-password-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div class="bg-yellow-500 p-6 text-white text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mx-auto mb-3"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/><path d="M15 12L17 10"/><path d="M15 12L17 14"/></svg>
+                <h3 class="text-xl font-bold">Reset User Password</h3>
+                <p class="text-xs opacity-90 mt-1">For: <span id="reset-modal-user-name" class="font-bold underline"></span></p>
+              </div>
+              <div class="p-6">
+                <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-4">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="admin_reset_password">
+                  <input type="hidden" name="user_id" id="reset-modal-user-id">
+                  <div class="space-y-1.5">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">New Password</label>
+                    <input type="password" name="new_password" required placeholder="••••••••"
+                           class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
+                  </div>
+                  <div class="space-y-1.5">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirm Password</label>
+                    <input type="password" name="confirm_password" required placeholder="••••••••"
+                           class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
+                  </div>
+                  <div class="pt-4 flex gap-2">
+                    <button type="submit" class="flex-1 h-11 bg-yellow-500 text-white rounded-lg font-bold text-sm shadow-md hover:bg-yellow-600 transition-colors">Reset Password</button>
+                    <button type="button" onclick="closeResetPasswordModal()" class="h-11 px-6 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
           <div class="rounded-lg border bg-card text-card-foreground bg-white">
             <div class="flex flex-col space-y-1.5 p-6">
                <h3 class="font-semibold leading-none tracking-tight text-2xl">Registered Advisers</h3>
@@ -677,15 +735,19 @@
                            <div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {% if adviser.user.is_active %}bg-green-500{% else %}bg-red-500{% endif %} text-white">{% if adviser.user.is_active %}active{% else %}inactive{% endif %}</div>
                         </td>
                         <td class="p-4 align-middle">
-                          <div class="flex gap-2">
-                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
-                              {% csrf_token %}
-                              <input type="hidden" name="action" value="toggle_user_status">
-                              <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
-                              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white">
-                                {% if adviser.user.is_active %}Deactivate{% else %}Activate{% endif %}
-                              </button>
-                            </form>
+                           <div class="flex gap-2">
+                             <button type="button" onclick="openResetPasswordModal('{{ adviser.user.id }}', '{{ adviser.user.get_full_name|default:adviser.user.username|escapejs }}')" 
+                                     class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-yellow-500 hover:bg-yellow-50 text-yellow-600 h-9 px-3 bg-white" title="Reset Password">
+                                 Reset
+                             </button>
+                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
+                               {% csrf_token %}
+                               <input type="hidden" name="action" value="toggle_user_status">
+                               <input type="hidden" name="user_id" value="{{ adviser.user.id }}">
+                               <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input hover:bg-gray-100 h-9 px-3 bg-white">
+                                 {% if adviser.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                               </button>
+                             </form>
                             <form method="POST" action="{% url 'admin_dashboard' %}" class="inline" onsubmit="return confirm('Are you sure you want to completely delete this Adviser account? This action cannot be undone.');">
                               {% csrf_token %}
                               <input type="hidden" name="action" value="delete_user">
@@ -785,6 +847,10 @@
                        </td>
                        <td class="p-4 align-middle">
                          <div class="flex gap-2">
+                           <button type="button" onclick="openResetPasswordModal('{{ admin.user.id }}', '{{ admin.user.get_full_name|default:admin.user.username|escapejs }}')" 
+                                   class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-yellow-500 hover:bg-yellow-50 text-yellow-600 h-9 px-3 bg-white" title="Reset Password">
+                               Reset
+                           </button>
                            <form method="POST" action="{% url 'admin_dashboard' %}" class="inline">
                              {% csrf_token %}
                              <input type="hidden" name="action" value="toggle_user_status">
@@ -848,11 +914,67 @@
        </div>
     </div>
   </div>
+    </div>
+
+    <!-- Reset User Password Modal -->
+    <div id="reset-password-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-600 p-6 text-white text-center">
+                <div class="size-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3 class="text-xl font-bold">Reset User Password</h3>
+                <p class="text-sm opacity-90 mt-1">Target: <span id="reset-user-display-name" class="font-black"></span></p>
+            </div>
+            <div class="p-8">
+                <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="admin_reset_password">
+                    <input type="hidden" name="user_id" id="reset-user-id-input">
+                    
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">New Password</label>
+                        <input type="password" name="new_password" required minlength="4"
+                               class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-yellow-500 outline-none transition-all bg-gray-50/50"
+                               placeholder="Min. 4 characters">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">Confirm Password</label>
+                        <input type="password" name="confirm_password" required minlength="4"
+                               class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-yellow-500 outline-none transition-all bg-gray-50/50"
+                               placeholder="Type password again">
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeResetPasswordModal()" 
+                                class="flex-1 h-12 rounded-xl border border-gray-200 font-bold text-gray-500 hover:bg-gray-50 transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="flex-1 h-12 rounded-xl bg-gray-900 text-white font-bold hover:shadow-lg transition-all active:scale-95 shadow-md">
+                            Reset Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+  window.openResetPasswordModal = function(userId, name) {
+    document.getElementById('reset-user-id-input').value = userId;
+    document.getElementById('reset-user-display-name').innerText = name;
+    document.getElementById('reset-password-modal').classList.remove('hidden');
+  };
+
+  window.closeResetPasswordModal = function() {
+    document.getElementById('reset-password-modal').classList.add('hidden');
+  };
+
     document.addEventListener('DOMContentLoaded', () => {
         // ─── Tab Switching Logic ──────────────────────────────────────────
         const triggers = document.querySelectorAll('.tab-trigger');
@@ -929,9 +1051,10 @@
                             notifList.appendChild(item);
                         });
                     }
+                    const totalUnread = data.unread_count;
                     if (msgBellBadge) {
-                        if (unreadCount > 0) {
-                            msgBellBadge.innerText = unreadCount;
+                        if (totalUnread > 0) {
+                            msgBellBadge.innerText = totalUnread;
                             msgBellBadge.classList.remove('hidden');
                         } else {
                             msgBellBadge.classList.add('hidden');
@@ -1181,6 +1304,17 @@
                 body.innerHTML = `<tr id="no-enrollments-msg"><td colspan="4" class="p-12 text-center text-gray-400">No pending enrollment requests</td></tr>`;
             }
         }
+    }
+
+    // ─── Password Reset Modal Logic ──────────────────────────────
+    window.openResetPasswordModal = function(userId, userName) {
+        document.getElementById('reset-modal-user-id').value = userId;
+        document.getElementById('reset-modal-user-name').innerText = userName;
+        document.getElementById('reset-password-modal').classList.remove('hidden');
+    }
+
+    window.closeResetPasswordModal = function() {
+        document.getElementById('reset-password-modal').classList.add('hidden');
     }
 </script>
 {% endblock %}

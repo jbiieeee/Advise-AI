@@ -23,12 +23,58 @@ def csrf_failure(request, reason=""):
     messages.error(request, "Security check failed (CSRF). Please refresh the page and try again.")
     return redirect(request.META.get('HTTP_REFERER', 'landing'))
 
+def get_total_unread_count(user):
+    """Calculates combined unread count from Notifications, Messages, and StaffMessages."""
+    if not user.is_authenticated:
+        return 0
+    from .models import Notification, Message, StaffMessage
+    notif_count = Notification.objects.filter(user=user, is_read=False).count()
+    msg_count = Message.objects.filter(receiver=user, is_read=False).count()
+    
+    staff_msg_count = 0
+    # Check if user is staff (adviser or admin)
+    is_staff = user.is_staff or user.is_superuser
+    if not is_staff:
+        try:
+            is_staff = user.userprofile.role in ['adviser', 'admin']
+        except:
+            pass
+            
+    if is_staff:
+        staff_msg_count = StaffMessage.objects.filter(receiver=user, is_read=False).count()
+        
+    return notif_count + msg_count + staff_msg_count
+
 def landing_page(request):
     return render(request, 'core/landing.html')
 
-@ratelimit(key='ip', rate='5/5m', method='POST', block=True)
+@ratelimit(key='ip', rate='10/5m', method='POST', block=False)
 def login_page(request):
+    # Lockout check for students/staff (session-based)
+    lockout_until_str = request.session.get('login_lockout_until')
+    if lockout_until_str:
+        try:
+            lockout_until = datetime.fromisoformat(lockout_until_str)
+            if timezone.is_naive(lockout_until):
+                lockout_until = timezone.make_aware(lockout_until)
+            
+            if timezone.now() < lockout_until:
+                diff = lockout_until - timezone.now()
+                mins = int(diff.total_seconds() // 60)
+                messages.error(request, f"Too many failed login attempts. Please wait {mins if mins > 0 else 1} minutes before trying again.")
+                return render(request, 'core/login.html')
+            else:
+                # Lockout expired
+                del request.session['login_lockout_until']
+                request.session['login_fails'] = 0
+        except (ValueError, TypeError):
+            pass
+
     if request.method == 'POST':
+        if getattr(request, 'limited', False):
+            messages.error(request, "Rate limit exceeded. Please try again later.")
+            return redirect('login')
+
         role = request.POST.get('role', 'student')
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -45,6 +91,8 @@ def login_page(request):
                     user.is_active = True
                     user.save()
                 
+                # Reset fails on success
+                request.session['login_fails'] = 0
                 # Explicitly specify the backend since allauth adds multiple backends
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('admin_dashboard')
@@ -57,6 +105,7 @@ def login_page(request):
         if user is not None:
             # For admin role, just check superuser status or specific role
             if role == 'admin' and user.is_superuser:
+                request.session['login_fails'] = 0
                 login(request, user)
                 return redirect('admin_dashboard')
             
@@ -70,6 +119,8 @@ def login_page(request):
                 messages.error(request, f'You do not have a {role} account.')
                 return redirect('login')
             
+            # Reset fails on success
+            request.session['login_fails'] = 0
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             if role == 'student' or profile.role == 'student':
                 return redirect('student_dashboard')
@@ -79,8 +130,22 @@ def login_page(request):
                 return redirect('admin_dashboard')
                     
         else:
-            messages.error(request, 'Invalid email or password.')
+            # Track failed attempts
+            fails = request.session.get('login_fails', 0) + 1
+            request.session['login_fails'] = fails
+            
+            if fails >= 6:
+                lockout_time = timezone.now() + timedelta(hours=1)
+                request.session['login_lockout_until'] = lockout_time.isoformat()
+                messages.error(request, "Too many failed attempts. Your login is restricted for 1 hour.")
+            elif fails >= 3:
+                remaining = 6 - fails
+                messages.error(request, f"Invalid email or password. You have {remaining} attempts remaining before a 1-hour lockout.")
+            else:
+                messages.error(request, 'Invalid email or password.')
             return redirect('login')
+            
+    return render(request, 'core/login.html')
             
     return render(request, 'core/login.html')
 
@@ -299,6 +364,7 @@ def api_messages_send(request):
                 return JsonResponse({'error': 'Cannot send staff messages to students'}, status=400)
             
             m = StaffMessage.objects.create(sender=user, receiver=receiver, content=content)
+        else:
             # Standard Message
             # Security: Students cannot message other students
             rev_role = getattr(receiver, 'userprofile', None)
@@ -368,53 +434,117 @@ def student_dashboard(request):
         action = request.POST.get('action')
         
         if action == 'redeem_code':
+            # Lockout check (session-based)
+            lock_str = request.session.get('redemption_lockout_until')
+            if lock_str:
+                try:
+                    lock_until = datetime.fromisoformat(lock_str)
+                    if timezone.is_naive(lock_until):
+                        lock_until = timezone.make_aware(lock_until)
+                    
+                    if timezone.now() < lock_until:
+                        diff = lock_until - timezone.now()
+                        m = int(diff.total_seconds() // 60)
+                        messages.error(request, f"Too many failed attempts. Redemption restricted for {m if m > 0 else 1} more minutes.")
+                        return redirect('student_dashboard')
+                    else:
+                        # Lockout expired
+                        del request.session['redemption_lockout_until']
+                        request.session['redemption_fails'] = 0
+                except (ValueError, TypeError):
+                    pass
+
             code_str = request.POST.get('enrollment_code', '').strip().upper()
             if not code_str:
                 messages.error(request, 'Please enter a valid Enrollment Code.')
             else:
                 try:
-                    enc = EnrollmentCode.objects.get(code=code_str, student=user, used=False)
-                    # Filter out subjects already passed or in-progress
-                    valid_subjects = []
-                    for subj in enc.approved_subjects.all():
-                        status = curriculum_status_map.get(subj.id, 'not_taken')
-                        if status in ['passed', 'in_progress']:
-                            continue
-                        
-                        # Also check if already in a pending TermEnrollment for this term
-                        if not TermEnrollment.objects.filter(student=user, subject=subj, status='pending').exists():
-                            valid_subjects.append(subj)
+                    # Check if code exists globally to distinguish errors
+                    enc = EnrollmentCode.objects.filter(code=code_str).first()
+                    
+                    if not enc:
+                        raise EnrollmentCode.DoesNotExist
+                    
+                    if enc.student != user:
+                        # Increment fails for wrong student code
+                        f = request.session.get('redemption_fails', 0) + 1
+                        request.session['redemption_fails'] = f
+                        if f >= 6:
+                            request.session['redemption_lockout_until'] = (timezone.now() + timedelta(hours=1)).isoformat()
+                            messages.error(request, "Too many invalid attempts. Enrollment redemption locked for 1 hour.")
+                        elif f >= 3:
+                            remaining = 6 - f
+                            messages.error(request, f"This Enrollment Code is assigned to another student. You have {remaining} attempts remaining.")
+                        else:
+                            messages.error(request, 'This Enrollment Code is assigned to another student.')
+                        return redirect('student_dashboard')
 
-                    if not valid_subjects:
-                        messages.warning(request, 'All subjects in this code have already been passed or are currently being taken.')
+                    if enc.used:
+                        # Success resets fails
+                        request.session['redemption_fails'] = 0
+                        messages.info(request, f'This enrollment code ({code_str}) has already been successfully redeemed for your account.')
                     else:
-                        for subj in valid_subjects:
-                            TermEnrollment.objects.get_or_create(
-                                student=user, subject=subj, term_label=enc.term_label,
-                                defaults={'enrollment_code': enc, 'status': 'pending'}
-                            )
-                        
-                        enc.used = True
-                        enc.used_at = timezone.now()
-                        enc.save()
-                        
-                        # Cumulative Enrollment logic: Only set to 'pending' if not currently 'enrolled'
-                        if profile.enrollment_status != 'enrolled':
-                            profile.enrollment_status = 'pending'
-                            profile.save()
-                        
-                        # New: Notify all Admins about enrollment code redemption
-                        admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
-                        for admin in admins:
-                            Notification.objects.create(
-                                user=admin,
-                                event_type='enrollment_code_redeemed',
-                                message=f'Student {user.get_full_name() or user.username} redeemed enrollment code {enc.code} for {enc.term_label}. Approval required.'
-                            )
+                        # Filter out subjects already passed or in-progress
+                        valid_subjects = []
+                        skipped = []
+                        for subj in enc.approved_subjects.all():
+                            status = curriculum_status_map.get(subj.id, 'not_taken')
+                            if status in ['passed', 'in_progress']:
+                                skipped.append(subj.code)
+                                continue
+                            
+                            # Also check if already in a pending TermEnrollment for this term
+                            if not TermEnrollment.objects.filter(student=user, subject=subj, status='pending').exists():
+                                valid_subjects.append(subj)
+                            else:
+                                skipped.append(f"{subj.code} (already pending)")
 
-                        messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
+                        if not valid_subjects:
+                            request.session['redemption_fails'] = 0
+                            msg = 'All subjects in this code have already been passed or are currently being taken.'
+                            if skipped:
+                                msg += f" (Already passed/pending: {', '.join(skipped)})"
+                            messages.warning(request, msg)
+                        else:
+                            for subj in valid_subjects:
+                                TermEnrollment.objects.get_or_create(
+                                    student=user, subject=subj, term_label=enc.term_label,
+                                    defaults={'enrollment_code': enc, 'status': 'pending'}
+                                )
+                            
+                            enc.used = True
+                            enc.used_at = timezone.now()
+                            enc.save()
+                            
+                            # Reset fails on success
+                            request.session['redemption_fails'] = 0
+                            
+                            # Cumulative Enrollment logic: Only set to 'pending' if not currently 'enrolled'
+                            if profile.enrollment_status != 'enrolled':
+                                profile.enrollment_status = 'pending'
+                                profile.save()
+                            
+                            # Notify all Admins
+                            admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
+                            for admin in admins:
+                                Notification.objects.create(
+                                    user=admin,
+                                    event_type='enrollment_code_redeemed',
+                                    message=f'Student {user.get_full_name() or user.username} redeemed enrollment code {enc.code} for {enc.term_label}. Approval required.'
+                                )
+
+                            messages.success(request, f'Registration code submitted! Your enrollment for {enc.term_label} is now pending Admin approval.')
                 except EnrollmentCode.DoesNotExist:
-                    messages.error(request, 'Invalid or already-used Enrollment Code. Please contact your adviser.')
+                    f = request.session.get('redemption_fails', 0) + 1
+                    request.session['redemption_fails'] = f
+                    if f >= 6:
+                        request.session['redemption_lockout_until'] = (timezone.now() + timedelta(hours=1)).isoformat()
+                        messages.error(request, "Too many invalid attempts. Enrollment redemption locked for 1 hour.")
+                    elif f >= 3:
+                        remaining = 6 - f
+                        messages.error(request, f"Invalid Enrollment Code. You have {remaining} attempts remaining.")
+                    else:
+                        messages.error(request, 'Invalid Enrollment Code. Please contact your adviser.')
                 except Exception as e:
                     messages.error(request, f'An unexpected error occurred: {str(e)}')
 
@@ -524,7 +654,7 @@ def student_dashboard(request):
     all_staff_ids_json = json.dumps(all_staff_ids)
 
     from core.models import Notification
-    unread_notifications_count = Notification.objects.filter(user=user, is_read=False).count()
+    unread_notifications_count = get_total_unread_count(user)
 
     context = {
         'profile': profile,
@@ -753,7 +883,7 @@ def adviser_dashboard(request):
         'all_subjects': all_subjects,
         'generated_codes': generated_codes,
         'staff_list': staff_list,
-        'unread_notifications_count': Notification.objects.filter(user=user, is_read=False).count(),
+        'unread_notifications_count': get_total_unread_count(user),
     }
     return render(request, 'core/adviser.html', context)
 
@@ -1110,6 +1240,23 @@ def admin_dashboard(request):
                     messages.success(request, f'Form {status} successfully.')
                 except FormSubmission.DoesNotExist:
                     messages.error(request, 'Form not found.')
+
+        elif action == 'admin_reset_password':
+            target_user_id = request.POST.get('user_id')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+
+            if target_user_id and new_password:
+                if new_password != confirm_password:
+                    messages.error(request, 'Passwords do not match.')
+                else:
+                    try:
+                        target_user = User.objects.get(id=target_user_id)
+                        target_user.set_password(new_password)
+                        target_user.save()
+                        messages.success(request, f'Password for {target_user.get_full_name() or target_user.username} has been reset.')
+                    except User.DoesNotExist:
+                        messages.error(request, 'User not found.')
                 
         return redirect('admin_dashboard')
 
@@ -1160,6 +1307,7 @@ def admin_dashboard(request):
         'apt_completed': Appointment.objects.filter(status='completed').count(),
         'form_pending': FormSubmission.objects.filter(status='pending').count(),
         'form_approved': FormSubmission.objects.filter(status='approved').count(),
+        'unread_notifications_count': get_total_unread_count(user),
     }
     return render(request, 'core/admin.html', context)
 
@@ -1292,49 +1440,7 @@ def profile_view(request):
 
 @login_required(login_url='login')
 def get_notification_count(request):
-    from django.http import JsonResponse
-    user = request.user
-    role = None
-    if hasattr(user, 'userprofile'):
-        role = user.userprofile.role
-    elif user.is_superuser:
-        role = 'admin'
-    
-    count = 0
-    if role == 'student':
-        # Retrieve count directly without circular dependency
-        from core.models import UserProfile, Message
-        adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
-        admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
-        all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
-        count = Message.objects.filter(receiver=user, sender__in=all_staff_ids, is_read=False).count()
-        
-    elif role in ['adviser', 'admin']:
-        from core.models import UserProfile, Message, Notification
-        adviser_user_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
-        admin_user_ids = list(User.objects.filter(is_superuser=True).values_list('id', flat=True))
-        all_staff_ids = list(set(adviser_user_ids + admin_user_ids))
-        
-        # Count unread messages from students to staff
-        msg_count = Message.objects.filter(
-            sender__userprofile__role='student',
-            receiver__in=all_staff_ids,
-            is_read=False
-        ).count()
-        
-        # For staff, we now also count system notifications
-        notif_count = Notification.objects.filter(user=user, is_read=False).count()
-        
-        # And unread staff-to-staff shared inbox messages (if you want to notify about these too)
-        staff_msgs_count = Message.objects.filter(
-            receiver=user,
-            is_staff_only=True,
-            is_read=False
-        ).count()
-        
-        count = msg_count + notif_count + staff_msgs_count
-        
-    return JsonResponse({'count': count})
+    return JsonResponse({'count': get_total_unread_count(request.user)})
 
 
 @login_required(login_url='login')
@@ -1468,7 +1574,7 @@ def api_get_active_sessions(request):
             'name': f"{p.user.first_name} {p.user.last_name}".strip() or p.user.username,
             'role': p.role.capitalize(),
             'email': p.user.email,
-            'last_active': p.last_activity.strftime('%I:%M %p'),
+            'last_active': timezone.localtime(p.last_activity).strftime('%I:%M %p'),
             'is_me': p.user == request.user
         })
     
@@ -1565,28 +1671,41 @@ def api_get_notifications(request):
     role = getattr(user, 'userprofile', None)
     role_str = role.role if role else ('admin' if user.is_superuser else None)
     
-    notifs_query = Notification.objects.filter(user=user)
+    user = request.user
     
-    # Filter for Admin: only new student and enrollment code usage
-    if role_str == 'admin':
-        notifs_query = notifs_query.filter(event_type__in=['new_student', 'enrollment_code_redeemed'])
-        
-    notifs = notifs_query.order_by('-created_at')[:20]
-    
+    # 1. Real Notifications
+    notifs_query = Notification.objects.filter(user=user).order_by('-created_at')[:15]
     data = []
-    for n in notifs:
+    for n in notifs_query:
         data.append({
-            'id': n.id,
-            'type': n.event_type,
+            'id': f"n_{n.id}",
+            'type': n.event_type.replace('_', ' ').capitalize(),
             'message': n.message,
             'is_read': n.is_read,
-            'created_at': localtime(n.created_at).strftime('%b %d, %Y %I:%M %p')
+            'created_at': localtime(n.created_at).strftime('%b %d, %I:%M %p')
         })
     
-    # Mark all as read when fetched? Or keep as is. User mentioned "latest notifications".
-    # Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    # 2. Unread Messages as notifications
+    # For students: messages from staff
+    # For staff: messages from students OR other staff (if StaffMessage)
+    unread_msgs = Message.objects.filter(receiver=user, is_read=False).order_by('-sent_at')[:10]
+    for m in unread_msgs:
+        data.append({
+            'id': f"m_{m.id}",
+            'type': 'New Message',
+            'message': f"From {m.sender.first_name or m.sender.username}: {m.content[:40]}...",
+            'is_read': False,
+            'created_at': localtime(m.sent_at).strftime('%b %d, %I:%M %p')
+        })
+        
+    # Sort combined by date (approximate since we use strings, but we can do it better)
+    # Actually, let's just keep them as requested: latest first.
     
-    return JsonResponse({'notifications': data})
+    return JsonResponse({
+        'notifications': data,
+        'unread_count': get_total_unread_count(user)
+    })
+
 
 @login_required(login_url='login')
 def api_mark_notifications_read(request):

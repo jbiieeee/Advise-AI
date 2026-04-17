@@ -72,7 +72,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
-    'allauth.socialaccount.providers.facebook',
     'django_ratelimit',
 ]
 
@@ -140,11 +139,6 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     'github': {
         'SCOPE': ['user', 'repo', 'read:org'],
-    },
-    'facebook': {
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name'],
     }
 }
 
@@ -184,7 +178,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
