@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Control Center | Advise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-900 overflow-hidden text-sm uppercase">
+    <div class="h-full flex flex-col">
+        <!-- GLOBAL MONITOR HEADER -->
+        <header class="bg-navy bg-[#001F3F] text-white px-8 py-5 flex justify-between items-center shadow-2xl z-50">
+            <div class="flex items-center gap-6">
+                <!-- Enhanced Back Button -->
+                <a href="{% url 'admin_dashboard' %}" 
+                   class="flex items-center gap-3 bg-white/5 border border-white/10 hover:bg-white/10 px-5 py-2.5 rounded-2xl transition-all group shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+                    <div class="text-left hidden md:block">
+                        <div class="text-[10px] font-black uppercase tracking-tighter leading-none">Exit Monitor</div>
+                        <div class="text-[8px] text-blue-300 font-bold uppercase tracking-widest mt-1 opacity-60">Return to Dashboard</div>
+                    </div>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-black uppercase tracking-tighter leading-none">Operations Control Center</h1>
+                    <p class="text-[10px] text-blue-300 font-bold uppercase tracking-[0.2em] mt-1.5 opacity-80">Real-Time System Presence & Audit</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-8">
+                <div class="text-right border-r border-white/10 pr-8">
+                    <div class="text-xl font-mono font-bold" id="digital-clock">00:00:00</div>
+                    <div class="text-[9px] text-blue-300 font-bold uppercase tracking-widest">System Master Clock</div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="bg-green-500/10 border border-green-500/20 px-4 py-2 rounded-xl flex items-center gap-3">
+                        <div class="size-2 rounded-full bg-green-500 animate-pulse"></div>
+                        <div class="text-left">
+                            <div class="text-xs font-black text-green-500">{{ live_calls_count }}</div>
+                            <div class="text-[8px] text-white/60 font-bold uppercase tracking-widest">Active Join</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN MONITORING GRID -->
+        <main class="flex-1 overflow-hidden p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- LEFT: SESSION PRESENCE (75%) -->
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                <div class="flex-1 glass border border-white rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col">
+                    <div class="p-8 border-b flex justify-between items-center bg-white/50">
+                        <div>
+                            <h2 class="text-xl font-black text-navy uppercase tracking-tight">Meeting Presence Hub</h2>
+                            <p class="text-xs text-slate-400 mt-1">Monitoring the heartbeat of every advising session.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-black uppercase">Schedule</span>
+                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-black uppercase animate-pulse">Live</span>
+                            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black uppercase">Complete</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 bg-white/90 backdrop-blur-md z-10">
+                                <tr class="text-[10px] uppercase font-black text-slate-400 tracking-widest border-b">
+                                    <th class="py-5 px-8">Session Detail</th>
+                                    <th class="py-5 px-4 text-center">Lifecycle Pulse</th>
+                                    <th class="py-5 px-4">Participants</th>
+                                    <th class="py-5 px-8 text-right">Activity Signal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for apt in appointment_monitoring %}
+                                <tr class="group hover:bg-blue-50/20 transition-all duration-300">
+                                    <td class="py-6 px-8">
+                                        <div class="flex items-center gap-4">
+                                            <div class="size-10 rounded-2xl bg-gradient-to-br from-navy to-light-blue shadow-lg flex items-center justify-center text-white font-black text-xs">
+                                                {{ forloop.counter }}
+                                            </div>
+                                            <div>
+                                                <div class="font-black text-navy text-base leading-tight">{{ apt.purpose }}</div>
+                                                <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">{{ apt.date_time|date:"l, F d, Y" }} @ {{ apt.date_time|date:"h:i A" }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 px-4">
+                                        <div class="flex justify-center items-center gap-2">
+                                            <div class="h-1.5 w-12 rounded-full bg-yellow-400" title="Phase 1: Scheduled"></div>
+                                            <div class="h-1.5 w-12 rounded-full {% if apt.actual_start_at %}bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]{% else %}bg-slate-200{% endif %}" title="Phase 2: In Progress"></div>
+                                            <div class="h-1.5 w-12 rounded-full {% if apt.actual_end_at or apt.status == 'completed' %}bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]{% else %}bg-slate-200{% endif %}" title="Phase 3: Finalized"></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 px-4">
+                                        <div class="flex -space-x-3">
+                                            <div class="size-9 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-navy" title="Student: {{ apt.student.username }}">S</div>
+                                            <div class="size-9 rounded-full border-4 border-white bg-light-blue text-white flex items-center justify-center text-[10px] font-black" title="Adviser: {{ apt.adviser.username }}">A</div>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 px-8 text-right">
+                                        {% if apt.actual_end_at or apt.status == 'completed' %}
+                                            <div class="inline-flex flex-col items-end">
+                                                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase border border-blue-200">Session Securely Closed</span>
+                                                <span class="text-[9px] text-slate-400 mt-1 italic">Concluded {{ apt.actual_end_at|date:"h:i A" }}</span>
+                                            </div>
+                                        {% elif apt.actual_start_at %}
+                                            <div class="inline-flex flex-col items-end">
+                                                <span class="text-[10px] font-black text-green-600 bg-green-50 px-3 py-1 rounded-full uppercase border border-green-200 animate-pulse tracking-widest flex items-center gap-2">
+                                                    <span class="size-1.5 rounded-full bg-green-500"></span>
+                                                    Transmission Live
+                                                </span>
+                                                <span class="text-[9px] text-slate-400 mt-1 italic">Joined {{ apt.actual_start_at|date:"h:i A" }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="inline-flex flex-col items-end">
+                                                <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase border border-amber-200">Awaiting Signal</span>
+                                                <span class="text-[9px] text-slate-400 mt-1 italic">Not yet started</span>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: LIVE HEARTBEAT (25%) -->
+            <div class="flex flex-col gap-6">
+                <div class="flex-1 glass border border-white rounded-[2.5rem] shadow-xl flex flex-col overflow-hidden">
+                    <div class="p-8 border-b bg-navy bg-[#001F3F] text-white">
+                        <h2 class="text-xl font-black uppercase tracking-tight">Audit Heartbeat</h2>
+                        <p class="text-[10px] text-blue-300 font-bold uppercase tracking-widest mt-1 opacity-70">Real-Time System Log Feed</p>
+                    </div>
+                    <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/30">
+                        <div class="space-y-6">
+                            {% for log in activity_logs %}
+                            <div class="relative pl-6 pb-6 border-l-2 border-slate-200 last:border-0 last:pb-0">
+                                <div class="absolute -left-[7px] top-1.5 size-3 rounded-full border-2 border-white shadow-md {% if 'Login' in log.action %}bg-green-500{% elif 'Approved' in log.action %}bg-blue-500{% else %}bg-amber-500{% endif %}"></div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[10px] font-black text-navy uppercase tracking-tighter">{{ log.action }}</span>
+                                    <span class="text-[9px] text-slate-400 font-mono">{{ log.timestamp|date:"h:i A" }}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-600 leading-relaxed italic">"{{ log.details }}"</p>
+                                <p class="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-[0.1em]">
+                                    — {% if log.user %}{{ log.user.get_full_name|default:log.user.username }}{% else %}SYSTEM PULSE{% endif %}
+                                </p>
+                            </div>
+                            {% empty %}
+                            <div class="py-20 text-center text-slate-400 italic text-sm">Waiting for incoming heartbeat signals...</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Digital Clock Logic
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('digital-clock').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Auto Refresh logic (every 30 seconds)
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

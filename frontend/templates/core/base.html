@@ -1,18 +1,20 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Django App{% endblock %}</title>
+    <title>{% block title %}Advise-AI{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
+
 <body class="bg-light-gray text-gray-900 font-sans antialiased min-h-screen flex flex-col">
     {% block navbar %}
     {% include 'components/navbar.html' %}
     {% endblock %}
-    
+
     <main class="flex-grow">
         {% block content %}{% endblock %}
     </main>
@@ -25,99 +27,260 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          {% if messages %}
-              {% for message in messages %}
-                  Swal.fire({
-                      icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% elif message.tags == "warning" %}warning{% else %}info{% endif %}',
-                      title: '{% if message.tags == "error" %}Oops!{% elif message.tags == "success" %}Success{% elif message.tags == "warning" %}Warning{% else %}Info{% endif %}',
-                      text: '{{ message }}',
-                      confirmButtonColor: '#0056b3', /* matching the light-blue / navy theme loosely */
-                  });
-              {% endfor %}
-          {% endif %}
-      });
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if messages %}
+            {% for message in messages %}
+            Swal.fire({
+                icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% elif message.tags == "warning" %}warning{% else %}info{% endif %}',
+                title: '{% if message.tags == "error" %}Oops!{% elif message.tags == "success" %}Success{% elif message.tags == "warning" %}Warning{% else %}Info{% endif %}',
+                text: '{{ message }}',
+                confirmButtonColor: '#0056b3', /* matching the light-blue / navy theme loosely */
+            });
+            {% endfor %}
+            {% endif %}
+        });
     </script>
 
     <script>
-      function syncNotifications() {
-          fetch('/api/notifications/count/')
-          .then(r => r.json())
-          .then(data => {
-              const badge = document.getElementById('msg-bell-badge');
-              if (badge) {
-                  badge.textContent = data.count;
-                  if (data.count > 0) {
-                      badge.classList.remove('hidden');
-                  } else {
-                      badge.classList.add('hidden');
-                  }
-              }
-          })
-          .catch(e => console.error('Notification sync error', e));
-      }
-      setInterval(syncNotifications, 5000);
+        let activeCallModal = null;
+        let lastCallId = null;
+        let seenNotificationIds = new Set();
+        let upcomingMeetingAlerted = false;
 
-      document.addEventListener('DOMContentLoaded', () => {
-          const bellBtn = document.getElementById('msg-bell-btn');
-          const dropdown = document.getElementById('notifications-dropdown');
-          const notifList = document.getElementById('notifications-list');
+        function syncNotifications() {
+            // Sync everything in one request to api_get_notifications (/api/notifications/system/)
+            fetch('/api/notifications/system/')
+                .then(r => r.json())
+                .then(data => {
+                    // 1. Update Badge Count
+                    const badge = document.getElementById('msg-bell-badge');
+                    const unreadCount = data.unread_count || 0;
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        if (unreadCount > 0) badge.classList.remove('hidden');
+                        else badge.classList.add('hidden');
+                    }
 
-          if (bellBtn && dropdown) {
-              bellBtn.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                  dropdown.classList.toggle('hidden');
-                  
-                  if (!dropdown.classList.contains('hidden')) {
-                      notifList.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">Loading...</div>';
-                      fetch('/api/notifications/latest/')
-                      .then(r => r.json())
-                      .then(data => {
-                          if (!data.notifications || data.notifications.length === 0) {
-                              notifList.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">No unread notifications.</div>';
-                              return;
-                          }
-                          notifList.innerHTML = '';
-                          data.notifications.forEach(n => {
-                              // Determine link based on content or type
-                              let link = "{% url 'messages_page' %}";
-                              if (n.title.toLowerCase().includes('enrollment')) {
-                                  link = "{% url 'admin_dashboard' %}?tab=enrollments";
-                              } else if (n.title.toLowerCase().includes('help') || n.title.toLowerCase().includes('response')) {
-                                  {% if role == 'student' %}
-                                  link = "{% url 'messages_page' %}";
-                                  if (n.sender_id) link += `?select_id=${n.sender_id}`;
-                                  {% else %}
-                                  link = "{% url 'admin_dashboard' %}?tab=help-forms";
-                                  {% endif %}
-                              } else if (n.sender_id) {
-                                  link += `?select_id=${n.sender_id}`;
-                              }
+                    // 2. Detect New Notifications for Live Toasts
+                    const notifications = data.notifications || [];
+                    const isFirstRun = seenNotificationIds.size === 0;
 
-                              notifList.insertAdjacentHTML('beforeend', `
-                                  <a href="${link}" class="block p-3 hover:bg-gray-100 transition-colors border-l-4 border-light-blue no-underline text-inherit">
-                                      <div class="flex justify-between items-start mb-1">
-                                          <p class="text-sm font-bold text-navy">${n.title}</p>
-                                          <span class="text-[9px] text-gray-400 font-medium">${n.time}</span>
-                                      </div>
-                                      <p class="text-[11px] text-gray-600 truncate">${n.content}</p>
-                                  </a>
-                              `);
-                          });
-                      })
-                      .catch(e => {
-                          notifList.innerHTML = '<div class="p-4 text-center text-sm text-red-400">Error loading notifications.</div>';
-                      });
-                  }
-              });
+                    notifications.forEach(n => {
+                        // Live Call logic (Highest Priority)
+                        if (n.raw_type === 'incoming_call' && !n.is_read && n.id !== lastCallId) {
+                            lastCallId = n.id;
+                            handleIncomingCall(n);
+                        }
+                        // Generic Live Toast for brand new notifications (exclude first run to avoid spam)
+                        else if (!n.is_read && !seenNotificationIds.has(n.id)) {
+                            seenNotificationIds.add(n.id);
+                            if (!isFirstRun) showLiveToast(n);
+                        }
 
-              document.addEventListener('click', (e) => {
-                  if (!dropdown.contains(e.target) && e.target !== bellBtn && !bellBtn.contains(e.target)) {
-                      dropdown.classList.add('hidden');
-                  }
-              });
-          }
-      });
+                        // Track seen unread IDs
+                        if (!n.is_read) seenNotificationIds.add(n.id);
+                    });
+
+                    // 3. Update Dropdown List (if present and visible/ready)
+                    const notifList = document.getElementById('notifications-list');
+                    if (notifList) {
+                        updateDropdownUI(notifications, notifList);
+                    }
+
+                    // 4. Action Center support (Dashboard specific)
+                    if (typeof updateAdviserActionCenter === 'function') {
+                        updateAdviserActionCenter(notifications);
+                    }
+                })
+                .catch(e => console.error('Notification sync error', e));
+        }
+
+        function updateDropdownUI(notifications, container) {
+            if (notifications.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">No unread notifications.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            notifications.forEach(n => {
+                // Determine link based on content or type
+                let link = "#";
+                if (n.raw_type === 'message') {
+                    link = "/messages/";
+                } else if (n.raw_type === 'help_response') {
+                    link = "/messages/?type=support";
+                } else if (n.type.toLowerCase().includes('enrollment')) {
+                    link = "/admin_dashboard/?tab=enrollments";
+                }
+
+                container.insertAdjacentHTML('beforeend', `
+                  <a href="${link}" class="block p-3 hover:bg-gray-100 transition-colors border-l-4 ${!n.is_read ? 'border-light-blue bg-blue-50/30' : 'border-transparent'} no-underline text-inherit">
+                      <div class="flex justify-between items-start mb-1">
+                          <p class="text-[10px] font-black text-navy uppercase">${n.type}</p>
+                          <span class="text-[9px] text-gray-400 font-medium">${n.display_date}</span>
+                      </div>
+                      <p class="text-[11px] text-gray-700 leading-snug">${n.message}</p>
+                  </a>
+              `);
+            });
+        }
+
+        function initiateCall(targetUserId, targetName) {
+            const roomName = `advise-ai-session-${Math.random().toString(36).substring(7)}-${targetUserId}`;
+
+            Swal.fire({
+                title: 'Initiate Secure Call?',
+                text: `You are about to ring ${targetName}. Students will receive an instant notification to join.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Start Calling',
+                confirmButtonColor: '#0E2A47',
+                cancelButtonColor: '#d33',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/api/notifications/trigger-call/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            receiver_id: targetUserId,
+                            room_name: room_name
+                        })
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.open(`/video-call/${roomName}/`, '_blank');
+                            } else {
+                                Swal.fire('Error', data.error || 'Failed to start call', 'error');
+                            }
+                        });
+                }
+            });
+        }
+
+        function showLiveToast(notification) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+            });
+            Toast.fire({
+                icon: 'info',
+                title: notification.type,
+                text: notification.message.length > 50 ? notification.message.substring(0, 50) + '...' : notification.message
+            });
+        }
+
+        function checkUpcomingMeetings(notifications) {
+            // Look for any text mentioning 'Meeting link' or 'Appointment' for now, 
+            // but we will mainly rely on custom dashboard logic in adviser.html for the 'Action Center'
+            // However, base.html can show a global top-bar if needed.
+            if (typeof updateAdviserActionCenter === 'function') {
+                updateAdviserActionCenter(notifications);
+            }
+        }
+
+        function handleIncomingCall(notification) {
+            try {
+                const callData = JSON.parse(notification.message);
+                const roomName = callData.room_name;
+                const caller = callData.caller_name;
+
+                Swal.fire({
+                    title: 'Incoming Secure Conference',
+                    html: `
+                    <div class="py-4">
+                        <div class="size-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0E2A47" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <p class="font-bold text-navy text-lg">${caller}</p>
+                        <p class="text-sm text-gray-600">is inviting you to a live advising session.</p>
+                    </div>
+                  `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Join Session',
+                    cancelButtonText: 'Decline',
+                    confirmButtonColor: '#0E2A47',
+                    cancelButtonColor: '#d33',
+                    allowOutsideClick: false,
+                    customClass: {
+                        title: 'font-bold text-navy'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Mark notification as read before joining
+                        fetch('/api/notifications/mark-read/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                            body: JSON.stringify({ notification_ids: [notification.id.replace('n_', '')] })
+                        });
+                        window.open(`/video-call/${roomName}/`, '_blank');
+                    } else {
+                        // Mark as read anyway on decline
+                        fetch('/api/notifications/mark-read/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                            body: JSON.stringify({ notification_ids: [notification.id.replace('n_', '')] })
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to parse call notification", e);
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        {% if user.is_authenticated %}
+        setInterval(syncNotifications, 10000); // Poll every 10s for live feel
+        {% endif %}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const bellBtn = document.getElementById('msg-bell-btn');
+            const dropdown = document.getElementById('notifications-dropdown');
+
+            if (bellBtn && dropdown) {
+                bellBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+
+                    if (!dropdown.classList.contains('hidden')) {
+                        // Mark as read when opened (optional, based on preference)
+                        // fetch('/api/notifications/mark-read/').then(() => syncNotifications());
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target) && e.target !== bellBtn && !bellBtn.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Initial sync
+            {% if user.is_authenticated %}
+            syncNotifications();
+            {% endif %}
+        });
     </script>
 </body>
+
 </html>

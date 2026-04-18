@@ -33,7 +33,9 @@ urlpatterns = [
     path('api/messages/thread/<int:contact_id>/', views.api_messages_thread, name='api_messages_thread'),
     path('api/messages/send/', views.api_messages_send, name='api_messages_send'),
     path('api/notifications/system/', views.api_get_notifications, name='api_get_notifications'),
+    path('api/notifications/trigger-call/', views.api_trigger_call, name='api_trigger_call'),
     path('api/analytics/sync/', views.api_analytics_sync, name='api_analytics_sync'),
+    path('system/monitor/', views.admin_monitor_view, name='admin_monitor'),
     path('api/admin/active-sessions/', views.api_get_active_sessions, name='api_get_active_sessions'),
     path('api/admin/send-official-notice/', views.api_send_official_notice, name='api_send_official_notice'),
 
@@ -45,4 +47,9 @@ urlpatterns = [
     # ── Universal Account OTP Verification ──
     path('auth/send-otp/', views.send_verification_otp, name='send_verification_otp'),
     path('auth/verify-otp/', views.verify_account_otp, name='verify_account_otp'),
+
+    # ── Appointment Lifecycle Signaling ────────────────────────
+    path('api/appointment/signal-start/<int:apt_id>/', views.api_signal_appointment_start, name='api_signal_appointment_start'),
+    path('api/appointment/signal-end/<int:apt_id>/', views.api_signal_appointment_end, name='api_signal_appointment_end'),
+    path('api/appointment/conflicts/', views.api_get_appointment_conflicts, name='api_get_appointment_conflicts'),
 ]

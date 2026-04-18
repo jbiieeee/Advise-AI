@@ -449,8 +449,25 @@
         const roomName = targetRoom || `advise-ai-session-${Math.random().toString(36).substring(7)}-${currentContactId}`;
         const callUrl = `/video-call/${roomName}/`;
 
-        // If we are the initiator (targetRoom is null), send invite message
-        if (!targetRoom) {
+        // If we are the initiator (targetRoom is null), send both a trigger and a chat message
+        if (!targetRoom && currentContactId) {
+            // 1. Trigger the real-time "Incoming Call" popup notification
+            fetch('/api/notifications/trigger-call/', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    receiver_id: currentContactId,
+                    room_name: roomName
+                })
+            }).then(r => r.json())
+            .then(data => {
+                if(data.status === 'success') console.log("Call notification triggered successfully.");
+            }).catch(e => console.error("Call trigger failed", e));
+
+            // 2. Fallback: Send a chat message too
             const inviteMsg = `[VIDEO CALL STARTED] Click to join: JOIN_CALL:${roomName}`;
             messageInput.value = inviteMsg;
             messageForm.dispatchEvent(new Event('submit'));

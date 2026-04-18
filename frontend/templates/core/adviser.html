@@ -160,7 +160,55 @@
   </header>
 
   <div class="px-4 sm:px-6 lg:px-8 py-8">
-{% csrf_token %}
+    <!-- Live Action Center (Adviser To-Do Bar) -->
+    <div id="adviser-action-center" class="mb-8">
+        <div class="bg-gradient-to-r from-navy via-navy to-light-blue rounded-2xl shadow-xl overflow-hidden border border-white/10 transition-all hover:shadow-2xl">
+            <div class="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-white/10">
+                <!-- Session Status / To-Do -->
+                <div class="flex-1 p-4 flex items-center gap-4 bg-white/5">
+                    <div class="size-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Today's Focus</h4>
+                        <p id="focus-message" class="text-sm text-white font-bold">
+                            {% if focus_apt %}
+                                <span class="text-blue-400 animate-pulse">⚠️ ACTION REQUIRED:</span> New request from {{ focus_apt.student.get_full_name|default:focus_apt.student.username }}
+                            {% else %}
+                                <span class="text-blue-400 font-black tracking-wide">COMPLETED:</span> You're all clear for today. Great job!
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats (Clickable) -->
+                <div class="flex items-center bg-black/10">
+                    <button onclick="activateTab('inquiries')" class="px-8 py-4 text-center hover:bg-white/5 transition-colors group">
+                        <p class="text-[10px] text-white/50 uppercase font-bold mb-1 group-hover:text-blue-300 transition-colors">Pending</p>
+                        <p class="text-xl font-bold text-white leading-none group-hover:scale-110 transition-transform">{{ pending_appointments.count|default:"0" }}</p>
+                    </button>
+                    <button onclick="activateTab('students')" class="px-8 py-4 text-center hover:bg-white/5 transition-colors border-l border-white/10 group">
+                        <p class="text-[10px] text-white/50 uppercase font-bold mb-1 group-hover:text-blue-300 transition-colors">Students</p>
+                        <p class="text-xl font-bold text-white leading-none group-hover:scale-110 transition-transform">{{ total_advisees|default:"0" }}</p>
+                    </button>
+                </div>
+
+                <div id="action-btn-container" class="p-4 flex items-center justify-center bg-white/10 min-w-[200px]">
+                    {% if focus_apt %}
+                        <button onclick="openConfirmModal('{{ focus_apt.id }}', '{{ focus_apt.purpose|escapejs }}', 'confirmed')" 
+                                class="px-6 py-2 bg-blue-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/30 hover:bg-blue-400 hover:-translate-y-1 transition-all">
+                          REVIEW NOW
+                        </button>
+                    {% else %}
+                        <div class="flex items-center gap-2 text-white/30 italic text-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M2 12h2"/><path d="m4.93 19.07 1.41-1.41"/><path d="M12 22v-2"/><path d="m19.07 19.07-1.41-1.41"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.91 9a3 3 0 0 1-5.82 0"/><path d="M8 9h8"/></svg>
+                            Time to relax
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -196,13 +244,13 @@
               </svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_appointments.count|default:"0" }}</h3>
-          <p class="text-sm text-gray-600 font-medium">Pending Appointments</p>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ active_sessions_count|default:"0" }}</h3>
+          <p class="text-sm font-medium text-gray-400 uppercase tracking-widest">Active Sessions</p>
         </div>
       </button>
 
       <!-- Stat 3 -->
-      <button onclick="activateTab('appointments')"
+      <button onclick="activateTab('inquiries')"
         class="rounded-lg border bg-card text-card-foreground hover:shadow-lg hover:scale-[1.02] transition-all border-l-4 border-l-light-blue shadow-md bg-white text-left w-full group">
         <div class="p-6 pt-6">
           <div class="flex justify-between items-start mb-4">
@@ -216,10 +264,88 @@
               </svg>
             </div>
           </div>
-          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ appointments_today|default:"0" }}</h3>
-          <p class="text-sm text-gray-600 font-medium">Appointments Today</p>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ pending_action_count|default:"0" }}</h3>
+          <p class="text-sm text-gray-600 font-medium uppercase tracking-widest">Needs Response</p>
         </div>
       </button>
+    </div>
+
+    <!-- ─── Appointment Confirmation Modal ────────────────────────────── -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-navy/60 backdrop-blur-md items-center justify-center p-4 z-[100]">
+      <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+        <div class="p-8 border-b border-gray-100 bg-gray-50/50">
+          <div class="flex items-center gap-4">
+            <div class="size-12 bg-navy rounded-2xl flex items-center justify-center text-white shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-navy uppercase tracking-tight" id="confirm-modal-title">Confirm Appointment</h2>
+              <p class="text-xs text-gray-400 font-medium" id="confirm-modal-purpose">Loading session details...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conflict Warning Banner -->
+        <div id="conflict-banner" class="hidden bg-yellow-50 border-b border-yellow-100 p-6 animate-in slide-in-from-top duration-300">
+          <div class="flex gap-4">
+            <div class="size-10 bg-yellow-400 rounded-xl flex items-center justify-center text-white shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-black text-yellow-800 uppercase tracking-tight">Schedule Conflict Detected</h4>
+              <p class="text-xs text-yellow-700/80 mb-3" id="conflict-desc">You already have a session at this time.</p>
+              <div class="p-4 bg-white/50 rounded-xl border border-yellow-200/50">
+                <p class="text-[10px] font-bold text-yellow-600 uppercase mb-2">Recommended Available Advisers:</p>
+                <div id="available-advisers-list" class="flex flex-wrap gap-2 text-[10px] font-black uppercase">
+                  <!-- Populated via JS -->
+                   <span class="text-gray-400 italic">Finding available staff...</span>
+                </div>
+              </div>
+              <p class="mt-3 text-[10px] text-yellow-600 font-medium italic">* Consider referring student to a free adviser or suggesting a different time.</p>
+            </div>
+          </div>
+        </div>
+        
+        <form method="POST" action="{% url 'adviser_dashboard' %}" class="p-8 space-y-6">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_appointment">
+          <input type="hidden" name="apt_id" id="confirm-modal-apt-id">
+          <input type="hidden" name="status" id="confirm-modal-status" value="confirmed">
+
+          <!-- Comment Field -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-navy uppercase tracking-widest pl-1" id="confirm-modal-note-label">Adviser's Message / Note</label>
+            <textarea name="adviser_notes" id="confirm-modal-notes" required placeholder="Type your response to the student here..."
+              class="w-full min-h-[120px] p-5 rounded-2xl border border-gray-200 focus:border-light-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all text-sm bg-gray-50/30 font-medium"></textarea>
+          </div>
+
+          <!-- Meeting Link Field (Hidden in Decline Mode) -->
+          <div id="meeting-link-field" class="space-y-2">
+            <label class="text-[10px] font-black text-light-blue uppercase tracking-widest pl-1">Session Meeting Link</label>
+            <div class="flex gap-2">
+              <input type="url" name="meeting_link" id="confirm-modal-link" 
+                     placeholder="Auto-generated if empty..."
+                     class="flex-1 h-12 rounded-2xl border border-gray-200 focus:border-light-blue outline-none px-5 text-sm bg-gray-50/30 font-medium">
+              <button type="button" onclick="useProfileLink('confirm-modal-link', '{{ user.userprofile.meeting_link|default:''|escapejs }}')"
+                      class="h-12 px-5 bg-white border-2 border-light-blue/20 text-light-blue rounded-2xl text-xs font-black hover:bg-blue-50 transition-all shadow-sm">
+                MY LINK
+              </button>
+            </div>
+            <p class="text-[9px] text-gray-400 italic pl-1">* Blank = Branded Advise AI link.</p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-4">
+            <button type="button" onclick="closeConfirmModal()" 
+                    class="flex-1 h-13 rounded-2xl text-sm font-bold text-gray-400 hover:bg-gray-50 transition-all border border-transparent">
+              Discard
+            </button>
+            <button type="submit" id="confirm-modal-submit"
+              class="flex-[2] h-13 rounded-2xl text-sm font-black bg-gradient-to-r from-navy to-black text-white hover:shadow-xl hover:-translate-y-1 transition-all shadow-navy/20">
+              APPROVE & NOTIFY STUDENT
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Dashboard Tabs Container -->
@@ -262,17 +388,8 @@
 
         <!-- Appointments Tab -->
         <button
-          class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-sm font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-md data-[state=inactive]:hover:bg-gray-200/50"
-          data-tab="appointments" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 mr-2">
-            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-            <line x1="16" x2="16" y1="2" y2="6" />
-            <line x1="8" x2="8" y1="2" y2="6" />
-            <line x1="3" x2="21" y1="10" y2="10" />
-          </svg>
-          Appointments
-        </button>
+        class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2 text-xs font-black uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-navy data-[state=active]:shadow-sm text-gray-500 hover:text-navy"
+        data-tab="appointments">Appointments History</button>
 
         <!-- Students Tab -->
         <button
@@ -312,93 +429,82 @@
           <div class="p-6 pt-0">
             <div class="space-y-4">
 
-              {% for apt in pending_appointments %}
-              <!-- Appointment Request -->
-              <div
-                class="rounded-lg border bg-card text-card-foreground border-l-4 border-l-yellow-500 shadow-sm bg-white">
-                <div class="p-6 pt-6">
+              {% for apt in appointments %}
+              <!-- Real-Time Appointment Card -->
+              <div class="rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all overflow-hidden 
+                {% if apt.status == 'pending' %}border-l-4 border-l-yellow-400
+                {% elif apt.status == 'in_progress' %}border-l-4 border-l-blue-500 ring-2 ring-blue-50/50
+                {% elif apt.status == 'completed' %}border-l-4 border-l-green-500 opacity-75
+                {% else %}border-l-4 border-l-navy/20{% endif %}">
+                
+                <div class="p-5">
                   <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
-                      <div class="flex items-center gap-2 mb-2">
-                        <h4 class="font-semibold text-lg">{{ apt.purpose }}</h4>
-                        <div
-                          class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent text-primary-foreground bg-yellow-500 text-white">
-                          Appointment</div>
-                      </div>
-                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                        <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="size-4">
-                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                          {{ apt.student.get_full_name|default:apt.student.username }} ({{ apt.student.userprofile.student_id|default:"-" }})
-                        </span>
-                        <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="size-4">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          {{ apt.date_time|date:"F j, Y, h:i A" }}
-                        </span>
-                        <span class="flex items-center gap-1 text-[10px] bg-navy/5 text-navy/40 px-2 py-0.5 rounded font-black uppercase">
-                          Requested: {{ apt.created_at|date:"M j, P" }}
-                        </span>
+                      <div class="flex items-center gap-3 mb-2">
+                        <h4 class="font-bold text-gray-900">{{ apt.purpose }}</h4>
+                        
+                        <!-- Status Badge -->
+                        {% if apt.status == 'pending' %}
+                          <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[9px] font-black uppercase rounded-md border border-yellow-200">Pending</span>
+                        {% elif apt.status == 'in_progress' %}
+                          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-black uppercase rounded-md border border-blue-200 animate-pulse flex items-center gap-1">
+                            <span class="size-1 bg-blue-600 rounded-full"></span>In Progress
+                          </span>
+                        {% elif apt.status == 'completed' %}
+                          <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[9px] font-black uppercase rounded-md border border-green-200">Done</span>
+                        {% elif apt.status == 'confirmed' %}
+                          <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black uppercase rounded-md border border-indigo-200">Upcoming</span>
+                        {% endif %}
                       </div>
 
-                      <!-- Control Section -->
-                      <div class="appointment-controls" data-id="APT-{{ apt.id }}">
-                        <form method="POST" action="{% url 'adviser_dashboard' %}" class="space-y-3">
-                          {% csrf_token %}
-                          <input type="hidden" name="action" value="update_appointment">
-                          <input type="hidden" name="apt_id" value="{{ apt.id }}">
-                          <input type="hidden" name="status" value="confirmed">
-                          
-                          <div class="space-y-4 pt-4 border-t">
-                            <div class="relative group">
-                              <div class="absolute -top-2 left-4 px-2 bg-white text-[10px] font-black text-navy uppercase tracking-widest z-10">Adviser Comment / Message</div>
-                              <textarea name="adviser_notes" placeholder="e.g. Please be on time. I have reviewed your records."
-                                class="w-full min-h-[80px] p-4 pt-5 rounded-xl border border-gray-200 focus:border-light-blue outline-none transition-all text-sm bg-gray-50/30"></textarea>
-                            </div>
-
-                            <div class="relative group">
-                              <div class="absolute -top-2 left-4 px-2 bg-white text-[10px] font-black text-light-blue uppercase tracking-widest z-10">Meeting Link (Google Meet)</div>
-                              <div class="flex gap-2">
-                                <input type="url" name="meeting_link" id="magic-link-{{ apt.id }}" placeholder="https://meet.google.com/xxx-xxxx-xxx"
-                                       value="{{ user.userprofile.meeting_link|default:'' }}"
-                                       class="flex-1 h-11 rounded-xl border border-gray-200 focus:border-light-blue outline-none px-4 text-sm bg-gray-50/30">
-                                <button type="button" onclick="useProfileLink('magic-link-{{ apt.id }}', '{{ user.userprofile.meeting_link|default:''|escapejs }}')"
-                                        class="px-4 py-2 bg-white border border-light-blue text-light-blue rounded-xl text-xs font-bold hover:bg-blue-50 transition-all flex items-center gap-2 shadow-sm whitespace-nowrap">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                  My Link
-                                </button>
-                                <a href="https://meet.google.com/new" target="_blank"
-                                   class="p-2.5 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl hover:text-navy hover:bg-gray-100 transition-all shadow-sm"
-                                   title="Create New Meeting on Google">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                </a>
-                              </div>
-                            </div>
-                            
-                            <div class="flex justify-end pt-2">
-                              <button type="submit"
-                                class="inline-flex items-center justify-center rounded-xl text-sm font-bold transition-all h-11 px-8 bg-gradient-to-r from-navy to-light-blue text-white hover:shadow-lg hover:-translate-y-0.5 shadow-md">
-                                Approve & Notify Student
-                              </button>
-                            </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-xs text-gray-500">
+                        <div class="flex items-center gap-2">
+                          <div class="size-7 bg-navy/5 rounded-full flex items-center justify-center text-navy font-bold text-[10px]">
+                            {{ apt.student.username|slice:":1"|upper }}
                           </div>
-                        </form>
+                          <div>
+                            <p class="font-bold text-gray-800 leading-none">{{ apt.student.get_full_name|default:apt.student.username }}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 uppercase">{{ apt.student.userprofile.student_id|default:"- No ID -" }}</p>
+                          </div>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                          <div class="flex items-center gap-1.5 font-medium text-navy">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {{ apt.date_time|date:"M j, Y • h:i A" }}
+                          </div>
+                          {% if apt.status == 'completed' %}
+                          <p class="text-[9px] text-green-600 font-bold mt-1">Finished at {{ apt.actual_end_at|date:"h:i A" }} (Hiding in 24h)</p>
+                          {% endif %}
+                        </div>
                       </div>
+                    </div>
 
+                    <!-- Action Button Map -->
+                    <div class="flex items-center gap-2">
+                      {% if apt.status == 'pending' %}
+                        <button onclick="openConfirmModal('{{ apt.id }}', '{{ apt.purpose|escapejs }}', 'confirmed')" 
+                                class="p-2.5 bg-navy text-white rounded-xl hover:bg-black shadow-sm transition-all group" title="Approve">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5L20 7"/></svg>
+                        </button>
+                        <button onclick="openConfirmModal('{{ apt.id }}', '{{ apt.purpose|escapejs }}', 'declined')" 
+                                class="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:bg-red-50 hover:text-red-500 border border-gray-100 transition-all group" title="Decline">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                      {% elif apt.status == 'confirmed' or apt.status == 'in_progress' %}
+                        <a href="{{ apt.meeting_link }}" 
+                           class="flex items-center gap-2 px-4 py-2 {% if apt.status == 'in_progress' %}bg-blue-600 hover:bg-blue-700{% else %}bg-navy hover:bg-black{% endif %} text-white rounded-xl text-xs font-bold shadow-md transition-all">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                          Join Call
+                        </a>
+                      {% endif %}
                     </div>
                   </div>
                 </div>
               </div>
               {% empty %}
-              <div class="p-8 text-center text-gray-500">No pending appointments at the moment.</div>
+              <div class="p-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <p class="text-sm text-gray-400 font-medium">No active or recently completed appointments.</p>
+              </div>
               {% endfor %}
 
             </div>
@@ -411,104 +517,34 @@
       <div class="tab-content hidden" id="tab-appointments">
         <div class="rounded-lg border bg-card text-card-foreground shadow-sm bg-white">
           <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-semibold leading-none tracking-tight text-2xl">Upcoming Appointments</h3>
-            <p class="text-sm text-muted-foreground">Manage your advising sessions with students</p>
+            <h3 class="font-semibold leading-none tracking-tight text-2xl uppercase tracking-tighter">Session History</h3>
+            <p class="text-sm text-muted-foreground">Log of all completed, declined, and cancelled sessions</p>
           </div>
           <div class="p-6 pt-0">
-            <div class="relative w-full overflow-auto">
-              <table class="w-full caption-bottom text-sm">
-                <thead class="[&_tr]:border-b">
-                  <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Purpose</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date &amp; Time</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="[&_tr:last-child]:border-0">
-                  {% for apt in pending_appointments %}
-                  <tr
-                    class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
-                    <td class="p-4 align-middle">
-                      <div>
-                        <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
-                        <p class="text-sm text-gray-500">{{ apt.student.userprofile.student_id|default:"-" }}</p>
-                      </div>
-                    </td>
-                    <td class="p-4 align-middle">{{ apt.purpose }}</td>
-                    <td class="p-4 align-middle">
-                      <div>
-                        <p class="font-medium">{{ apt.date_time|date:"Y-m-d" }}</p>
-                        <p class="text-sm text-gray-500">{{ apt.date_time|date:"h:i A" }}</p>
-                      </div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div
-                        class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-900">
-                        {{ apt.status }}</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <form method="POST" action="{% url 'adviser_dashboard' %}" class="flex flex-col gap-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="update_appointment">
-                        <input type="hidden" name="apt_id" value="{{ apt.id }}">
-                        <input type="text" name="adviser_notes" placeholder="Zoom link or details..."
-                          class="border rounded px-2 py-1 text-xs">
-                        <div class="flex gap-2">
-                          <button name="status" value="confirmed" type="submit"
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-8 px-2 bg-green-500 hover:bg-green-600 text-white">Approve
-                            / Reply</button>
-                        </div>
-                      </form>
-                    </td>
-                  </tr>
-                  {% endfor %}
-
-                  {% for apt in confirmed_appointments %}
-                  <tr
-                    class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted hover:bg-light-gray">
-                    <td class="p-4 align-middle">
-                      <div>
-                        <p class="font-medium">{{ apt.student.first_name }} {{ apt.student.last_name }}</p>
-                        <p class="text-sm text-gray-500">{{ apt.student.userprofile.student_id|default:"-" }}</p>
-                      </div>
-                    </td>
-                    <td class="p-4 align-middle">{{ apt.purpose }}</td>
-                    <td class="p-4 align-middle">
-                      <div>
-                        <p class="font-medium">{{ apt.date_time|date:"Y-m-d" }}</p>
-                        <p class="text-sm text-gray-500">{{ apt.date_time|date:"h:i A" }}</p>
-                      </div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div
-                        class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-900">
-                        {{ apt.status }}</div>
-                    </td>
-                    <td class="p-4 align-middle">
-                      <div class="flex flex-col gap-2">
-                         {% if apt.meeting_link %}
-                         <a href="{{ apt.meeting_link }}" target="_blank" class="text-xs font-bold text-light-blue hover:underline flex items-center gap-1">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 8 5 4-5 4V8z"/></svg>
-                           Join Call
-                         </a>
-                         {% endif %}
-                         <button onclick="addToGoogleCalendar({
-                            purpose: '{{ apt.purpose|escapejs }}',
-                            date_time: '{{ apt.date_time|date:"c" }}',
-                            meeting_link: '{{ apt.meeting_link|default:''|escapejs }}',
-                            notes: '{{ apt.adviser_notes|default:''|escapejs }}'
-                         })" class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-navy transition-colors flex items-center gap-1">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Z"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="m9 16 2 2 4-4"/></svg>
-                           Sync to Calendar
-                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <div class="space-y-4">
+              {% for apt in appointments_history %}
+              <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-50 bg-gray-50/30">
+                <div class="flex items-center gap-4">
+                  <div class="size-10 bg-white border rounded-xl flex items-center justify-center text-navy shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-900">{{ apt.purpose }}</p>
+                    <p class="text-[10px] text-gray-500">{{ apt.student.get_full_name }} • {{ apt.date_time|date:"M j, Y" }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded border 
+                    {% if apt.status == 'completed' %}bg-green-50 text-green-600 border-green-100
+                    {% elif apt.status == 'declined' %}bg-red-50 text-red-600 border-red-100
+                    {% else %}bg-gray-50 text-gray-400 border-gray-100{% endif %}">
+                    {{ apt.status }}
+                  </span>
+                </div>
+              </div>
+              {% empty %}
+              <p class="text-center py-8 text-gray-400 text-sm">No history records found.</p>
+              {% endfor %}
             </div>
           </div>
         </div>
@@ -771,6 +807,70 @@
     // ─── Curriculum Logic ─────────────────────────────────────────────
     triggers = document.querySelectorAll('.tab-trigger');
     contents = document.querySelectorAll('.tab-content');
+    
+    // ─── Appointment Lifecycle Modal Logic ─────────────────────────────
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmAptId = document.getElementById('confirm-modal-apt-id');
+    const confirmPurpose = document.getElementById('confirm-modal-purpose');
+    const confirmTitle = document.getElementById('confirm-modal-title');
+    const confirmStatus = document.getElementById('confirm-modal-status');
+    const confirmNotesLabel = document.getElementById('confirm-modal-note-label');
+    const confirmSubmit = document.getElementById('confirm-modal-submit');
+    const meetingLinkField = document.getElementById('meeting-link-field');
+    const conflictBanner = document.getElementById('conflict-banner');
+    const availableStaffList = document.getElementById('available-advisers-list');
+    const conflictDesc = document.getElementById('conflict-desc');
+
+    window.openConfirmModal = function(id, purpose, nextStatus = 'confirmed') {
+      if (confirmAptId) confirmAptId.value = id;
+      if (confirmPurpose) confirmPurpose.textContent = `Session Topic: ${purpose}`;
+      if (confirmStatus) confirmStatus.value = nextStatus;
+      
+      // Determine UI mode based on status
+      const isDeclined = nextStatus === 'declined';
+      if (confirmTitle) confirmTitle.textContent = isDeclined ? 'Decline Appointment' : 'Confirm Appointment';
+      if (confirmNotesLabel) confirmNotesLabel.textContent = isDeclined ? 'Reason for Denial (Will be emailed to student)' : 'Adviser\'s Message / Note';
+      if (confirmSubmit) {
+        confirmSubmit.textContent = isDeclined ? 'DECLINE & NOTIFY STUDENT' : 'APPROVE & NOTIFY STUDENT';
+        confirmSubmit.className = isDeclined 
+          ? 'flex-[2] h-13 rounded-2xl text-sm font-black bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-200'
+          : 'flex-[2] h-13 rounded-2xl text-sm font-black bg-gradient-to-r from-navy to-black text-white shadow-navy/20';
+      }
+      
+      if (meetingLinkField) meetingLinkField.style.display = isDeclined ? 'none' : 'block';
+      if (conflictBanner) conflictBanner.classList.add('hidden');
+
+      // Check for conflicts if approving
+      if (!isDeclined) {
+        fetch(`/api/appointment/conflicts/?apt_id=${id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.has_conflict) {
+              if (conflictBanner) conflictBanner.classList.remove('hidden');
+              if (conflictDesc) conflictDesc.textContent = `You already have ${data.conflicts.length} session(s) near this time.`;
+              
+              if (availableStaffList) {
+                availableStaffList.innerHTML = data.recommendations.map(staff => 
+                  `<span class="px-2 py-1 bg-white border border-yellow-200 rounded-lg text-yellow-800">DR. ${staff.name}</span>`
+                ).join('') || '<span class="text-red-400">All advisers are busy.</span>';
+              }
+            }
+          });
+      }
+
+      if (confirmModal) {
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+      }
+    };
+
+    window.closeConfirmModal = function() {
+      if (confirmModal) {
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+      }
+    };
+
     let selectedStudentId = null;
     let selectedSubjectIds = new Set();
 
@@ -1078,64 +1178,42 @@
 
     triggers.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
-    // ─── Notifications Logic (System Alerts) ───────────────────────────
-    const msgBellBtn = document.getElementById('msg-bell-btn');
-    const notifDropdown = document.getElementById('notifications-dropdown');
-    const notifList = document.getElementById('notifications-list');
-    const msgBellBadge = document.getElementById('msg-bell-badge');
+    // Centralized via base.html logic
 
-    function updateNotifications() {
-        fetch('/api/notifications/system/')
-            .then(res => res.json())
-            .then(data => {
-                notifList.innerHTML = '';
-                let unreadCount = 0;
-                
-                if (data.notifications.length === 0) {
-                    notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent alerts</div>';
-                } else {
-                    data.notifications.forEach(n => {
-                        if (!n.is_read) unreadCount++;
-                        const item = document.createElement('div');
-                        item.className = `p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}`;
-                        item.innerHTML = `
-                            <p class="text-[10px] font-black text-navy uppercase tracking-tighter">${n.type.replace(/_/g, ' ')}</p>
-                            <p class="text-xs text-gray-700 mt-1 leading-tight">${n.message}</p>
-                            <p class="text-[9px] text-gray-400 mt-1">${n.created_at}</p>
-                        `;
-                        notifList.appendChild(item);
-                    });
-                }
+    window.updateAdviserActionCenter = function(notifications) {
+        const focusMsg = document.getElementById('focus-message');
+        const btnContainer = document.getElementById('action-btn-container');
+        if (!focusMsg || !btnContainer) return;
 
-                const totalUnread = data.unread_count;
-                if (msgBellBadge) {
-                    if (totalUnread > 0) {
-                        msgBellBadge.innerText = totalUnread;
-                        msgBellBadge.classList.remove('hidden');
-                    } else {
-                        msgBellBadge.classList.add('hidden');
-                    }
-                }
-            });
-    }
-
-    if (msgBellBtn) {
-        msgBellBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            notifDropdown.classList.toggle('hidden');
-            if (!notifDropdown.classList.contains('hidden')) {
-                fetch('/api/notifications/mark-read/')
-                    .then(() => updateNotifications());
+        // Find meetings in notifications (e.g., confirmed appointments)
+        const incomingCall = notifications.find(n => n.raw_type === 'incoming_call' && !n.is_read);
+        const aptNotifs = notifications.filter(n => n.message.includes('Meeting link') || n.type.includes('Appointment'));
+        
+        if (incomingCall) {
+            focusMsg.innerHTML = `<span class="text-red-400 animate-pulse">🔴 INCOMING CALL:</span> ${JSON.parse(incomingCall.message).caller_name}`;
+            btnContainer.innerHTML = `<button onclick="handleIncomingCall(${JSON.stringify(incomingCall).replace(/"/g, '&quot;')})" class="px-6 py-2 bg-blue-500 text-white rounded-xl font-bold animate-bounce shadow-lg shadow-blue-500/50 hover:bg-blue-400 transition-all">JOIN NOW</button>`;
+        } else if (aptNotifs.length > 0) {
+            const latestApt = aptNotifs[0];
+            const linkMatch = latestApt.message.match(/https:\/\/meet\.jit\.si\/[^\s]+/);
+            if (linkMatch) {
+                focusMsg.innerHTML = `<span class="text-blue-400">Next Up:</span> ${latestApt.message.substring(0, 30)}...`;
+                btnContainer.innerHTML = `<a href="${linkMatch[0]}" target="_blank" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-blue-500 transition-all shadow-md group">
+                    JOIN MEETING
+                    <svg class="group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>`;
+            } else {
+                focusMsg.innerHTML = "Confirmed sessions detected. <span class='text-blue-400/60 text-[10px] ml-2'>(See list below)</span>";
+                btnContainer.innerHTML = `<button onclick="activateTab('appointments')" class="text-xs text-white/60 font-bold hover:text-white transition-colors underline decoration-blue-500/50 underline-offset-4">Review Schedule</button>`;
             }
-        });
-    }
-
-    document.addEventListener('click', () => {
-         if (notifDropdown) notifDropdown.classList.add('hidden');
-    });
-
-    setInterval(updateNotifications, 10000); 
-    updateNotifications();
+        } else {
+            focusMsg.innerHTML = `<span class="text-blue-400 font-black tracking-wide">COMPLETED:</span> You're all clear for today. Great job!`;
+            btnContainer.innerHTML = `
+                <div class="flex items-center gap-2 text-white/30 italic text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M2 12h2"/><path d="m4.93 19.07 1.41-1.41"/><path d="M12 22v-2"/><path d="m19.07 19.07-1.41-1.41"/><path d="M22 12h-2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.91 9a3 3 0 0 1-5.82 0"/><path d="M8 9h8"/></svg>
+                    Time to relax
+                </div>`;
+        }
+    };
 
 
     // ─── Inquiry respond/cancel ────────────────────────────────────────────
@@ -1176,7 +1254,7 @@
         // Make the link ultra-prominent in the description
         const joinLink = apt.meeting_link ? `\n\n🔴 JOIN MEETING HERE: ${apt.meeting_link}` : '';
         const details = encodeURIComponent(`Advising Appointment${joinLink}\n\nTopic: ${apt.purpose}\n\nNotes: ${apt.notes || 'None'}`);
-        const location = encodeURIComponent(apt.meeting_link || 'Online / Google Meet');
+        const location = encodeURIComponent(apt.meeting_link || 'Advise AI Conference');
         
         const url = `${baseUrl}&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
         window.open(url, '_blank');

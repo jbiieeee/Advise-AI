@@ -23,7 +23,7 @@ class UserProfile(models.Model):
     enrollment_status = models.CharField(max_length=20, choices=ENROLLMENT_STATUS, default='not_enrolled')
     curriculum_code = models.CharField(max_length=50, blank=True, null=True)
     assigned_adviser = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='assigned_students', null=True, blank=True)
-    meeting_link = models.URLField(max_length=500, blank=True, null=True, help_text="Adviser's default meeting room link")
+    meeting_link = models.URLField(max_length=500, blank=True, null=True, help_text="Default platform meeting room link")
     last_activity = models.DateTimeField(auto_now=True)
     
     # New fields for Adviser OTP Verification
@@ -71,9 +71,11 @@ class FormSubmission(models.Model):
 
 class Appointment(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
+        ('pending', 'Pending Status'),
         ('confirmed', 'Confirmed'),
-        ('completed', 'Completed'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Done'),
+        ('declined', 'Declined'),
         ('cancelled', 'Cancelled'),
     )
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='student_appointments')
@@ -83,6 +85,8 @@ class Appointment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     adviser_notes = models.TextField(blank=True, null=True)
     meeting_link = models.URLField(max_length=500, blank=True, null=True)
+    actual_start_at = models.DateTimeField(null=True, blank=True)
+    actual_end_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):
@@ -118,6 +122,7 @@ class Notification(models.Model):
         ('enrollment_code_redeemed', 'Enrollment Code Redeemed'),
         ('enrollment_approved', 'Enrollment Approved'),
         ('help_response', 'Help/Report Responded'),
+        ('incoming_call', 'Incoming Video Call'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)

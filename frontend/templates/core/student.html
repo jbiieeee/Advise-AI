@@ -797,18 +797,22 @@
                   <p class="font-semibold text-sm text-gray-900 leading-tight">{{ apt.purpose }}</p>
                   <p class="text-xs text-gray-500 mb-1">{{ apt.date_time|date:"M j, g:i A" }}</p>
                   <span
-                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase {% if apt.status == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                    {{ apt.status }}
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase 
+                    {% if apt.status == 'confirmed' %}bg-green-100 text-green-700 border-green-200
+                    {% elif apt.status == 'in_progress' %}bg-blue-100 text-blue-700 border-blue-200 animate-pulse
+                    {% elif apt.status == 'completed' %}bg-gray-100 text-gray-700 border-gray-200
+                    {% else %}bg-yellow-100 text-yellow-700 border-yellow-200{% endif %}">
+                    {% if apt.status == 'in_progress' %}Live Now{% else %}{{ apt.status }}{% endif %}
                   </span>
                 </div>
               </div>
               
-              {% if apt.status == 'confirmed' %}
+              {% if apt.status == 'confirmed' or apt.status == 'in_progress' %}
               <div class="flex flex-col gap-2 pt-2 border-t border-gray-200/50">
                 {% if apt.meeting_link %}
                 <a href="{{ apt.meeting_link }}" target="_blank" class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-light-blue/20 text-xs font-bold text-light-blue hover:bg-blue-50 transition-all shadow-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
-                  Join Google Meet
+                  Join Conference
                 </a>
                 {% endif %}
                 <button onclick="addToGoogleCalendar({
@@ -1467,68 +1471,7 @@
     // Load curriculum on start
     loadMyCurriculum();
 
-    // ─── Notifications Logic ──────────────────────────────────────────
-    const notifBtn = document.getElementById('msg-bell-btn');
-    const notifDropdown = document.getElementById('notifications-dropdown');
-    const notifList = document.getElementById('notifications-list');
-    const msgBellBadge = document.getElementById('msg-bell-badge');
-
-    if (notifBtn && notifDropdown) {
-      notifBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        notifDropdown.classList.toggle('hidden');
-        if (!notifDropdown.classList.contains('hidden')) {
-          // Mark as read when opened
-          fetch('/api/notifications/mark-read/', {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-          }).then(() => {
-            if (msgBellBadge) msgBellBadge.classList.add('hidden');
-          });
-        }
-      });
-
-      document.addEventListener('click', () => notifDropdown.classList.add('hidden'));
-    }
-
-    window.updateNotifications = function() {
-      fetch('/api/notifications/system/')
-        .then(res => res.json())
-        .then(data => {
-          if (!notifList) return;
-          notifList.innerHTML = '';
-          let unreadCount = 0;
-          if (data.notifications.length === 0) {
-            notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent notifications</div>';
-          } else {
-            data.notifications.forEach(n => {
-              if (!n.is_read) unreadCount++;
-              const item = document.createElement('div');
-              item.className = `p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}`;
-              item.innerHTML = `
-                <p class="text-[11px] font-bold text-navy uppercase">${n.type.replace(/_/g, ' ')}</p>
-                <p class="text-sm text-gray-700 mt-0.5">${n.message}</p>
-                <p class="text-[10px] text-gray-400 mt-1">${n.created_at}</p>
-              `;
-              notifList.appendChild(item);
-            });
-          }
-
-          const totalUnread = data.unread_count;
-          if (msgBellBadge) {
-            if (totalUnread > 0) {
-              msgBellBadge.innerText = totalUnread;
-              msgBellBadge.classList.remove('hidden');
-            } else {
-              msgBellBadge.classList.add('hidden');
-            }
-          }
-        });
-    };
-
-    // Initial load and poll
-    updateNotifications();
-    setInterval(updateNotifications, 30000);
+    // Centralized via base.html logic
 
     window.addToGoogleCalendar = function(apt) {
         const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
@@ -1546,7 +1489,7 @@
         // Make the link ultra-prominent in the description
         const joinLink = apt.meeting_link ? `\n\n🔴 JOIN MEETING HERE: ${apt.meeting_link}` : '';
         const details = encodeURIComponent(`Advising Appointment${joinLink}\n\nTopic: ${apt.purpose}\n\nNotes: ${apt.notes || 'None'}`);
-        const location = encodeURIComponent(apt.meeting_link || 'Online / Google Meet');
+        const location = encodeURIComponent(apt.meeting_link || 'Advise AI Conference');
         
         const url = `${baseUrl}&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
         window.open(url, '_blank');

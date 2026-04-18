@@ -142,42 +142,56 @@
           <p class="text-sm text-gray-600 group-hover:text-navy transition-colors">Total Enrolled Students</p>
         </div>
       </div>
+      <!-- System Monitor Box [NEW] -->
+      <!-- System Monitor Box [Synced to Theme] -->
+      <a href="{% url 'admin_monitor' %}" class="rounded-lg border bg-card text-card-foreground hover:shadow-lg transition-all border-l-4 border-l-navy shadow-md bg-white cursor-pointer group active:scale-[0.98]">
+        <div class="p-6 pt-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2 bg-gradient-to-br from-navy to-light-blue rounded-lg text-white shadow group-hover:scale-110 transition-transform relative">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-6"><path d="M12 2v10"/><path d="M16 8l-4 4-4-4"/><path d="M4.5 16.5c-1.5 1.26-2 2.6-2 3.5h19c0-.9-.5-2.24-2-3.5"/><path d="M12 18v2"/></svg>
+              <div class="absolute -top-1 -right-1 size-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+            </div>
+            <div class="text-[10px] uppercase font-black text-navy tracking-tighter group-hover:tracking-widest transition-all">Operations Command</div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-900 mb-1 flex items-baseline gap-2">
+            Active
+            <span class="text-xs font-black text-light-blue uppercase animate-pulse">Monitor</span>
+          </h3>
+          <p class="text-sm text-gray-600 group-hover:text-navy transition-colors">Launch Control Center</p>
+        </div>
+      </a>
       <!-- Additional Stat cards mapped similarly -->
     </div>
 
     <!-- Dashboard Tabs Container -->
     <div class="space-y-6" id="dashboard-tabs">
       <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto flex shadow-sm bg-gray-100 flex-wrap overflow-x-auto overflow-y-hidden">
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="main" data-state="active">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="main" data-state="active">
           Main Dashboard
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="analytics" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="analytics" data-state="inactive">
           Analytics
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="enrollments" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="enrollments" data-state="inactive">
           Enrollments
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="students" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="students" data-state="inactive">
           Manage Students
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="help-forms" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="help-forms" data-state="inactive">
           Help/Report Forms
           {% if pending_forms.count > 0 %}
           <span class="ml-1.5 px-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{{ pending_forms.count }}</span>
           {% endif %}
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="manage" data-state="inactive">
           Manage Advisers
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="manage-admins" data-state="inactive">
+        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm hover:bg-white/50" data-tab="manage-admins" data-state="inactive">
           Manage Admins
         </button>
-        <button class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm" data-tab="logs" data-state="inactive">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Activity Logs
-        </button>
         <a href="{% url 'messages_page' %}?type=staff"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all flex-1 text-gray-600 hover:text-navy hover:bg-white"
+           class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2 text-sm font-semibold transition-all text-gray-600 hover:text-navy hover:bg-white/50"
            data-tab="staff-messaging">
           Staff Messaging
         </a>
@@ -192,7 +206,7 @@
               <p class="text-sm text-muted-foreground">Real-time monitoring of student-adviser interactions and support system</p>
             </div>
             <div class="p-6 pt-0">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- System Broadcast Hub -->
                 <div class="p-5 rounded-xl border-2 border-dashed border-light-blue/30 bg-blue-50/20">
                    <h4 class="font-bold text-navy flex items-center gap-2 mb-3">
@@ -221,6 +235,7 @@
                    </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -555,8 +570,12 @@
                       <td class="p-4 align-middle">
                              <a href="{% url 'messages_page' %}?student_id={{ student.user.id }}"
                                      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-light-blue/20 hover:bg-light-blue/5 h-9 px-3 bg-white text-light-blue" title="Send Official Notice">
-                                 Message
+                                  Message
                              </a>
+                             <button onclick="initiateCall('{{ student.user.id }}', '{{ student.user.get_full_name|default:student.user.username|escapejs }}')"
+                                     class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-green-500 hover:bg-green-50 text-green-600 h-9 px-3 bg-white" title="Call Student Now">
+                                 Call
+                             </button>
                              <button onclick="viewStudentCurriculum('{{ student.user.id }}', '{{ student.user.first_name }} {{ student.user.last_name }}')" 
                                      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-navy/20 hover:bg-navy/5 h-9 px-3 bg-white text-navy" title="View Curriculum & Set Grades">
                                  Curriculum
@@ -902,74 +921,7 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Activity Logs Tab -->
-      <div class="tab-content hidden" id="tab-logs">
-        <div class="rounded-lg border bg-card text-card-foreground shadow-md border-l-4 border-l-navy bg-white">
-          <div class="flex flex-col space-y-1.5 p-6 border-b">
-            <h3 class="text-2xl font-bold text-navy flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              System Activity Monitoring
-            </h3>
-            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">Admin Only Access • Secure Audit Trail</p>
-          </div>
-          <div class="p-6">
-            <div class="relative w-full overflow-auto max-h-[600px] custom-scrollbar">
-              <table class="w-full text-sm">
-                <thead class="sticky top-0 bg-gray-50 z-10">
-                  <tr class="border-b">
-                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-48">Timestamp</th>
-                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-40">Administrator</th>
-                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px] w-48">Action</th>
-                    <th class="h-12 px-4 text-left font-bold text-navy uppercase tracking-widest text-[10px]">Technical Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for log in activity_logs %}
-                  <tr class="border-b hover:bg-blue-50/20 transition-colors">
-                    <td class="p-4 font-mono text-[11px] text-gray-500">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
-                    <td class="p-4">
-                      <div class="font-bold text-navy">
-                        {% if log.user %}
-                          {{ log.user.get_full_name|default:log.user.username }}
-                        {% else %}
-                          System / Deleted User
-                        {% endif %}
-                      </div>
-                    </td>
-                    <td class="p-4">
-                      <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tight 
-                        {% if 'Approved' in log.action or 'Added' in log.action %}bg-green-100 text-green-700
-                        {% elif 'Declined' in log.action or 'Deleted' in log.action %}bg-red-100 text-red-700
-                        {% elif 'Reset' in log.action %}bg-yellow-100 text-yellow-700
-                        {% else %}bg-blue-100 text-blue-700{% endif %}">
-                        {{ log.action }}
-                      </span>
-                    </td>
-                    <td class="p-4 text-xs text-gray-600 italic">
-                      {{ log.details }}
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="4" class="p-20 text-center text-gray-400">
-                      <p class="font-bold">No activity logs recorded yet.</p>
-                      <p class="text-xs">All administrative actions will be automatically tracked here.</p>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-            </div>
-          </div>
-
-        </div>
+      
       </div>
 
     </div>
@@ -1006,6 +958,72 @@
        </div>
     </div>
   </div>
+
+  <!-- Session Tracking / Logs Modal -->
+  <div id="apt-logs-modal" class="fixed inset-0 bg-navy/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="p-6 border-b flex justify-between items-center bg-gray-50/80">
+            <div>
+                <h3 class="text-xl font-black text-navy uppercase tracking-tighter" id="apt-log-title">Meeting Activity Trail</h3>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Lifecycle Event Logs</p>
+            </div>
+            <button onclick="document.getElementById('apt-logs-modal').classList.add('hidden')" class="hover:bg-gray-200 p-2 rounded-full transition-colors text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6">
+            <div id="apt-log-content" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Log entries injected here -->
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 text-center border-t">
+            <p class="text-[10px] text-gray-400 font-medium italic">All times are recorded in system local time.</p>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    function viewAptLogs(aptId, purpose) {
+        const modal = document.getElementById('apt-logs-modal');
+        const content = document.getElementById('apt-log-content');
+        document.getElementById('apt-log-title').innerText = purpose;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        content.innerHTML = '<div class="py-10 text-center text-gray-400 animate-pulse text-xs">Fetching activity trail...</div>';
+        
+        // Use existing logs pass in context or fetch via API (we'll filter the activity_logs from context for now)
+        // Since we don't have a specific API for filtered logs yet, we'll implement a small helper in the template
+        // Or better, we can just look through the activity_logs that are already in the context!
+        
+        // However, for best UX, I'll filter the activity_logs that mentions the purpose or 'Appointment'
+        let logsFound = false;
+        content.innerHTML = '';
+        
+        {% for log in activity_logs %}
+            if ("{{ log.details|escapejs }}".includes(purpose) || "{{ log.action|escapejs }}".includes(purpose)) {
+                logsFound = true;
+                content.insertAdjacentHTML('beforeend', `
+                    <div class="flex gap-4 items-start relative pb-4 border-l-2 border-gray-100 pl-4 ml-2">
+                        <div class="absolute -left-[9px] top-0 size-4 rounded-full bg-white border-2 border-light-blue shadow-sm"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="bg-blue-50 text-light-blue text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-blue-100">{{ log.action }}</span>
+                                <span class="text-[9px] text-gray-400 font-mono">{{ log.timestamp|date:"h:i A" }}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 italic">"{{ log.details }}"</p>
+                            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold">— {% if log.user %}{{ log.user.get_full_name|default:log.user.username }}{% else %}System{% endif %}</p>
+                        </div>
+                    </div>
+                `);
+            }
+        {% endfor %}
+        
+        if (!logsFound) {
+            content.innerHTML = '<div class="py-20 text-center text-gray-400 italic text-sm">No specific log events found for this session.</div>';
+        }
+    }
+  </script>
     </div>
 
     <!-- Reset User Password Modal -->
@@ -1407,5 +1425,84 @@
     window.closeResetPasswordModal = function() {
         document.getElementById('reset-password-modal').classList.add('hidden');
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // ─── Tab Switching Logic ──────────────────────────────────────────
+        const triggers = document.querySelectorAll('.tab-trigger');
+        const contents = document.querySelectorAll('.tab-content');
+
+        window.switchTab = function(tabName) {
+            const trigger = Array.from(triggers).find(t => t.dataset.tab === tabName);
+            if (!trigger) return;
+
+            const targetId = `tab-${tabName}`;
+            
+            // Reset all
+            triggers.forEach(t => {
+                t.dataset.state = 'inactive';
+                t.classList.remove('bg-blue-100', 'text-blue-700', 'shadow-sm');
+            });
+            contents.forEach(c => c.classList.add('hidden'));
+
+            // Set active
+            trigger.dataset.state = 'active';
+            trigger.classList.add('bg-blue-100', 'text-blue-700', 'shadow-sm');
+
+            const target = document.getElementById(targetId);
+            if (target) target.classList.remove('hidden');
+
+            // Responsive: scroll to tabs on mobile
+            if (window.innerWidth < 768) {
+                const tabsElem = document.getElementById('dashboard-tabs');
+                if (tabsElem) tabsElem.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', () => switchTab(trigger.dataset.tab));
+        });
+
+        // ─── Modal Toggling setup ─────────────────────────────────────────
+        const toggleModal = (btnId, modalId, closeId) => {
+            const btn = document.getElementById(btnId);
+            const modal = document.getElementById(modalId);
+            const close = document.getElementById(closeId);
+            if (btn && modal) btn.onclick = () => modal.classList.toggle('hidden');
+            if (close && modal) close.onclick = () => modal.classList.add('hidden');
+        };
+
+        toggleModal('add-adviser-btn', 'add-adviser-modal', 'close-adviser-modal');
+        toggleModal('add-admin-btn', 'add-admin-modal', 'close-admin-modal');
+        toggleModal('add-student-btn', 'add-student-modal', 'cancel-add-student');
+
+        // ─── Real-Time Analytics Polling ───────────────────────────────────
+        window.updateAnalytics = function() {
+            fetch('/api/analytics/sync/')
+                .then(res => res.json())
+                .then(data => {
+                    const map = {
+                        'stat-online-users': data.online_users,
+                        'stat-total-forms': data.total_forms,
+                        'stat-total-appointments': data.total_appointments,
+                        'stat-total-pending': data.total_pending,
+                        'stat-total-students-l': data.total_students,
+                        'ana-enrolled-count': data.enrolled_count,
+                        'ana-pending-enrollment-count': data.pending_enrollment_count,
+                        'ana-not-enrolled-count': data.not_enrolled_count,
+                        'ana-apt-pending': data.apt_pending,
+                        'ana-apt-confirmed': data.apt_confirmed,
+                        'ana-apt-completed': data.apt_completed,
+                        'ana-avg-response-time': data.avg_response_time,
+                        'ana-form-pending': data.form_pending
+                    };
+                    Object.entries(map).forEach(([id, val]) => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerText = val;
+                    });
+                });
+        };
+        setInterval(updateAnalytics, 30000);
+        updateAnalytics();
+    });
 </script>
 {% endblock %}

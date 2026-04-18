@@ -2,8 +2,47 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import UserProfile
 from allauth.account.signals import user_signed_up
-
 from django.contrib import messages
+from allauth.socialaccount.signals import pre_social_login
+from allauth.account.models import EmailAddress
+
+@receiver(pre_social_login)
+def pre_social_login_verify(request, sociallogin, **kwargs):
+    """
+    Called before a social login is completed.
+    Ensures that if the social provider confirms the email is verified,
+    we sync that to both the allauth EmailAddress model and our UserProfile.
+    """
+    user = sociallogin.user
+    if not user.email:
+        return
+
+    # Extract verification status from provider data
+    is_provider_verified = (
+        sociallogin.account.extra_data.get('email_verified') or 
+        sociallogin.account.extra_data.get('verified') or
+        False
+    )
+
+    if is_provider_verified:
+        # 1. Sync allauth EmailAddress model
+        email_obj, created = EmailAddress.objects.get_or_create(
+            user=user, 
+            email=user.email,
+            defaults={'verified': True, 'primary': True}
+        )
+        if not email_obj.verified:
+            email_obj.verified = True
+            email_obj.save()
+
+        # 2. Sync our local UserProfile if it exists
+        try:
+            profile = user.userprofile
+            if not profile.is_email_verified:
+                profile.is_email_verified = True
+                profile.save(update_fields=['is_email_verified'])
+        except Exception:
+            pass # Profile might be created in student_dashboard or user_signed_up later
 
 @receiver(user_signed_up)
 def social_login_profile_sync(request, user, **kwargs):
@@ -44,8 +83,14 @@ def social_login_profile_sync(request, user, **kwargs):
             profile.role = 'student'
         
         # Auto-verify email if social provider says so
-        if sociallogin.account.extra_data.get('email_verified') or sociallogin.account.extra_data.get('verified'):
+        is_provider_verified = data.get('email_verified') or data.get('verified') or False
+        if is_provider_verified:
             profile.is_email_verified = True
+            # Also ensure allauth record is verified
+            EmailAddress.objects.update_or_create(
+                user=user, email=user.email,
+                defaults={'verified': True, 'primary': True}
+            )
             
         profile.save()
             

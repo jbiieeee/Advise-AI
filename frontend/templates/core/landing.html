@@ -2,158 +2,201 @@
 {% load static %}
 
 {% block content %}
-<div class="min-h-screen">
+<div class="min-h-screen bg-white">
   <!-- Hero Section -->
-  <section class="bg-gradient-to-br from-navy to-light-blue py-20 text-white relative overflow-hidden">
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-      <h2 class="text-5xl font-bold mb-6 drop-shadow-lg">
-        Virtual Academic Advising & Enrollment Assistance
+  <section
+    class="bg-gradient-to-br from-navy to-light-blue py-48 md:py-56 text-white relative overflow-hidden flex items-center min-h-screen">
+    <div
+      class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30">
+    </div>
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full animate-in slide-in-from-top-4 duration-700">
+      <h2
+        class="text-4xl md:text-5xl lg:text-6xl font-black mb-6 drop-shadow-2xl leading-tight tracking-tight uppercase">
+        Academic Advising and Enrollment Assistance System for H.E.
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-light-blue to-white">
+          Institutions in Manila</span>
       </h2>
-      <p class="text-xl mb-4 max-w-3xl mx-auto text-white/95 drop-shadow">
-        A comprehensive web platform designed specifically for Higher Education Institutions in Manila
+      <p
+        class="text-lg md:text-xl lg:text-2xl mb-8 max-w-4xl mx-auto text-white/90 drop-shadow font-medium leading-relaxed">
+        Connecting students and advisers through a centralized digital platform for easier academic planning and
+        document processing.
       </p>
-      <p class="text-lg mb-8 max-w-3xl mx-auto text-white/90 drop-shadow-sm">
-        Featuring AI-powered FAQ chatbot, digital form submission & tracking, and real-time analytics dashboards to modernize student support and streamline the advising process
-      </p>
-      <div class="flex gap-4 justify-center">
-        <a href="{% url 'register' %}" class="inline-flex items-center justify-center rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-11 px-8 bg-white text-light-blue hover:bg-gray-100 shadow-xl font-semibold">
-          Register as Student
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="{% url 'register' %}"
+          class="inline-flex items-center justify-center rounded-xl text-[13px] font-black transition-all hover:scale-105 active:scale-95 h-10 px-5 bg-white text-navy shadow-lg group">
+          Register Now
+          <svg class="ml-2 size-4 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg"
+            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14m-7-7 7 7-7 7" />
+          </svg>
         </a>
-        <a href="{% url 'login' %}" class="inline-flex items-center justify-center rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-11 px-8 border-2 border-white text-white hover:bg-white/20 shadow-xl font-semibold">
-          Admin/Adviser Login
+        <a href="{% url 'login' %}"
+          class="inline-flex items-center justify-center rounded-xl text-[13px] font-black transition-all hover:bg-white/10 h-10 px-5 border-2 border-white text-white shadow-md">
+          Portal
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="py-20 bg-white">
+  <!-- Core Factors Section -->
+  <section class="py-24 bg-gray-50/80 relative border-y border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <h3 class="text-4xl font-bold text-gray-900 mb-4">
-          Complete Digital Ecosystem for HEIs
+      <div class="text-center mb-20 animate-in slide-in-from-bottom-4 duration-700">
+        <h3 class="text-3xl font-extrabold text-navy mb-4 tracking-tight uppercase italic opacity-85">
+          Integrated Solutions
         </h3>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          Four integrated solutions working together to transform academic advising in Manila
+        <p class="text-lg text-gray-500 max-w-2xl mx-auto font-medium">
+          Advise AI combines three core disciplines to streamline your university experience.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- Feature 1 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-          <div class="flex flex-col space-y-1.5 p-6">
-            <div class="mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-            </div>
-            <h3 class="text-2xl font-semibold leading-none tracking-tight">Smart Scheduling</h3>
-            <p class="text-sm text-muted-foreground text-base">AI-powered course scheduling for your academic goals.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Factor 1 -->
+        <div
+          class="group p-8 rounded-3xl border border-white bg-white hover:border-light-blue transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="size-14 bg-navy/5 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-50 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-navy">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
           </div>
-        </div>
-        
-        <!-- Feature 2 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <div class="mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              </div>
-              <h3 class="text-2xl font-semibold leading-none tracking-tight">Academic Advising</h3>
-              <p class="text-sm text-muted-foreground text-base">Get personalized guidance available 24/7.</p>
-            </div>
+          <h4 class="text-lg font-black mb-2 uppercase tracking-tighter">Remote Advising</h4>
+          <p class="text-gray-500 group-hover:text-navy leading-relaxed text-xs font-medium">Secure one-on-one sessions
+            with your university adviser from anywhere.</p>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <div class="mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-              <h3 class="text-2xl font-semibold leading-none tracking-tight">Peer Connections</h3>
-              <p class="text-sm text-muted-foreground text-base">Connect with fellow students effortlessly.</p>
-            </div>
+        <!-- Factor 2 -->
+        <div
+          class="group p-8 rounded-3xl border border-white bg-white hover:border-light-blue transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="size-14 bg-navy/5 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-50 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-navy">
+              <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+            </svg>
+          </div>
+          <h4 class="text-lg font-black mb-2 uppercase tracking-tighter">Instant AI</h4>
+          <p class="text-gray-500 group-hover:text-navy leading-relaxed text-xs font-medium">Get immediate answers to
+            common policy inquiries through our assistant.</p>
         </div>
 
-        <!-- Feature 4 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <div class="mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-              </div>
-              <h3 class="text-2xl font-semibold leading-none tracking-tight">Progress Tracking</h3>
-              <p class="text-sm text-muted-foreground text-base">Monitor your journey with detailed insights.</p>
-            </div>
+        <!-- Factor 3 -->
+        <div
+          class="group p-8 rounded-3xl border border-white bg-white hover:border-light-blue transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="size-14 bg-navy/5 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-50 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-navy">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M7 7h10" />
+              <path d="M7 12h10" />
+              <path d="M7 17h10" />
+            </svg>
+          </div>
+          <h4 class="text-lg font-black mb-2 uppercase tracking-tighter">Progress Tracking</h4>
+          <p class="text-gray-500 group-hover:text-navy leading-relaxed text-xs font-medium">Monitor your curriculum
+            progress and grades from one dashboard.</p>
         </div>
 
-        <!-- Feature 5 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <div class="mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2-1 4-2 7-2 2.5 0 4.5 1 6 2a1 1 0 0 1 1 1v7z"/></svg>
-              </div>
-              <h3 class="text-2xl font-semibold leading-none tracking-tight">Secure Platform</h3>
-              <p class="text-sm text-muted-foreground text-base">Enterprise-grade security measures.</p>
-            </div>
+        <!-- Factor 4 -->
+        <div
+          class="group p-8 rounded-3xl border border-white bg-white hover:border-light-blue transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="size-14 bg-navy/5 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-50 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="size-6 text-navy">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h4 class="text-lg font-black mb-2 uppercase tracking-tighter">Live Collaboration</h4>
+          <p class="text-gray-500 group-hover:text-navy leading-relaxed text-xs font-medium">Stay updated with live
+            notifications and messaging for all updates.</p>
         </div>
-
-        <!-- Feature 6 -->
-        <div class="rounded-lg border bg-card text-card-foreground border-2 hover:shadow-lg transition-shadow hover:border-light-blue/20">
-            <div class="flex flex-col space-y-1.5 p-6">
-              <div class="mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-light-blue"><path d="M21.42 10.922a2 2 0 0 1-.019 3.018l-8.58 8.543a2 2 0 0 1-2.808.019l-8.543-8.58a2 2 0 0 1-.019-3.018l8.58-8.543a2 2 0 0 1 2.808-.019z"/><path d="M12 12h.01"/></svg>                   
-              </div>
-              <h3 class="text-2xl font-semibold leading-none tracking-tight">Enrollment Support</h3>
-              <p class="text-sm text-muted-foreground text-base">Streamlined enrollment with assistance.</p>
-            </div>
-        </div>
-
       </div>
     </div>
   </section>
 
-  <!-- Stats Section -->
-  <section class="py-20 bg-gradient-to-r from-navy to-light-blue text-white relative overflow-hidden">
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="text-center mb-12">
-        <h3 class="text-3xl font-bold mb-2">Proven Results Across Manila HEIs</h3>
-        <p class="text-white/90">Making academic advising faster and more efficient</p>
+  <!-- Quick Start Section -->
+  <section class="py-24 bg-white relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h3 class="text-2xl font-black text-navy mb-4 uppercase tracking-tighter opacity-80">Simple Process</h3>
+        <p class="text-gray-500 font-medium">Get started with Advise-AI in three easy steps.</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-        <div class="transform hover:scale-105 transition-transform">
-          <div class="text-5xl font-bold mb-2 drop-shadow-lg">15+</div>
-          <div class="text-white/90">Partner Universities</div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
+        <!-- Step 1 -->
+        <div class="text-center relative">
+          <div
+            class="size-16 bg-navy text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl rotate-3">
+            1</div>
+          <h4 class="text-lg font-black text-navy mb-2 uppercase tracking-tighter">Register</h4>
+          <p class="text-gray-500 text-sm font-medium">Create your secure university account in seconds.</p>
         </div>
-        <div class="transform hover:scale-105 transition-transform">
-          <div class="text-5xl font-bold mb-2 drop-shadow-lg">50K+</div>
-          <div class="text-white/90">Active Students</div>
+        <!-- Step 2 -->
+        <div class="text-center relative">
+          <div
+            class="size-16 bg-light-blue text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl -rotate-3">
+            2</div>
+          <h4 class="text-lg font-black text-navy mb-2 uppercase tracking-tighter">Sync Records</h4>
+          <p class="text-gray-500 text-sm font-medium">Verify your enrollment and access your history.</p>
         </div>
-        <div class="transform hover:scale-105 transition-transform">
-          <div class="text-5xl font-bold mb-2 drop-shadow-lg">95%</div>
-          <div class="text-white/90">Satisfaction Rate</div>
+        <!-- Step 3 -->
+        <div class="text-center">
+          <div
+            class="size-16 bg-navy text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl rotate-3">
+            3</div>
+          <h4 class="text-lg font-black text-navy mb-2 uppercase tracking-tighter">Plan Future</h4>
+          <p class="text-gray-500 text-sm font-medium">Schedule your first advising session today.</p>
         </div>
-        <div class="transform hover:scale-105 transition-transform">
-          <div class="text-5xl font-bold mb-2 drop-shadow-lg">24/7</div>
-          <div class="text-white/90">AI Support Available</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simpler Stats -->
+  <section class="py-24 bg-navy text-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div class="p-8 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-sm">
+          <div class="text-5xl font-black mb-2 tracking-tighter">24/7</div>
+          <div class="text-sm font-bold text-white/50 uppercase tracking-widest italic">Always Online</div>
+        </div>
+        <div class="p-8 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-sm">
+          <div class="text-5xl font-black mb-2 tracking-tighter">Secure</div>
+          <div class="text-sm font-bold text-white/50 uppercase tracking-widest italic">Verified Access</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="py-20 bg-light-gray">
+  <section class="py-24 bg-light-gray relative border-t-4 border-light-blue shadow-inner">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h3 class="text-4xl font-bold text-gray-900 mb-6">
-        Transform Your Academic Experience
+      <h3 class="text-3xl font-extrabold text-navy mb-6 tracking-tight">
+        Ready to Simplify Your Academic Life?
       </h3>
-      <p class="text-xl text-gray-600 mb-4">
-        Join thousands of students benefiting from our integrated platform
+      <p class="text-lg text-gray-500 mb-10 leading-relaxed px-4">
+        Join our platform to handle your records and advising in one place.
       </p>
-      <p class="text-base text-gray-500 mb-8">
-        Web platform • AI chatbot • Digital forms • Analytics dashboards
-      </p>
-      <a href="{% url 'register' %}" class="inline-flex items-center justify-center rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-11 px-8 bg-gradient-to-r from-navy to-light-blue hover:opacity-90 shadow-lg text-white">
-        Create Your Account
-      </a>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'register' %}"
+          class="inline-flex items-center justify-center rounded-xl text-lg font-bold transition-all hover:bg-navy/90 h-14 px-10 bg-navy text-white shadow-xl">
+          Register Your Account
+        </a>
+        <a href="{% url 'about' %}"
+          class="inline-flex items-center justify-center rounded-xl text-lg font-bold transition-all hover:bg-gray-100 h-14 px-10 border-2 border-gray-200 text-gray-600">
+          Tell Me More
+        </a>
+      </div>
     </div>
   </section>
 

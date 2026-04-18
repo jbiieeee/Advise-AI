@@ -6,6 +6,7 @@
     <title>Advise AI | Video Conference</title>
     <!-- Standard Jitsi External API -->
     <script src="https://meet.jit.si/external_api.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --bg-dark: #202124;
@@ -50,7 +51,7 @@
         }
         .nav-brand {
             display: flex;
-            items-center: center;
+            align-items: center;
             gap: 12px;
             pointer-events: auto;
         }
@@ -98,8 +99,32 @@
         .btn-exit:hover {
             background: #ef4444;
             border-color: #ef4444;
+        }
+        .btn-invite {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-invite:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+        /* Fix for Jitsi full-screen modal overlap */
+        #invite-modal {
+            z-index: 9999;
+        }
+        .btn-exit:hover, .btn-invite:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         .btn-safe-launch {
             background: #2563eb;
@@ -128,25 +153,59 @@
 
     <div class="top-nav">
         <div class="nav-brand">
-            <div class="brand-logo">ADV</div>
-            <div class="brand-text">Academic Advising Conference</div>
+            <div class="brand-logo">AA</div>
+            <div class="brand-text">Advise AI <span class="text-xs font-normal opacity-60 ml-1">Conference</span></div>
         </div>
         <div class="nav-actions">
+            <!-- Invite Participants Button -->
+            <button onclick="openInviteModal()" class="btn-invite">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+                Invite Participants
+            </button>
+
             <!-- Safe Launch Fallback -->
             <a href="https://meet.jit.si/{{ room_name }}" target="_blank" class="btn-safe-launch" id="safe-launch-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                Launch Native Mode
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Native Mode
             </a>
             <a href="{% url 'messages_page' %}" class="btn-exit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                Exit Session
+                Exit
             </a>
         </div>
     </div>
 
     <div id="conference-container"></div>
 
+    <!-- Invitation Modal -->
+    <div id="invite-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h2 class="text-xl font-bold text-navy">Invite Participants</h2>
+                    <p class="text-xs text-gray-400 mt-1">Select students or staff to join this session</p>
+                </div>
+                <button onclick="closeInviteModal()" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 bg-white">
+                <div class="relative mb-4">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="user-search" placeholder="Search by name, role, or program..." 
+                           class="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                </div>
+                
+                <div id="user-list" class="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div class="p-8 text-center text-gray-400 animate-pulse text-sm">Initializing directory...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Jitsi Setup
         document.addEventListener('DOMContentLoaded', () => {
             const domain = "meet.jit.si";
             const options = {
@@ -158,16 +217,18 @@
                     displayName: "{{ display_name|escapejs }}"
                 },
                 configOverwrite: {
-                    prejoinPageEnabled: false,
+                    prejoinPageEnabled: false, // Disabled for faster, more reliable connections
                     disableDeepLinking: true,
-                    disableThirdPartyRequests: true,
+                    disableThirdPartyRequests: false,
                     doNotStoreRoom: true,
                     startWithAudioMuted: false,
                     startWithVideoMuted: false,
                     defaultRemoteDisplayName: 'Participant',
                     enableWelcomePage: false,
+                    enableLobby: false,
                     p2p: {
-                        enabled: true
+                        enabled: true,
+                        useStunTurn: true // Added for better firewall traversal
                     }
                 },
                 interfaceConfigOverwrite: {
@@ -178,7 +239,7 @@
                     SHOW_POWERED_BY: false,
                     MOBILE_APP_PROMO: false,
                     DEFAULT_REMOTE_DISPLAY_NAME: 'Participant',
-                    TILE_VIEW_MAX_COLUMNS: 2,
+                    TILE_VIEW_MAX_COLUMNS: 10,
                     TOOLBAR_BUTTONS: [
                         'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
                         'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
@@ -189,13 +250,165 @@
                     ],
                 }
             };
-
-            const api = new JitsiMeetExternalAPI(domain, options);
+            window.api = new JitsiMeetExternalAPI(domain, options);
             
-            api.addEventListener('readyToClose', () => {
+            // Lifecycle Signaling
+            const aptId = "{{ appointment_id|default:''|escapejs }}";
+            if (aptId) {
+                window.api.addEventListener('videoConferenceJoined', () => {
+                    fetch(`/api/appointment/signal-start/${aptId}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    });
+                });
+
+                window.api.addEventListener('videoConferenceLeft', () => {
+                   signalEnd();
+                });
+            }
+
+            function signalEnd() {
+                if (aptId) {
+                    fetch(`/api/appointment/signal-end/${aptId}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    });
+                }
+            }
+
+            window.api.addEventListener('readyToClose', () => {
+                if (aptId) signalEnd();
                 window.location.href = "{% url 'messages_page' %}";
             });
         });
+
+        // ─── Invitation System Logic ──────────────────────────────
+        const inviteModal = document.getElementById('invite-modal');
+        const userList = document.getElementById('user-list');
+        const searchInput = document.getElementById('user-search');
+        let allUsers = [];
+
+        function openInviteModal() {
+            inviteModal.classList.remove('hidden');
+            inviteModal.classList.add('flex');
+            fetchUsers();
+        }
+
+        function closeInviteModal() {
+            inviteModal.classList.add('hidden');
+            inviteModal.classList.remove('flex');
+        }
+
+        function fetchUsers() {
+            userList.innerHTML = '<div class="p-8 text-center text-gray-400 animate-pulse text-sm">Fetching directory...</div>';
+            fetch('/api/messages/v2/list/')
+                .then(r => r.json())
+                .then(data => {
+                    allUsers = data.contacts;
+                    renderUsers(allUsers);
+                })
+                .catch(err => {
+                    userList.innerHTML = '<div class="p-8 text-center text-red-100 text-sm">Error loading users.</div>';
+                });
+        }
+
+        function renderUsers(users) {
+            userList.innerHTML = '';
+            if (users.length === 0) {
+                userList.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm">No users found match your search.</div>';
+                return;
+            }
+
+            users.forEach(u => {
+                const uId = u.id || u.user_id;
+                const uRole = u.role || (u.is_staff ? 'staff' : 'student');
+                const roleLabel = uRole.charAt(0).toUpperCase() + uRole.slice(1);
+                const extraInfo = u.program || u.email || "";
+                
+                userList.insertAdjacentHTML('beforeend', `
+                    <div class="px-2 py-3 hover:bg-gray-50 flex items-center justify-between group transition-all rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
+                                ${u.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">${u.name}</p>
+                                <div class="flex items-center gap-2 mt-0.5" id="user-role-${uId}">
+                                    <span class="text-[9px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md font-bold uppercase tracking-wider">${roleLabel}</span>
+                                    ${extraInfo ? `<span class="text-[10px] text-gray-400 font-medium">${extraInfo}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="sendInvite(${uId}, '${u.name.replace(/'/g, "\\'")}', this)" 
+                                class="px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                            Invite
+                        </button>
+                    </div>
+                `);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                u.name.toLowerCase().includes(query) || 
+                (u.role && u.role.toLowerCase().includes(query)) ||
+                (u.program && u.program.toLowerCase().includes(query))
+            );
+            renderUsers(filtered);
+        });
+
+        function sendInvite(userId, userName, btn) {
+            const originalText = btn.textContent;
+            btn.textContent = 'Calling...';
+            btn.disabled = true;
+
+            fetch('/api/notifications/trigger-call/', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    receiver_id: userId,
+                    room_name: "{{ room_name|escapejs }}"
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    btn.textContent = 'Sent ✅';
+                    btn.classList.replace('bg-slate-900', 'bg-green-600');
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.replace('bg-green-600', 'bg-slate-900');
+                        btn.disabled = false;
+                    }, 3000);
+                }
+            })
+            .catch(err => {
+                btn.textContent = 'Failed';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
 </body>
 </html>

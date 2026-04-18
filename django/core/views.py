@@ -1,13 +1,16 @@
 import json
+from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 from .decorators import student_required, adviser_required, admin_required
 from django.db.models import Q
@@ -254,8 +257,10 @@ def api_messages_list(request):
         unread = Message.objects.filter(sender=c_user, receiver=user, is_read=False).count()
         is_admin = c_user.is_superuser or (hasattr(c_user, 'userprofile') and c_user.userprofile.role == 'admin')
         contacts.append({
+            'id': c_user.id,
             'user_id': c_user.id,
             'name': f"{c_user.first_name} {c_user.last_name}".strip() or c_user.username,
+            'role': c_user.userprofile.role if hasattr(c_user, 'userprofile') else ('admin' if c_user.is_superuser else 'student'),
             'last_message': last_msg.content if last_msg else "No messages yet.",
             'last_message_time': last_msg.sent_at if last_msg else None,
             'unread_count': unread,
@@ -273,8 +278,10 @@ def api_messages_list(request):
             ).order_by('-sent_at').first()
             unread = StaffMessage.objects.filter(sender=s_user, receiver=user, is_read=False).count()
             contacts.append({
+                'id': s_user.id,
                 'user_id': s_user.id,
                 'name': f"{s_user.first_name} {s_user.last_name}".strip() or s_user.username,
+                'role': s_user.userprofile.role if hasattr(s_user, 'userprofile') else 'admin',
                 'last_message': last_msg.content if last_msg else "No staff messages yet.",
                 'last_message_time': last_msg.sent_at if last_msg else None,
                 'unread_count': unread,
@@ -597,10 +604,11 @@ def student_dashboard(request):
                         student=user, 
                         adviser=adviser,
                         date_time=dt_aware, 
-                        purpose=purpose
+                        purpose=purpose,
+                        status='pending'
                     )
-                    messages.success(request, 'Appointment scheduled successfully!')
-                    log_activity(user, "Appointment Scheduled", f"Scheduled for {dt_str} regarding {purpose}")
+                    log_activity(user, "Appointment Requested", f"Requested session: {purpose} for {dt_aware.strftime('%Y-%m-%d %H:%M')}")
+                    messages.success(request, 'Your appointment has been scheduled and is pending approval.')
                 except ValueError:
                     messages.error(request, 'Invalid date/time format.')
             else:
@@ -688,7 +696,6 @@ def student_dashboard(request):
     
     all_staff_ids_json = json.dumps(all_staff_ids)
 
-    from core.models import Notification
     unread_notifications_count = get_total_unread_count(user)
 
     # Persistent Verification Check (One-Time Only)
@@ -820,10 +827,20 @@ def adviser_dashboard(request):
                         if sp and sp.assigned_adviser is None:
                             sp.assigned_adviser = user
                             sp.save()
+                        
+                        # AUTO-GENERATE internal video conference link if empty
+                        if not apt.meeting_link:
+                            import uuid
+                            room_id = uuid.uuid4().hex[:8]
+                            room_name = f"AdviseAI-Apt-{room_id}"
+                            # Build the full absolute internal URL
+                            internal_link = request.build_absolute_uri(reverse('video_call_session', args=[room_name]))
+                            apt.meeting_link = internal_link
+
                     if adviser_notes:
                         apt.adviser_notes = adviser_notes
                     
-                    meeting_link = request.POST.get('meeting_link')
+                    meeting_link = request.POST.get('meeting_link') or apt.meeting_link
                     if meeting_link:
                         apt.meeting_link = meeting_link
                         
@@ -836,6 +853,12 @@ def adviser_dashboard(request):
                         Message.objects.create(sender=user, receiver=apt.student, content=msg_content.strip())
                         
                     apt.save()
+                    
+                    # Branded Email Notification on Confirmation or Denial
+                    if status in ['confirmed', 'declined'] and apt.student.email:
+                        send_branded_appointment_email(apt, adviser_comment=adviser_notes or "")
+                        
+                    log_activity(user, "Appointment Status Updated", f"Changed status of session ({apt.purpose}) to {status} for student {apt.student.username}")
                     messages.success(request, f'Appointment {status} successfully.')
                 except Appointment.DoesNotExist:
                     messages.error(request, 'Appointment not found.')
@@ -872,9 +895,30 @@ def adviser_dashboard(request):
                     
         return redirect('adviser_dashboard')
 
-    pending_appointments = Appointment.objects.filter(status='pending').order_by('date_time')
-    confirmed_appointments = Appointment.objects.filter(status='confirmed', adviser=user).order_by('date_time')
+    # 1. Consolidated Real-Time Appointments List
+    # - Pending: Available for confirmation
+    # - In Progress: Currently in a call
+    # - Done: Visible for 24 hours after completion
+    from datetime import timedelta
+    now = timezone.now()
+    # 1. Main Operational Feed (Pending, Confirmed, In Progress)
+    my_appointments = Appointment.objects.filter(
+        adviser=user,
+        status__in=['pending', 'confirmed', 'in_progress']
+    ).select_related('student', 'student__userprofile').order_by('date_time')
     my_students = UserProfile.objects.filter(Q(role='student') & (Q(assigned_adviser__isnull=True) | Q(assigned_adviser=user)))
+
+    # 2. Appointments History (Completed, Declined, Cancelled)
+    appointments_history = Appointment.objects.filter(
+        adviser=user,
+        status__in=['completed', 'declined', 'cancelled']
+    ).select_related('student', 'student__userprofile').order_by('-date_time')[:50]
+
+    # 3. Priority Action Center Logic (Find earliest session that needs response)
+    focus_apt = Appointment.objects.filter(
+        adviser=user,
+        status='pending'
+    ).order_by('date_time').first()
 
     # Build per-student conversation threads
     # A thread between a student and ANY adviser/admin is visible to all advisers unless assigned to a specific adviser
@@ -927,16 +971,21 @@ def adviser_dashboard(request):
                 is_verified = True
                 profile.is_email_verified = True
                 profile.save(update_fields=['is_email_verified'])
-        except ImportWarning:
+        except Exception:
             pass
+
+    # Get all adviser user IDs for the dashboard JS
+    all_adviser_ids = list(UserProfile.objects.filter(role='adviser').values_list('user_id', flat=True))
 
     context = {
         'is_verified': is_verified,
-        'pending_appointments': pending_appointments,
-        'confirmed_appointments': confirmed_appointments,
+        'appointments': my_appointments,
+        'appointments_history': appointments_history,
+        'focus_apt': focus_apt,
         'my_students': my_students,
         'total_advisees': my_students.count(),
-        'appointments_today': pending_appointments.count(),
+        'pending_action_count': Appointment.objects.filter(adviser=user, status='pending').count(),
+        'active_sessions_count': my_appointments.filter(status='in_progress').count(),
         'student_threads': student_threads,
         'total_unread': total_unread,
         'adviser_user': user,
@@ -1054,6 +1103,10 @@ def get_conversation(request, student_id):
 @admin_required
 def admin_dashboard(request):
     user = request.user
+    from django.db.models import Q
+    from datetime import timedelta
+    # Monitoring retention threshold (1 week)
+    threshold_1w = timezone.now() - timedelta(days=7)
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -1383,12 +1436,70 @@ def admin_dashboard(request):
         'apt_pending': Appointment.objects.filter(status='pending').count(),
         'apt_confirmed': Appointment.objects.filter(status='confirmed').count(),
         'apt_completed': Appointment.objects.filter(status='completed').count(),
-        'form_pending': FormSubmission.objects.filter(status='pending').count(),
-        'form_approved': FormSubmission.objects.filter(status='approved').count(),
-        'unread_notifications_count': get_total_unread_count(user),
+        
+        # Monitoring & Records (1-Week Retention for Completed)
+        'appointment_monitoring': Appointment.objects.filter(
+            Q(status__in=['pending', 'confirmed', 'in_progress']) |
+            Q(status='completed', actual_end_at__gte=threshold_1w)
+        ).order_by('-date_time')[:100],
         'activity_logs': ActivityLog.objects.all()[:100],
+        'student_records': students,
+        'unassigned_students': students.filter(assigned_adviser=None),
+        'all_advisers': advisers,
+        'help_forms': FormSubmission.objects.all(),
+        'enrollment_requests': all_pending,
+        'curriculum_subjects': CurriculumSubject.objects.all().order_by('program', 'year_level', 'semester'),
+        'unread_notifications_count': get_total_unread_count(user),
     }
     return render(request, 'core/admin.html', context)
+
+@login_required
+def admin_monitor_view(request):
+    # Check if user is superuser or has 'admin' role
+    is_admin = request.user.is_superuser
+    if not is_admin and hasattr(request.user, 'userprofile'):
+        is_admin = request.user.userprofile.role == 'admin'
+    
+    if not is_admin:
+        return redirect('landing')
+    
+    context = {
+        'appointment_monitoring': Appointment.objects.all().order_by('-created_at')[:100],
+        'activity_logs': ActivityLog.objects.all().order_by('-timestamp')[:100],
+        'live_calls_count': Appointment.objects.filter(actual_start_at__isnull=False, actual_end_at__isnull=True).count(),
+        'total_completed': Appointment.objects.filter(status='completed').count(),
+    }
+    return render(request, 'core/admin_monitor.html', context)
+
+@login_required
+def api_signal_appointment_start(request, apt_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        apt = Appointment.objects.get(id=apt_id)
+        if apt.actual_start_at is None:
+            apt.actual_start_at = timezone.now()
+            apt.save()
+            log_activity(request.user, "Meeting Started", f"Conference logic started for assignment: {apt.purpose}")
+        return JsonResponse({'status': 'success', 'started_at': apt.actual_start_at})
+    except Appointment.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
+@login_required
+def api_signal_appointment_end(request, apt_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        apt = Appointment.objects.get(id=apt_id)
+        if apt.actual_end_at is None:
+            apt.actual_end_at = timezone.now()
+            apt.status = 'completed'
+            apt.save()
+            log_activity(request.user, "Meeting Ended", f"Conference logic concluded for assignment: {apt.purpose}")
+        return JsonResponse({'status': 'success', 'ended_at': apt.actual_end_at})
+    except Appointment.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
 
 @login_required(login_url='login')
 def api_analytics_sync(request):
@@ -1758,10 +1869,12 @@ def api_get_notifications(request):
     for n in notifs_query:
         data.append({
             'id': f"n_{n.id}",
-            'type': n.event_type.replace('_', ' ').capitalize(),
+            'type': n.get_event_type_display(),
+            'raw_type': n.event_type,
             'message': n.message,
             'is_read': n.is_read,
-            'created_at': localtime(n.created_at).strftime('%b %d, %I:%M %p')
+            'created_at': n.created_at.timestamp(), # Use timestamp for accurate frontend sorting
+            'display_date': localtime(n.created_at).strftime('%b %d, %I:%M %p')
         })
     
     # 2. Unread Messages as notifications
@@ -1772,12 +1885,65 @@ def api_get_notifications(request):
         data.append({
             'id': f"m_{m.id}",
             'type': 'New Message',
+            'raw_type': 'message',
             'message': f"From {m.sender.first_name or m.sender.username}: {m.content[:40]}...",
             'is_read': False,
-            'created_at': localtime(m.sent_at).strftime('%b %d, %I:%M %p')
+            'created_at': m.sent_at.timestamp(),
+            'display_date': localtime(m.sent_at).strftime('%b %d, %I:%M %p')
+        })
+    
+    # Sort combined by timestamp descending
+    data.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    # Calculate unread count for the simplified badge update
+    unread_count = Notification.objects.filter(user=user, is_read=False).count()
+    unread_count += Message.objects.filter(receiver=user, is_read=False).count()
+
+    return JsonResponse({
+        'notifications': data,
+        'unread_count': unread_count
+    })
+
+@login_required
+@csrf_exempt
+def api_trigger_call(request):
+    """
+    Endpoint for Advisers to trigger an 'Incoming Call' notification for a student.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        target_user_id = data.get('receiver_id')
+        room_name = data.get('room_name')
+        
+        if not target_user_id or not room_name:
+            return JsonResponse({'error': 'Missing receiver_id or room_name'}, status=400)
+            
+        target_user = User.objects.get(id=target_user_id)
+        
+        # Create a machine-parseable notification message
+        caller_name = request.user.get_full_name() or request.user.username
+        notif_msg = json.dumps({
+            'caller_name': caller_name,
+            'room_name': room_name,
+            'display_text': f"{caller_name} is inviting you to a secure video conference."
         })
         
-    # Sort combined by date (approximate since we use strings, but we can do it better)
+        from core.models import Notification
+        Notification.objects.create(
+            user=target_user,
+            event_type='incoming_call',
+            message=notif_msg,
+            is_read=False
+        )
+        
+        return JsonResponse({'status': 'success'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Target user not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
     # Actually, let's just keep them as requested: latest first.
     
     return JsonResponse({
@@ -1978,6 +2144,33 @@ def get_my_curriculum(request):
     return JsonResponse({'curriculum': data})
 
 
+def recalculate_enrollment_status(student_user):
+    """
+    Automates the enrollment status transition based on academic activity.
+    - 'enrolled': If any subject is 'in_progress' or they have approved term enrollments.
+    - 'not_enrolled': If all finished (passed/failed) and no active sessions.
+    """
+    from core.models import StudentCurriculum, TermEnrollment
+    
+    profile = student_user.userprofile
+    
+    # Check for active academic records
+    has_active_subjects = StudentCurriculum.objects.filter(student=student_user, status='in_progress').exists()
+    has_approved_enrollments = TermEnrollment.objects.filter(student=student_user, status='approved').exists()
+    
+    if has_active_subjects or has_approved_enrollments:
+        profile.enrollment_status = 'enrolled'
+    else:
+        # Check if they have pending requests (might be 'pending' status)
+        if TermEnrollment.objects.filter(student=student_user, status='pending').exists():
+            profile.enrollment_status = 'pending'
+        else:
+            profile.enrollment_status = 'not_enrolled'
+            
+    profile.save(update_fields=['enrollment_status'])
+    return profile.enrollment_status
+
+
 @login_required(login_url='login')
 def update_student_subject(request):
     """
@@ -2016,6 +2209,15 @@ def update_student_subject(request):
         student=student, subject=subject,
         defaults={'status': status, 'grade': grade, 'term_taken': term_taken}
     )
+    
+    # Auto-Sync Enrollment Status
+    new_status = recalculate_enrollment_status(student)
+
+    return JsonResponse({
+        'status': 'success', 
+        'message': f'Status for {subject.code} updated to {status}.',
+        'student_enrollment_status': new_status
+    })
     return JsonResponse({'status': 'ok', 'record_status': rec.status})
 
 
@@ -2177,15 +2379,8 @@ def process_enrollment_request(request):
                     enrollment.status = 'declined'
                 enrollment.save()
                 
-                # Check if student has any more pending requests
-                student_user = enrollment.student
-                if not TermEnrollment.objects.filter(student=student_user, status='pending').exists():
-                    p = student_user.userprofile
-                    if TermEnrollment.objects.filter(student=student_user, status='approved').exists():
-                        p.enrollment_status = 'enrolled'
-                    else:
-                        p.enrollment_status = 'not_enrolled'
-                    p.save()
+                # Auto-Sync Enrollment Status
+                recalculate_enrollment_status(enrollment.student)
 
             return JsonResponse({'status': 'success', 'message': f'Successfully {action}ed {len(enrollment_ids)} requests.'})
         except Exception as e:
@@ -2357,11 +2552,32 @@ def video_call_session(request, room_name):
     """
     Renders a standalone, professional video conference page for the given room name.
     """
-    profile = request.user.userprofile
+    import re
+    # Sanitize room name: Alphanumeric and hyphens only to prevent signaling errors
+    room_name = re.sub(r'[^a-zA-Z0-9-]', '', room_name)
+    
+    # Robust Profile Retrieval to handle staff/admins who might not have one yet
+    from core.models import UserProfile
+    profile, created = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'role': 'admin' if request.user.is_superuser else 'adviser'}
+    )
+    
+    # Try to find the related appointment to track lifecycle
+    appointment_id = None
+    try:
+        # Check if the room name matches one of our appointment links
+        apt = Appointment.objects.filter(meeting_link__icontains=room_name).first()
+        if apt:
+            appointment_id = apt.id
+    except:
+        pass
+
     context = {
         'room_name': room_name,
         'role': profile.role,
         'display_name': request.user.get_full_name() or request.user.username,
+        'appointment_id': appointment_id,
     }
     return render(request, 'core/video_conference.html', context)
 
@@ -2445,3 +2661,208 @@ def verify_account_otp(request):
     if user.userprofile.role == 'adviser':
         return redirect('adviser_dashboard')
     return redirect('student_dashboard')
+
+
+# ─────────────────────────────────────────────────────────────
+#  APPOINTMENT LIFECYCLE SIGNALING SYSTEM
+# ─────────────────────────────────────────────────────────────
+
+@csrf_exempt
+@login_required
+def api_signal_appointment_start(request, apt_id):
+    """Signals that a video conference has started."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    try:
+        apt = get_object_or_404(Appointment, id=apt_id)
+        # Security: Only the assigned adviser or the student can signal start
+        if request.user != apt.adviser and request.user != apt.student:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            
+        apt.status = 'in_progress'
+        if not apt.actual_start_at:
+            apt.actual_start_at = timezone.now()
+        apt.save()
+        
+        log_activity(request.user, "Meeting Started", f"Session for {apt.purpose} is now in_progress.")
+        return JsonResponse({'status': 'success', 'new_status': apt.status})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@login_required
+def api_signal_appointment_end(request, apt_id):
+    """Signals that a video conference has ended."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    try:
+        apt = get_object_or_404(Appointment, id=apt_id)
+        if request.user != apt.adviser and request.user != apt.student:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            
+        apt.status = 'completed'
+        apt.actual_end_at = timezone.now()
+        apt.save()
+        
+        log_activity(request.user, "Meeting Completed", f"Session for {apt.purpose} has ended and marked as Done.")
+        return JsonResponse({'status': 'success', 'new_status': apt.status})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def send_branded_appointment_email(appointment, adviser_comment=""):
+    """
+    Sends a professional, branded HTML email to the student upon appointment approval.
+    """
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+    import urllib.parse
+    
+    student = appointment.student
+    adviser = appointment.adviser
+    
+    subject = f"Appointment Confirmed: {appointment.purpose} - Advise AI"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [student.email]
+    
+    # 1. Construct Google Calendar URL
+    base_cal_url = "https://www.google.com/calendar/render?action=TEMPLATE"
+    cal_title = urllib.parse.quote(f"Advising: {appointment.purpose}")
+    cal_dates = appointment.date_time.strftime('%Y%m%dT%H%M%S') + "/" + (appointment.date_time + timedelta(minutes=30)).strftime('%Y%m%dT%H%M%S')
+    cal_details = urllib.parse.quote(f"Adviser: {adviser.get_full_name()}\nComment: {adviser_comment}\nJoin Meeting: {appointment.meeting_link}")
+    calendar_link = f"{base_cal_url}&text={cal_title}&dates={cal_dates}&details={cal_details}&location={urllib.parse.quote(appointment.meeting_link or 'Advise AI Conference')}"
+
+    is_declined = appointment.status == 'declined'
+    
+    # Mode-based Branding
+    color_primary = "#001f3f" if not is_declined else "#475569" # Navy or Slate
+    title_text = "Your Appointment is Confirmed!" if not is_declined else "Appointment Decision"
+    subtitle_text = "Your session has been approved." if not is_declined else "Your request has been reviewed."
+
+    # 2. Design the HTML Content
+    html_content = f"""
+    <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eef2f6; border-radius: 16px; overflow: hidden; background-color: #ffffff;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, {color_primary} 0%, #000000 100%); padding: 32px; text-align: center; color: #ffffff;">
+            <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">ADVISE AI</div>
+            <div style="font-size: 14px; opacity: 0.8; font-weight: 500;">Academic Excellence Through Guidance</div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+            <h1 style="font-size: 20px; font-weight: 700; margin-bottom: 24px; color: {color_primary};">{title_text}</h1>
+            
+            <p style="margin-bottom: 24px;">Hello <strong>{student.first_name or student.username}</strong>,</p>
+            
+            <p style="margin-bottom: 32px;">{subtitle_text} Regarding session: <strong>"{appointment.purpose}"</strong>.</p>
+            
+            <!-- Details Card -->
+            <div style="background-color: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 32px; border: 1px solid #f1f5f9;">
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Status</div>
+                    <div style="font-size: 15px; font-weight: 700; color: {'#16a34a' if not is_declined else '#dc2626'}; text-transform: uppercase;">{appointment.status}</div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Adviser</div>
+                    <div style="font-size: 15px; font-weight: 600; color: #001f3f;">{adviser.get_full_name() or adviser.username}</div>
+                </div>
+
+                {f'''
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Adviser's Feedback</div>
+                    <div style="font-size: 14px; font-style: italic; color: #475569;">"{adviser_comment}"</div>
+                </div>
+                ''' if adviser_comment else ''}
+            </div>
+
+            {'<!-- Join Link -->' if not is_declined else ''}
+            {f'''
+            <div style="text-align: center; margin-bottom: 32px;">
+                <a href="{appointment.meeting_link}" style="display: inline-block; background-color: #001f3f; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">Join Video Conference</a>
+            </div>
+            <div style="text-align: center;">
+                <a href="{calendar_link}" style="font-size: 13px; font-weight: 600; color: #64748b; text-decoration: none; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px;">+ Add to Google Calendar</a>
+            </div>
+            ''' if not is_declined else '<p style="text-align: center; font-size: 13px; color: #64748b;">Please review the notes above and contact your adviser for further coordination.</p>'}
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
+            <p style="font-size: 12px; color: #94a3b8; margin: 0;">Automated notification from Advise AI System.</p>
+        </div>
+    </div>
+    """
+    
+    text_content = strip_tags(html_content)
+    
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    
+    try:
+        msg.send()
+        return True
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return False
+
+
+def api_get_appointment_conflicts(request):
+    """
+    Checks for schedule overlaps and identifies free advisers for peer recommendation.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+        
+    apt_id = request.GET.get('apt_id')
+    try:
+        apt = Appointment.objects.get(id=apt_id)
+        target_time = apt.date_time
+        
+        # 1. Check current adviser conflicts (30m window)
+        start_win = target_time - timedelta(minutes=29)
+        end_win = target_time + timedelta(minutes=29)
+        
+        conflicts = Appointment.objects.filter(
+            adviser=request.user,
+            date_time__range=(start_win, end_win),
+            status__in=['confirmed', 'in_progress']
+        ).exclude(id=apt.id)
+        
+        has_conflict = conflicts.exists()
+        conflict_details = []
+        for c in conflicts:
+            conflict_details.append({
+                'purpose': c.purpose,
+                'time': c.date_time.strftime('%I:%M %p'),
+                'student': c.student.get_full_name() or c.student.username
+            })
+            
+        # 2. Recommend available advisers
+        # Find advisers who have NO sessions in this window
+        busy_adviser_ids = Appointment.objects.filter(
+            date_time__range=(start_win, end_win),
+            status__in=['confirmed', 'in_progress']
+        ).values_list('adviser_id', flat=True)
+        
+        available_advisers = UserProfile.objects.filter(
+            role='adviser'
+        ).exclude(user_id__in=busy_adviser_ids).exclude(user_id=request.user.id)
+        
+        recommendations = []
+        for p in available_advisers:
+            recommendations.append({
+                'id': p.user.id,
+                'name': p.user.get_full_name() or p.user.username
+            })
+
+        return JsonResponse({
+            'has_conflict': has_conflict,
+            'conflicts': conflict_details,
+            'recommendations': recommendations
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
