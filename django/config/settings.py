@@ -109,7 +109,10 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR.parent / 'frontend' / 'templates'],
+        'DIRS': [
+            BASE_DIR.parent / 'frontend' / 'templates',
+            BASE_DIR / 'templates_prod', # For Render build-time copy
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -226,8 +229,7 @@ if not DEBUG:
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 
-# AI Assistant Settings
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'add a new one')
+
 
 # Email / SMTP Configuration (REQUIRED for Adviser OTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -241,3 +243,5 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = f"Advise AI Security <{EMAIL_HOST_USER}>"
 
+# AI Assistant Settings
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'add a new one')
