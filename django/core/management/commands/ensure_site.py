@@ -8,30 +8,29 @@ class Command(BaseCommand):
     help = 'Ensures the default Site object exists and provisions SocialApps for allauth'
 
     def handle(self, *args, **options):
-        # 1. Site Configuration
+        # 1. Diagnostic & Cleanup
+        self.stdout.write("--- DATABASE DIAGNOSTICS ---")
+        all_sites = Site.objects.all()
+        self.stdout.write(f"Existing Sites: {[f'ID:{s.id} {s.domain}' for s in all_sites]}")
+        
+        all_apps = SocialApp.objects.all()
+        self.stdout.write(f"Existing SocialApps: {[f'ID:{a.id} {a.provider}' for a in all_apps]}")
+
+        # NUCLEAR WIPE
+        SocialApp.objects.all().delete()
+        self.stdout.write(self.style.WARNING("Nuclear Wipe: Deleted all SocialApps."))
+        
+        # Site Provisioning
         site_id = getattr(settings, 'SITE_ID', 1)
         domain = os.environ.get('SITE_DOMAIN', 'advise-ai.onrender.com')
         name = 'Advise-AI'
         
-        site, created = Site.objects.get_or_create(
-            id=site_id,
-            defaults={'domain': domain, 'name': name}
-        )
-        
-        if not created:
-            if site.domain != domain or site.name != name:
-                site.domain = domain
-                site.name = name
-                site.save()
-                self.stdout.write(self.style.SUCCESS(f'Updated site: {domain}'))
-        else:
-            self.stdout.write(self.style.SUCCESS(f'Created site: {domain}'))
+        # Ensure we only have ONE site with this ID
+        Site.objects.filter(id=site_id).delete()
+        site = Site.objects.create(id=site_id, domain=domain, name=name)
+        self.stdout.write(self.style.SUCCESS(f"Re-provisioned Site ID {site_id}: {domain}"))
 
-        # 2. Social Apps Configuration - NUCLEAR CLEANUP
-        # Delete all existing apps first to ensure no duplicates exist in the DB
-        SocialApp.objects.all().delete()
-        self.stdout.write(self.style.WARNING('Cleaned all existing SocialApps to resolve duplicates.'))
-
+        # 2. Social Apps Re-provisioning fresh
         providers = {
             'google': {
                 'client_id': os.environ.get('SOCIAL_AUTH_GOOGLE_CLIENT_ID'),
@@ -52,40 +51,13 @@ class Command(BaseCommand):
 
         for provider, config in providers.items():
             if config['client_id'] and config['secret']:
-                # Find all existing apps for this provider
-                existing_apps = SocialApp.objects.filter(provider=provider)
-                
-                if existing_apps.exists():
-                    # If multiple exist, we need to clean up duplicates
-                    if existing_apps.count() > 1:
-                        self.stdout.write(self.style.WARNING(f'Found {existing_apps.count()} duplicate apps for {provider}. Cleaning up...'))
-                        # Keep the first one, delete the rest
-                        app = existing_apps.first()
-                        existing_apps.exclude(id=app.id).delete()
-                    else:
-                        app = existing_apps.first()
-
-                    # Update credentials if they changed
-                    if app.client_id != config['client_id'] or app.secret != config['secret']:
-                        app.client_id = config['client_id']
-                        app.secret = config['secret']
-                        app.save()
-                        self.stdout.write(self.style.SUCCESS(f'Updated {config["name"]} credentials'))
-                    else:
-                        self.stdout.write(self.style.SUCCESS(f'{config["name"]} is already up to date'))
-                else:
-                    # Create new if none exists
-                    app = SocialApp.objects.create(
-                        provider=provider,
-                        name=config['name'],
-                        client_id=config['client_id'],
-                        secret=config['secret']
-                    )
-                    self.stdout.write(self.style.SUCCESS(f'Provisioned {config["name"]} SocialApp'))
-                
-                # Ensure the app is linked to the site
-                if not app.sites.filter(id=site.id).exists():
-                    app.sites.add(site)
-                    self.stdout.write(self.style.SUCCESS(f'Linked {config["name"]} to site {domain}'))
+                app = SocialApp.objects.create(
+                    provider=provider,
+                    name=config['name'],
+                    client_id=config['client_id'],
+                    secret=config['secret']
+                )
+                app.sites.add(site)
+                self.stdout.write(self.style.SUCCESS(f'Provisioned fresh {config["name"]} linked to {domain}'))
             else:
-                self.stdout.write(self.style.WARNING(f'Skipping {config["name"]}: client_id or secret is not set in environment.'))
+                self.stdout.write(self.style.WARNING(f'Skipping {config["name"]}: Missing env vars.'))
