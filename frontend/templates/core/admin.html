@@ -699,37 +699,6 @@
             </div>
           </div>
 
-          <!-- Reset Password Modal -->
-          <div id="reset-password-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div class="bg-yellow-500 p-6 text-white text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mx-auto mb-3"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/><path d="M15 12L17 10"/><path d="M15 12L17 14"/></svg>
-                <h3 class="text-xl font-bold">Reset User Password</h3>
-                <p class="text-xs opacity-90 mt-1">For: <span id="reset-modal-user-name" class="font-bold underline"></span></p>
-              </div>
-              <div class="p-6">
-                <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-4">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="admin_reset_password">
-                  <input type="hidden" name="user_id" id="reset-modal-user-id">
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">New Password</label>
-                    <input type="password" name="new_password" required placeholder="••••••••"
-                           class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirm Password</label>
-                    <input type="password" name="confirm_password" required placeholder="••••••••"
-                           class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
-                  </div>
-                  <div class="pt-4 flex gap-2">
-                    <button type="submit" class="flex-1 h-11 bg-yellow-500 text-white rounded-lg font-bold text-sm shadow-md hover:bg-yellow-600 transition-colors">Reset Password</button>
-                    <button type="button" onclick="closeResetPasswordModal()" class="h-11 px-6 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
 
           <div class="rounded-lg border bg-card text-card-foreground bg-white">
             <div class="flex flex-col space-y-1.5 p-6">
@@ -852,7 +821,13 @@
                 <div class="flex gap-3 pt-2">
                   <button type="submit" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-gray-900 hover:opacity-90 shadow-md text-white">Create Admin Account</button>
                   <button type="button" id="close-admin-modal" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 bg-white text-black">Cancel</button>
-                         <div class="rounded-lg border bg-card text-card-foreground bg-white shadow-md">
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Manage Admins Table Section -->
+          <div class="rounded-lg border bg-card text-card-foreground bg-white shadow-md">
             <div class="flex flex-col space-y-1.5 p-6 border-b">
                <h3 class="font-bold text-2xl text-navy">Manage System Administrators</h3>
             </div>
@@ -921,7 +896,6 @@
             </div>
           </div>
         </div>
-      
       </div>
 
     </div>
@@ -982,302 +956,142 @@
     </div>
   </div>
 
-  <script>
-    function viewAptLogs(aptId, purpose) {
-        const modal = document.getElementById('apt-logs-modal');
-        const content = document.getElementById('apt-log-content');
-        document.getElementById('apt-log-title').innerText = purpose;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
-        content.innerHTML = '<div class="py-10 text-center text-gray-400 animate-pulse text-xs">Fetching activity trail...</div>';
-        
-        // Use existing logs pass in context or fetch via API (we'll filter the activity_logs from context for now)
-        // Since we don't have a specific API for filtered logs yet, we'll implement a small helper in the template
-        // Or better, we can just look through the activity_logs that are already in the context!
-        
-        // However, for best UX, I'll filter the activity_logs that mentions the purpose or 'Appointment'
-        let logsFound = false;
-        content.innerHTML = '';
-        
-        {% for log in activity_logs %}
-            if ("{{ log.details|escapejs }}".includes(purpose) || "{{ log.action|escapejs }}".includes(purpose)) {
-                logsFound = true;
-                content.insertAdjacentHTML('beforeend', `
-                    <div class="flex gap-4 items-start relative pb-4 border-l-2 border-gray-100 pl-4 ml-2">
-                        <div class="absolute -left-[9px] top-0 size-4 rounded-full bg-white border-2 border-light-blue shadow-sm"></div>
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="bg-blue-50 text-light-blue text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-blue-100">{{ log.action }}</span>
-                                <span class="text-[9px] text-gray-400 font-mono">{{ log.timestamp|date:"h:i A" }}</span>
-                            </div>
-                            <p class="text-xs text-slate-600 italic">"{{ log.details }}"</p>
-                            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold">— {% if log.user %}{{ log.user.get_full_name|default:log.user.username }}{% else %}System{% endif %}</p>
-                        </div>
-                    </div>
-                `);
-            }
-        {% endfor %}
-        
-        if (!logsFound) {
-            content.innerHTML = '<div class="py-20 text-center text-gray-400 italic text-sm">No specific log events found for this session.</div>';
-        }
-    }
-  </script>
+  <!-- Reset Password Modal [SHARED] -->
+  <div id="reset-password-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-yellow-500 p-6 text-white text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mx-auto mb-3"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/><path d="M15 12L17 10"/><path d="M15 12L17 14"/></svg>
+        <h3 class="text-xl font-bold">Reset User Password</h3>
+        <p class="text-xs opacity-90 mt-1">For: <span id="reset-modal-user-name" class="font-bold underline"></span></p>
+      </div>
+      <div class="p-6">
+        <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-4">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="admin_reset_password">
+          <input type="hidden" name="user_id" id="reset-modal-user-id">
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">New Password</label>
+            <input type="password" name="new_password" required placeholder="••••••••"
+                   class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirm Password</label>
+            <input type="password" name="confirm_password" required placeholder="••••••••"
+                   class="w-full h-11 px-4 rounded-lg border border-gray-200 outline-none focus:border-yellow-500 bg-gray-50/50 text-sm">
+          </div>
+          <div class="pt-4 flex gap-2">
+            <button type="submit" class="flex-1 h-11 bg-yellow-500 text-white rounded-lg font-bold text-sm shadow-md hover:bg-yellow-600 transition-colors">Reset Password</button>
+            <button type="button" onclick="closeResetPasswordModal()" class="h-11 px-6 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Reset User Password Modal -->
-    <div id="reset-password-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div class="bg-gradient-to-r from-yellow-500 to-orange-600 p-6 text-white text-center">
-                <div class="size-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <h3 class="text-xl font-bold">Reset User Password</h3>
-                <p class="text-sm opacity-90 mt-1">Target: <span id="reset-user-display-name" class="font-black"></span></p>
-            </div>
-            <div class="p-8">
-                <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-6">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="admin_reset_password">
-                    <input type="hidden" name="user_id" id="reset-user-id-input">
-                    
-                    <div class="space-y-2">
-                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">New Password</label>
-                        <input type="password" name="new_password" required minlength="4"
-                               class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-yellow-500 outline-none transition-all bg-gray-50/50"
-                               placeholder="Min. 4 characters">
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">Confirm Password</label>
-                        <input type="password" name="confirm_password" required minlength="4"
-                               class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-yellow-500 outline-none transition-all bg-gray-50/50"
-                               placeholder="Type password again">
-                    </div>
-
-                    <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="closeResetPasswordModal()" 
-                                class="flex-1 h-12 rounded-xl border border-gray-200 font-bold text-gray-500 hover:bg-gray-50 transition-all">
-                            Cancel
-                        </button>
-                        <button type="submit" 
-                                class="flex-1 h-12 rounded-xl bg-gray-900 text-white font-bold hover:shadow-lg transition-all active:scale-95 shadow-md">
-                            Reset Now
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-  window.openResetPasswordModal = function(userId, name) {
-    document.getElementById('reset-user-id-input').value = userId;
-    document.getElementById('reset-user-display-name').innerText = name;
-    document.getElementById('reset-password-modal').classList.remove('hidden');
-  };
-
-  window.closeResetPasswordModal = function() {
-    document.getElementById('reset-password-modal').classList.add('hidden');
-  };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // ─── Tab Switching Logic ──────────────────────────────────────────
-        const triggers = document.querySelectorAll('.tab-trigger');
-        const contents = document.querySelectorAll('.tab-content');
-
-        window.switchTab = function(tabName) {
-            const trigger = Array.from(triggers).find(t => t.dataset.tab === tabName);
-            if (!trigger) return;
-
-            const targetId = `tab-${tabName}`;
-            
-            // Reset all
-            triggers.forEach(t => {
-                t.dataset.state = 'inactive';
-                t.classList.remove('bg-white', 'text-foreground', 'shadow-sm', 'bg-navy', 'text-white');
-            });
-            contents.forEach(c => c.classList.add('hidden'));
-
-            // Set active
-            trigger.dataset.state = 'active';
-            trigger.classList.add('bg-white', 'text-foreground', 'shadow-sm');
-
-            const target = document.getElementById(targetId);
-            if (target) target.classList.remove('hidden');
-
-            // Responsive: scroll to tabs on mobile
-            if (window.innerWidth < 768) {
-                document.getElementById('dashboard-tabs').scrollIntoView({ behavior: 'smooth' });
-            }
-
-        };
-
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', () => switchTab(trigger.dataset.tab));
-        });
-
-        // ─── Modal Toggling setup ─────────────────────────────────────────
-        const toggleModal = (btnId, modalId, closeId) => {
-            const btn = document.getElementById(btnId);
-            const modal = document.getElementById(modalId);
-            const close = document.getElementById(closeId);
-            if (btn && modal) btn.onclick = () => modal.classList.toggle('hidden');
-            if (close && modal) close.onclick = () => modal.classList.add('hidden');
-        };
-
-        toggleModal('add-adviser-btn', 'add-adviser-modal', 'close-adviser-modal');
-        toggleModal('add-admin-btn', 'add-admin-modal', 'close-admin-modal');
-        toggleModal('add-student-btn', 'add-student-modal', 'cancel-add-student');
-
-        // ─── Notifications Polling ────────────────────────────────────────
-        const notifDropdown = document.getElementById('notifications-dropdown');
-        const notifList = document.getElementById('notifications-list');
-        const msgBellBadge = document.getElementById('msg-bell-badge');
-
-        window.updateNotifications = function() {
-            fetch('/api/notifications/system/')
-                .then(res => res.json())
-                .then(data => {
-                    if (!notifList) return;
-                    notifList.innerHTML = '';
-                    let unreadCount = 0;
-                    if (data.notifications.length === 0) {
-                        notifList.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No recent notifications</div>';
-                    } else {
-                        data.notifications.forEach(n => {
-                            if (!n.is_read) unreadCount++;
-                            const item = document.createElement('div');
-                            item.className = `p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}`;
-                            item.innerHTML = `
-                                <p class="text-[11px] font-bold text-navy uppercase">${n.type.replace(/_/g, ' ')}</p>
-                                <p class="text-sm text-gray-700 mt-0.5">${n.message}</p>
-                                <p class="text-[10px] text-gray-400 mt-1">${n.created_at}</p>
-                            `;
-                            notifList.appendChild(item);
-                        });
-                    }
-                    const totalUnread = data.unread_count;
-                    if (msgBellBadge) {
-                        if (totalUnread > 0) {
-                            msgBellBadge.innerText = totalUnread;
-                            msgBellBadge.classList.remove('hidden');
-                        } else {
-                            msgBellBadge.classList.add('hidden');
-                        }
-                    }
-                });
-        };
-
-        const bellBtn = document.getElementById('msg-bell-btn');
-        if (bellBtn) {
-            bellBtn.onclick = (e) => {
-                e.stopPropagation();
-                notifDropdown.classList.toggle('hidden');
-                if (!notifDropdown.classList.contains('hidden')) {
-                    fetch('/api/notifications/mark-read/').then(updateNotifications);
-                }
-            };
-        }
-        document.onclick = () => notifDropdown?.classList.add('hidden');
-        setInterval(updateNotifications, 15000);
-        updateNotifications();
-
-        // ─── Real-Time Analytics Polling ───────────────────────────────────
-        window.updateAnalytics = function() {
-            fetch('/api/analytics/sync/')
-                .then(res => res.json())
-                .then(data => {
-                    const map = {
-                        'stat-online-users': data.online_users,
-                        'stat-total-forms': data.total_forms,
-                        'stat-total-appointments': data.total_appointments,
-                        'stat-total-pending': data.total_pending,
-                        'stat-total-students-l': data.total_students,
-                        'stat-total-students-s': data.total_students,
-                        'ana-enrolled-count': data.enrolled_count,
-                        'ana-pending-enrollment-count': data.pending_enrollment_count,
-                        'ana-not-enrolled-count': data.not_enrolled_count,
-                        'ana-apt-pending': data.apt_pending,
-                        'ana-apt-confirmed': data.apt_confirmed,
-                        'ana-apt-completed': data.apt_completed,
-                        'ana-avg-response-time': data.avg_response_time,
-                        'ana-form-pending': data.form_pending
-                    };
-                    Object.entries(map).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.innerText = val;
-                    });
-                });
-        };
-        setInterval(updateAnalytics, 30000);
-        updateAnalytics();
-
-    });
-
-
-    // ─── Active Sessions Modal (Who's Online) ─────────────────
-    window.openActiveSessionsModal = function() {
-        const modal = document.getElementById('active-sessions-modal');
-        const body = document.getElementById('active-sessions-body');
-        if (!modal || !body) return;
-        body.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400"><div class="animate-spin size-6 border-2 border-light-blue border-t-transparent rounded-full mx-auto mb-2"></div>Loading active sessions...</td></tr>';
-        modal.classList.remove('hidden');
-
-        fetch('/api/admin/active-sessions/')
-            .then(r => r.json())
-            .then(data => {
-                body.innerHTML = '';
-                if (data.active_sessions.length === 0) {
-                    body.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-gray-400">No other active sessions found.</td></tr>';
-                    return;
-                }
-                data.active_sessions.forEach(s => {
-                    body.insertAdjacentHTML('beforeend', `
-                        <tr class="hover:bg-gray-50 transition-colors border-b">
-                            <td class="p-4 font-bold text-navy">${s.name} ${s.is_me ? '<span class="text-[9px] bg-blue-100 text-light-blue px-1 rounded ml-1">YOU</span>' : ''}</td>
-                            <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${s.role === 'Admin' ? 'bg-navy text-white border-navy' : 'bg-gray-100 text-gray-600 border-gray-200'}">${s.role}</span></td>
-                            <td class="p-4 text-xs text-gray-500 font-mono">${s.last_active}</td>
-                            <td class="p-4 text-center"><div class="flex items-center justify-center"><div class="size-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div></div></td>
-                        </tr>
-                    `);
-                });
-            });
+    // ─── Shared Utilities & Modal Logic ────────────────────────────────
+    const toggleModal = (btnId, modalId, closeId) => {
+        const btn = document.getElementById(btnId);
+        const modal = document.getElementById(modalId);
+        const close = document.getElementById(closeId);
+        if (btn && modal) btn.onclick = () => modal.classList.remove('hidden');
+        if (close && modal) close.onclick = () => modal.classList.add('hidden');
     };
 
+    // ─── Reset Password Modal Logic ───────────────────────────────────
+    window.openResetPasswordModal = function(userId, name) {
+        const modal = document.getElementById('reset-password-modal');
+        const idInput = document.getElementById('reset-modal-user-id');
+        const nameSpan = document.getElementById('reset-modal-user-name');
+        if (idInput) idInput.value = userId;
+        if (nameSpan) nameSpan.innerText = name;
+        if (modal) modal.classList.remove('hidden');
+    };
 
-    // ─── Admin Curriculum & Grading Logic ───────────────────────
-    let currentModalStudentId = null;
-    window.viewStudentCurriculum = function(studentId, studentName) {
-        currentModalStudentId = studentId;
+    window.closeResetPasswordModal = function() {
+        const modal = document.getElementById('reset-password-modal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // ─── Appointment Logs Logic ───────────────────────────────────────
+    window.viewAptLogs = function(aptId, purpose) {
+        const modal = document.getElementById('apt-logs-modal');
+        const content = document.getElementById('apt-log-content');
+        const title = document.getElementById('apt-log-title');
+        
+        if (title) title.innerText = purpose;
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        
+        if (content) {
+            content.innerHTML = '<div class="py-10 text-center text-gray-400 animate-pulse text-xs">Fetching activity trail...</div>';
+            let logsFound = false;
+            let logHtml = '';
+            
+            {% for log in activity_logs %}
+                if ("{{ log.details|escapejs }}".includes(purpose) || "{{ log.action|escapejs }}".includes(purpose)) {
+                    logsFound = true;
+                    logHtml += `
+                        <div class="flex gap-4 items-start relative pb-4 border-l-2 border-gray-100 pl-4 ml-2">
+                            <div class="absolute -left-[9px] top-0 size-4 rounded-full bg-white border-2 border-light-blue shadow-sm"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="bg-blue-50 text-light-blue text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-blue-100">{{ log.action }}</span>
+                                    <span class="text-[9px] text-gray-400 font-mono">{{ log.timestamp|date:"h:i A" }}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 italic">"${"{{ log.details|escapejs }}"}"</p>
+                                <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold">— {% if log.user %}{{ log.user.get_full_name|default:log.user.username }}{% else %}System{% endif %}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            {% endfor %}
+            content.innerHTML = logsFound ? logHtml : '<div class="py-20 text-center text-gray-400 italic text-sm">No specific log events found for this session.</div>';
+        }
+    };
+
+    // ─── Student Curriculum & Records (Combined Logic) ────────────────
+    window.viewStudentCurriculum = function(userId, name) {
+        document.getElementById('admin-modal-student-name').innerText = name + "'s Curriculum";
         const modal = document.getElementById('admin-curriculum-modal');
-        const accordion = document.getElementById('admin-curriculum-accordion');
         const loading = document.getElementById('admin-curr-loading');
-        document.getElementById('admin-modal-student-name').innerText = studentName;
+        const accordion = document.getElementById('admin-curriculum-accordion');
+        
         modal.classList.remove('hidden');
-        accordion.classList.add('hidden');
+        modal.classList.add('flex');
         loading.classList.remove('hidden');
-
-        fetch(`/api/curriculum/${studentId}/`)
+        accordion.classList.add('hidden');
+        
+        fetch(`/api/curriculum/${userId}/`)
             .then(res => res.json())
             .then(data => {
                 loading.classList.add('hidden');
                 accordion.classList.remove('hidden');
+                
+                if (data.error) {
+                    accordion.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">${data.error}</div>`;
+                    return;
+                }
+                
                 document.getElementById('admin-modal-student-info').innerText = `${data.student.student_id} • ${data.student.program}`;
-                accordion.innerHTML = '';
+                
                 const groups = {};
                 data.curriculum.forEach(subj => {
                     const key = `Year ${subj.year_level}, Semester ${subj.semester}`;
                     if (!groups[key]) groups[key] = [];
                     groups[key].push(subj);
                 });
+                
+                let html = '';
                 Object.entries(groups).forEach(([groupName, subjects], idx) => {
                     const sectionId = `admin-curr-section-${idx}`;
-                    accordion.insertAdjacentHTML('beforeend', `
+                    html += `
                         <div class="border-b last:border-b-0">
                             <button onclick="document.getElementById('${sectionId}').classList.toggle('hidden')" 
                                     class="w-full px-5 py-4 bg-gray-50/50 hover:bg-gray-100 flex items-center justify-between transition-colors sticky top-0 z-10 border-b">
@@ -1303,11 +1117,11 @@
                                                     </td>
                                                     <td class="p-4 w-48 text-right">
                                                         <div class="flex flex-wrap gap-1 justify-end">
-                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'passed')" 
+                                                            <button onclick="adminUpdateStatus('${userId}', '${subj.id}', 'passed')" 
                                                                     class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'passed' ? 'bg-green-500 text-white border-green-600' : 'bg-white text-green-600 border-green-200 hover:bg-green-50'}">Pass</button>
-                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'failed')" 
+                                                            <button onclick="adminUpdateStatus('${userId}', '${subj.id}', 'failed')" 
                                                                     class="px-2 py-1 rounded text-[9px] font-black border uppercase transition-all ${subj.status === 'failed' ? 'bg-red-500 text-white border-red-600' : 'bg-white text-red-600 border-red-200 hover:bg-red-50'}">Fail</button>
-                                                            <button onclick="adminUpdateStatus('${studentId}', '${subj.id}', 'not_taken')" 
+                                                            <button onclick="adminUpdateStatus('${userId}', '${subj.id}', 'not_taken')" 
                                                                     class="px-2 py-1 rounded text-[9px] font-black border border-gray-200 uppercase bg-white text-gray-400 hover:bg-gray-100 transition-all">Clear</button>
                                                         </div>
                                                     </td>
@@ -1318,191 +1132,173 @@
                                 </table>
                             </div>
                         </div>
-                    `);
+                    `;
                 });
+                accordion.innerHTML = html;
+            })
+            .catch(err => {
+                loading.classList.add('hidden');
+                accordion.classList.remove('hidden');
+                accordion.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Failed to load curriculum.</div>`;
             });
-    }
+    };
 
     window.adminUpdateStatus = function(studentId, subjectId, status) {
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         fetch('/api/curriculum/update-subject/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({ student_id: studentId, subject_id: subjectId, status: status })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success' || data.status === 'ok') {
-                viewStudentCurriculum(studentId, document.getElementById('admin-modal-student-name').innerText);
-            } else {
-                alert('Error: ' + (data.error || 'Unknown error'));
+                viewStudentCurriculum(studentId, document.getElementById('admin-modal-student-name').innerText.replace("'s Curriculum", ""));
             }
         });
-    }
+    };
 
-    // ─── Enrollment Processing (AJAX) ───────────────────────────
+    // ─── Enrollment Processing ───────────────────────────────────────
     window.adminProcessEnrollment = function(requestId, action, rowId) {
         const formData = new FormData();
         formData.append('action', `admin_${action}_enrollment`);
         formData.append('request_id', requestId);
         
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
         fetch(window.location.href, {
             method: 'POST',
             body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': '{{ csrf_token }}' }
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
                 const row = document.getElementById(rowId);
                 if (row) {
-                    row.style.transition = 'all 0.5s ease';
                     row.style.opacity = '0';
-                    row.style.transform = 'translateX(20px)';
-                    setTimeout(() => {
-                        row.remove();
-                        checkEmptyEnrollments();
-                        updateAnalytics();
-                    }, 500);
+                    setTimeout(() => { row.remove(); updateAnalytics(); }, 500);
                 }
-            } else {
-                alert('Error: ' + data.message);
-            }
+            } else { alert('Error: ' + data.message); }
         });
     };
 
-    window.adminProcessBulkEnrollment = function(codeId, action, rowId) {
-        const formData = new FormData();
-        formData.append('action', `admin_${action}_enrollment_bulk`);
-        formData.append('enrollment_code_id', codeId);
-        
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const row = document.getElementById(rowId);
-                if (row) {
-                    row.style.transition = 'all 0.5s ease';
-                    row.style.opacity = '0';
-                    row.style.transform = 'translateY(-10px)';
-                    setTimeout(() => {
-                        row.remove();
-                        checkEmptyEnrollments();
-                        updateAnalytics();
-                    }, 500);
-                }
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
+    // ─── Analytics, Notifications & Sessions ──────────────────────────
+    window.updateAnalytics = function() {
+        fetch('/api/analytics/sync/')
+            .then(res => res.json())
+            .then(data => {
+                const map = {
+                    'stat-online-users': data.online_users,
+                    'stat-total-forms': data.total_forms,
+                    'stat-total-appointments': data.total_appointments,
+                    'stat-total-pending': data.total_pending,
+                    'stat-total-students-l': data.total_students,
+                    'ana-enrolled-count': data.enrolled_count,
+                    'ana-pending-enrollment-count': data.pending_enrollment_count,
+                    'ana-apt-pending': data.apt_pending,
+                    'ana-apt-confirmed': data.apt_confirmed,
+                    'ana-form-pending': data.form_pending
+                };
+                Object.entries(map).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = val;
+                });
+            });
     };
 
-    function checkEmptyEnrollments() {
-        const body = document.getElementById('enrollment-list-body');
-        if (body && body.querySelectorAll('.group-row').length === 0) {
-            const noMsg = document.getElementById('no-enrollments-msg');
-            if (noMsg) noMsg.classList.remove('hidden');
-            else {
-                body.innerHTML = `<tr id="no-enrollments-msg"><td colspan="4" class="p-12 text-center text-gray-400">No pending enrollment requests</td></tr>`;
-            }
-        }
-    }
+    window.updateNotifications = function() {
+        const notifList = document.getElementById('notifications-list');
+        const badge = document.getElementById('msg-bell-badge');
+        fetch('/api/notifications/system/')
+            .then(res => res.json())
+            .then(data => {
+                if (!notifList) return;
+                notifList.innerHTML = data.notifications.length === 0 ? 
+                    '<div class="p-4 text-center text-gray-500 text-sm">No recent notifications</div>' :
+                    data.notifications.map(n => `
+                        <div class="p-3 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50 border-l-4 border-l-light-blue' : ''}">
+                            <p class="text-[11px] font-bold text-navy uppercase">${n.type.replace(/_/g, ' ')}</p>
+                            <p class="text-sm text-gray-700 mt-0.5">${n.message}</p>
+                            <p class="text-[10px] text-gray-400 mt-1">${n.created_at}</p>
+                        </div>
+                    `).join('');
+                if (badge) {
+                    badge.innerText = data.unread_count;
+                    badge.classList.toggle('hidden', data.unread_count === 0);
+                }
+            });
+    };
 
-    window.openResetPasswordModal = function(userId, userName) {
-        document.getElementById('reset-user-id-input').value = userId;
-        document.getElementById('reset-user-display-name').innerText = userName;
-        document.getElementById('reset-password-modal').classList.remove('hidden');
-    }
+    window.openActiveSessionsModal = function() {
+        const modal = document.getElementById('active-sessions-modal');
+        const body = document.getElementById('active-sessions-body');
+        if (!modal || !body) return;
+        body.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">Loading...</td></tr>';
+        modal.classList.remove('hidden');
+        fetch('/api/admin/active-sessions/')
+            .then(r => r.json())
+            .then(data => {
+                body.innerHTML = data.active_sessions.map(s => `
+                    <tr class="hover:bg-gray-50 border-b">
+                        <td class="p-4 font-bold text-navy">${s.name} ${s.is_me ? '<span class="text-[9px] bg-blue-100 text-light-blue px-1 rounded ml-1">YOU</span>' : ''}</td>
+                        <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${s.role === 'Admin' ? 'bg-navy text-white border-navy' : 'bg-gray-100 text-gray-600 border-gray-200'}">${s.role}</span></td>
+                        <td class="p-4 text-xs text-gray-500 font-mono">${s.last_active}</td>
+                        <td class="p-4 text-center"><div class="size-2 rounded-full bg-green-500 mx-auto"></div></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="p-12 text-center text-gray-400">No other active sessions</td></tr>';
+            });
+    };
 
-    window.closeResetPasswordModal = function() {
-        document.getElementById('reset-password-modal').classList.add('hidden');
-    }
-
+    // ─── Initialization ───────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        // ─── Tab Switching Logic ──────────────────────────────────────────
         const triggers = document.querySelectorAll('.tab-trigger');
         const contents = document.querySelectorAll('.tab-content');
 
         window.switchTab = function(tabName) {
             const trigger = Array.from(triggers).find(t => t.dataset.tab === tabName);
             if (!trigger) return;
-
-            const targetId = `tab-${tabName}`;
             
-            // Reset all
             triggers.forEach(t => {
-                t.dataset.state = 'inactive';
-                t.classList.remove('bg-blue-100', 'text-blue-700', 'shadow-sm');
+                t.classList.remove('bg-white', 'text-navy', 'shadow-sm', 'bg-blue-100', 'text-blue-700');
+                t.classList.add('text-gray-500');
             });
             contents.forEach(c => c.classList.add('hidden'));
 
-            // Set active
-            trigger.dataset.state = 'active';
-            trigger.classList.add('bg-blue-100', 'text-blue-700', 'shadow-sm');
-
-            const target = document.getElementById(targetId);
+            trigger.classList.add('bg-white', 'text-navy', 'shadow-sm');
+            trigger.classList.remove('text-gray-500');
+            const target = document.getElementById(`tab-${tabName}`);
             if (target) target.classList.remove('hidden');
-
-            // Responsive: scroll to tabs on mobile
-            if (window.innerWidth < 768) {
-                const tabsElem = document.getElementById('dashboard-tabs');
-                if (tabsElem) tabsElem.scrollIntoView({ behavior: 'smooth' });
-            }
+            localStorage.setItem('adminActiveTab', tabName);
         };
 
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', () => switchTab(trigger.dataset.tab));
-        });
+        triggers.forEach(t => t.onclick = () => switchTab(t.dataset.tab));
+        switchTab(localStorage.getItem('adminActiveTab') || 'overview');
 
-        // ─── Modal Toggling setup ─────────────────────────────────────────
-        const toggleModal = (btnId, modalId, closeId) => {
-            const btn = document.getElementById(btnId);
-            const modal = document.getElementById(modalId);
-            const close = document.getElementById(closeId);
-            if (btn && modal) btn.onclick = () => modal.classList.toggle('hidden');
-            if (close && modal) close.onclick = () => modal.classList.add('hidden');
+        registerModalHandlers('add-student-btn', 'add-student-modal', 'cancel-add-student');
+        registerModalHandlers('add-adviser-btn', 'add-adviser-modal', 'close-adviser-modal');
+        registerModalHandlers('add-admin-btn', 'add-admin-modal', 'close-admin-modal');
+
+        const bellBtn = document.getElementById('msg-bell-btn');
+        const notifDropdown = document.getElementById('notifications-dropdown');
+        if (bellBtn) bellBtn.onclick = (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('hidden');
+            if (!notifDropdown.classList.contains('hidden')) fetch('/api/notifications/mark-read/').then(updateNotifications);
         };
+        document.onclick = () => notifDropdown?.classList.add('hidden');
 
-        toggleModal('add-adviser-btn', 'add-adviser-modal', 'close-adviser-modal');
-        toggleModal('add-admin-btn', 'add-admin-modal', 'close-admin-modal');
-        toggleModal('add-student-btn', 'add-student-modal', 'cancel-add-student');
-
-        // ─── Real-Time Analytics Polling ───────────────────────────────────
-        window.updateAnalytics = function() {
-            fetch('/api/analytics/sync/')
-                .then(res => res.json())
-                .then(data => {
-                    const map = {
-                        'stat-online-users': data.online_users,
-                        'stat-total-forms': data.total_forms,
-                        'stat-total-appointments': data.total_appointments,
-                        'stat-total-pending': data.total_pending,
-                        'stat-total-students-l': data.total_students,
-                        'ana-enrolled-count': data.enrolled_count,
-                        'ana-pending-enrollment-count': data.pending_enrollment_count,
-                        'ana-not-enrolled-count': data.not_enrolled_count,
-                        'ana-apt-pending': data.apt_pending,
-                        'ana-apt-confirmed': data.apt_confirmed,
-                        'ana-apt-completed': data.apt_completed,
-                        'ana-avg-response-time': data.avg_response_time,
-                        'ana-form-pending': data.form_pending
-                    };
-                    Object.entries(map).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.innerText = val;
-                    });
-                });
-        };
+        setInterval(updateNotifications, 15000);
         setInterval(updateAnalytics, 30000);
+        updateNotifications();
         updateAnalytics();
     });
+
+    const registerModalHandlers = (btnId, modalId, closeId) => {
+        const btn = document.getElementById(btnId);
+        const modal = document.getElementById(modalId);
+        const close = document.getElementById(closeId);
+        if(btn && modal && close) {
+            btn.onclick = () => modal.classList.remove('hidden');
+            close.onclick = () => modal.classList.add('hidden');
+        }
+    };
 </script>
 {% endblock %}

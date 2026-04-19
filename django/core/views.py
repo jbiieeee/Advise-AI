@@ -903,7 +903,7 @@ def adviser_dashboard(request):
     now = timezone.now()
     # 1. Main Operational Feed (Pending, Confirmed, In Progress)
     my_appointments = Appointment.objects.filter(
-        adviser=user,
+        Q(adviser=user) | Q(adviser__isnull=True),
         status__in=['pending', 'confirmed', 'in_progress']
     ).select_related('student', 'student__userprofile').order_by('date_time')
     my_students = UserProfile.objects.filter(Q(role='student') & (Q(assigned_adviser__isnull=True) | Q(assigned_adviser=user)))
@@ -916,7 +916,7 @@ def adviser_dashboard(request):
 
     # 3. Priority Action Center Logic (Find earliest session that needs response)
     focus_apt = Appointment.objects.filter(
-        adviser=user,
+        Q(adviser=user) | Q(adviser__isnull=True),
         status='pending'
     ).order_by('date_time').first()
 

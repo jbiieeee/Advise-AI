@@ -23,7 +23,6 @@
     {% include 'components/footer.html' %}
     {% endblock %}
 
-    {% block extra_scripts %}{% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -126,18 +125,26 @@
         }
 
         function initiateCall(targetUserId, targetName) {
-            const roomName = `advise-ai-session-${Math.random().toString(36).substring(7)}-${targetUserId}`;
+            if (!targetUserId) {
+                console.error("Call failed: targetUserId is missing.");
+                Swal.fire('Error', 'Unable to identify the recipient. Please refresh and try again.', 'error');
+                return;
+            }
 
+            const roomName = `advise-ai-session-${Math.random().toString(36).substring(7)}-${targetUserId}`;
+            
             Swal.fire({
-                title: 'Initiate Secure Call?',
-                text: `You are about to ring ${targetName}. Students will receive an instant notification to join.`,
-                icon: 'question',
+                title: 'Start Video Call?',
+                text: `You are about to start a session with ${targetName}. This will notify them to join.`,
+                icon: 'video',
                 showCancelButton: true,
-                confirmButtonText: 'Start Calling',
-                confirmButtonColor: '#0E2A47',
-                cancelButtonColor: '#d33',
+                confirmButtonText: 'Start Call',
+                confirmButtonColor: '#1d2a44',
+                cancelButtonColor: '#6c757d'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    console.log(`Initiating call for ${targetUserId} in room ${roomName}`);
+                    
                     fetch('/api/notifications/trigger-call/', {
                         method: 'POST',
                         headers: {
@@ -146,16 +153,34 @@
                         },
                         body: JSON.stringify({
                             receiver_id: targetUserId,
-                            room_name: room_name
+                            room_name: roomName
                         })
                     })
                         .then(r => r.json())
                         .then(data => {
                             if (data.status === 'success') {
+                                // Log the call in the message thread as well
+                                fetch('/api/messages/send/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: JSON.stringify({
+                                        receiver_id: targetUserId,
+                                        content: `[VIDEO CALL STARTED] Click to join: JOIN_CALL:${roomName}`,
+                                        type: 'standard'
+                                    })
+                                });
+
                                 window.open(`/video-call/${roomName}/`, '_blank');
                             } else {
+                                console.error("Server error during call trigger:", data.error);
                                 Swal.fire('Error', data.error || 'Failed to start call', 'error');
                             }
+                        }).catch(err => {
+                            console.error("Network error during call trigger:", err);
+                            Swal.fire('Error', 'Network request failed. Check your connection.', 'error');
                         });
                 }
             });
@@ -281,6 +306,7 @@
             {% endif %}
         });
     </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 
 </html>

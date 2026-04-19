@@ -436,9 +436,7 @@
 
     if (startCallBtn) {
         startCallBtn.onclick = () => {
-            const roomName = `advise-ai-session-${Math.random().toString(36).substring(7)}-${currentContactId}`;
-            window.activeRoomName = roomName;
-            initiateCall(roomName);
+            initiateCall();
         };
     }
     if (inviteAdviserBtn) {
@@ -448,15 +446,23 @@
     function initiateCall(targetRoom = null) {
         const roomName = targetRoom || `advise-ai-session-${Math.random().toString(36).substring(7)}-${currentContactId}`;
         const callUrl = `/video-call/${roomName}/`;
+        
+        // Track the room name globally so "Invite" modal knows which session to share
+        window.activeRoomName = roomName;
 
         // If we are the initiator (targetRoom is null), send both a trigger and a chat message
-        if (!targetRoom && currentContactId) {
+        if (!targetRoom) {
+            if (!currentContactId) {
+                console.error("Cannot initiate call: No contact selected.");
+                return;
+            }
+            
             // 1. Trigger the real-time "Incoming Call" popup notification
             fetch('/api/notifications/trigger-call/', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({
                     receiver_id: currentContactId,
@@ -464,8 +470,12 @@
                 })
             }).then(r => r.json())
             .then(data => {
-                if(data.status === 'success') console.log("Call notification triggered successfully.");
-            }).catch(e => console.error("Call trigger failed", e));
+                if(data.status === 'success') {
+                    console.log("Call notification triggered successfully.");
+                } else {
+                    console.error("Server reject call trigger:", data.error);
+                }
+            }).catch(e => console.error("Call trigger network failure", e));
 
             // 2. Fallback: Send a chat message too
             const inviteMsg = `[VIDEO CALL STARTED] Click to join: JOIN_CALL:${roomName}`;

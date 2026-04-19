@@ -943,11 +943,13 @@
                            'not_taken': '[NOT TAKEN]'
                         }[subj.status] || subj.status.toUpperCase();
                         
+                        const isDisabled = !['not_taken', 'failed'].includes(subj.status);
+                        
                         return `
-                          <tr class="curr-row hover:bg-blue-50/30 transition-colors" data-year="${subj.year_level}">
+                          <tr class="curr-row hover:bg-blue-50/30 transition-colors ${isDisabled ? 'opacity-60' : ''}" data-year="${subj.year_level}">
                             <td class="p-3 w-10">
                               <input type="checkbox" class="subject-checkbox size-4 rounded border-gray-300 text-light-blue focus:ring-light-blue" 
-                                     value="${subj.id}" data-code="${subj.code}" ${subj.status === 'passed' ? 'disabled' : ''} onchange="toggleSubjectSelection(this)">
+                                     value="${subj.id}" data-code="${subj.code}" ${isDisabled ? 'disabled' : ''} onchange="toggleSubjectSelection(this)">
                             </td>
                             <td class="p-3 font-mono text-[10px] font-bold text-navy w-20">${subj.code}</td>
                             <td class="p-3">
@@ -962,7 +964,7 @@
                             <td class="p-3 w-28 text-right">
                                <button onclick="requestEnrollment('${subj.id}', '${subj.code}')" 
                                        class="text-[10px] font-bold text-navy hover:text-light-blue uppercase tracking-tighter disabled:opacity-30"
-                                       ${subj.status === 'passed' ? 'disabled' : ''}>
+                                       ${isDisabled ? 'disabled' : ''}>
                                  Override Code
                                </button>
                             </td>
