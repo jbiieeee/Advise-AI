@@ -48,23 +48,35 @@ class Command(BaseCommand):
 
         for provider, config in providers.items():
             if config['client_id'] and config['secret']:
-                app, app_created = SocialApp.objects.get_or_create(
-                    provider=provider,
-                    defaults={
-                        'name': config['name'],
-                        'client_id': config['client_id'],
-                        'secret': config['secret'],
-                    }
-                )
+                # Find all existing apps for this provider
+                existing_apps = SocialApp.objects.filter(provider=provider)
                 
-                if not app_created:
+                if existing_apps.exists():
+                    # If multiple exist, we need to clean up duplicates
+                    if existing_apps.count() > 1:
+                        self.stdout.write(self.style.WARNING(f'Found {existing_apps.count()} duplicate apps for {provider}. Cleaning up...'))
+                        # Keep the first one, delete the rest
+                        app = existing_apps.first()
+                        existing_apps.exclude(id=app.id).delete()
+                    else:
+                        app = existing_apps.first()
+
                     # Update credentials if they changed
                     if app.client_id != config['client_id'] or app.secret != config['secret']:
                         app.client_id = config['client_id']
                         app.secret = config['secret']
                         app.save()
                         self.stdout.write(self.style.SUCCESS(f'Updated {config["name"]} credentials'))
+                    else:
+                        self.stdout.write(self.style.SUCCESS(f'{config["name"]} is already up to date'))
                 else:
+                    # Create new if none exists
+                    app = SocialApp.objects.create(
+                        provider=provider,
+                        name=config['name'],
+                        client_id=config['client_id'],
+                        secret=config['secret']
+                    )
                     self.stdout.write(self.style.SUCCESS(f'Provisioned {config["name"]} SocialApp'))
                 
                 # Ensure the app is linked to the site
