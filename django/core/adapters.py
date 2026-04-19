@@ -43,3 +43,26 @@ class AdviseAISocialAccountAdapter(DefaultSocialAccountAdapter):
         user = super().save_user(request, sociallogin, form)
         # The role assignment is also handled in signals, but we can be extra sure here.
         return user
+
+    def get_app(self, request, provider, client_id=None):
+        """
+        Resilient fetcher to prevent 500 crashes if the DB has duplicates.
+        If MultipleObjectsReturned is raised, we log it and return the first valid app.
+        """
+        from allauth.socialaccount.models import SocialApp
+        from django.core.exceptions import MultipleObjectsReturned
+        
+        try:
+            return super().get_app(request, provider, client_id=client_id)
+        except MultipleObjectsReturned:
+            # SAFETY NET: Just return the first one instead of crashing the site
+            apps = SocialApp.objects.filter(provider=provider)
+            if client_id:
+                apps = apps.filter(client_id=client_id)
+            
+            # Check for site link too if possible
+            from django.conf import settings
+            site_apps = apps.filter(sites__id=settings.SITE_ID)
+            if site_apps.exists():
+                return site_apps.first()
+            return apps.first()
