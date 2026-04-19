@@ -1,41 +1,8 @@
-# Advise-AI: Secure Intelligent Academic Portal (STRIDE Branch)
+# Advise-AI: Secure Intelligent Academic Portal (MEET Branch)
 
 Welcome to the official repository for **Advise-AI**, a premium academic advising platform designed specifically for the modern institutional ecosystem. This branch (`stride`) represents the most secure iteration of the platform, implementing advanced threat modeling mitigations and AI-driven workflows.
 
 ---
-
-## 🌟 Core Features
-
-### 1. Intelligent Advising (Gemini 1.5 Flash)
-- **AI Virtual Buddy**: Real-time academic Chatbot integrated using Google's 1.5 Flash model.
-- **Context-Aware Recommendations**: Personalized guidance based on student curriculum status.
-
-### 2. Secure Video Conferencing (Jitsi Integration)
-- **Built-in Meet**: Seamless WebRTC conferencing directly in the browser.
-- **Dynamic Security**: Automated room generation and real-time signalling for secure advising sessions.
-
-### 3. Professional Academic Workflow
-- **Curriculum Tracking**: Interactive progress boards for students and evaluation tools for advisers.
-- **Enrollment Code System**: Single-use, cryptographically secure codes for streamlined enrollment overrides.
-
-### 4. Advanced Communications
-- **Real-Time Notification Engine**: Instant AJAX-based alerts for messages, calls, and session updates.
-- **Automated Call Logs**: Persistent chat integration ensures meeting links are never lost.
-
----
-
-## 🛡️ Security Architecture (STRIDE Implementation)
-
-This project was built using the **STRIDE** methodology to ensure high-grade data protection:
-- **Spoofing**: Defeated via Google/GitHub OAuth 2.0 and Adviser-specific OTP verification.
-- **Tampering**: Guarded by Django's native CSRF protection and ORM parameterization.
-- **Repudiation**: Enforced through a centralized immutable Activity Log (Audit Trail).
-- **Information Disclosure**: Protected by Role-Based Access Control (RBAC) and SSL/TLS encryption.
-- **Denial of Service**: Mitigated through cache-backed Rate Limiting (`django-ratelimit`).
-- **Elevation of Privilege**: Secured via strict server-side middleware and permission checkpoints.
-
----
-
 ## 🚀 Local Installation & Setup
 
 Follow these steps to deploy Advise-AI on your local workstation for development or evaluation.
@@ -107,3 +74,36 @@ Access the application at: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 - **Infrastructure**: Render Cloud, WhiteNoise Static Asset Management
 
 ---
+## 🌟 Core Features
+
+### 1. Intelligent Advising (Gemini 1.5 Flash)
+- **AI Virtual Buddy**: Real-time academic Chatbot integrated using Google's 1.5 Flash model.
+- **Context-Aware Recommendations**: Personalized guidance based on student curriculum status.
+
+### 2. Secure Video Conferencing (Jitsi Integration)
+- **Built-in Meet**: Seamless WebRTC conferencing directly in the browser.
+- **Dynamic Security**: Automated room generation and real-time signalling for secure advising sessions.
+
+### 3. Professional Academic Workflow
+- **Curriculum Tracking**: Interactive progress boards for students and evaluation tools for advisers.
+- **Enrollment Code System**: Single-use, cryptographically secure codes for streamlined enrollment overrides.
+
+### 4. Advanced Communications
+- **Real-Time Notification Engine**: Instant AJAX-based alerts for messages, calls, and session updates.
+- **Automated Call Logs**: Persistent chat integration ensures meeting links are never lost.
+
+---
+
+## 🛡️ Security Architecture (STRIDE Implementation)
+
+This project was built using the **STRIDE** methodology to ensure high-grade data protection:
+- **Spoofing**: Defeated via Google/GitHub OAuth 2.0 and Adviser-specific OTP verification.
+- **Tampering**: Guarded by Django's native CSRF protection and ORM parameterization.
+- **Repudiation**: Enforced through a centralized immutable Activity Log (Audit Trail).
+- **Information Disclosure**: Protected by Role-Based Access Control (RBAC) and SSL/TLS encryption.
+- **Denial of Service**: Mitigated through cache-backed Rate Limiting (`django-ratelimit`).
+- **Elevation of Privilege**: Secured via strict server-side middleware and permission checkpoints.
+
+---
+
+
