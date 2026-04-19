@@ -27,7 +27,11 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS(f'Created site: {domain}'))
 
-        # 2. Social Apps Configuration
+        # 2. Social Apps Configuration - NUCLEAR CLEANUP
+        # Delete all existing apps first to ensure no duplicates exist in the DB
+        SocialApp.objects.all().delete()
+        self.stdout.write(self.style.WARNING('Cleaned all existing SocialApps to resolve duplicates.'))
+
         providers = {
             'google': {
                 'client_id': os.environ.get('SOCIAL_AUTH_GOOGLE_CLIENT_ID'),
