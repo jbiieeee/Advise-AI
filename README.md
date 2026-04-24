@@ -70,7 +70,7 @@ Access the application at: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 - **UI/UX**: HTML5, Vanilla CSS3, Modern JavaScript (No heavy frameworks)
 - **AI Engine**: Google Generative AI (Gemini 1.5 Flash)
 - **Security**: Django-Allauth (OAuth), Django-Ratelimit, Cryptography
-- **Database**: PostgreSQL (Production) / SQLite (Local)
+- **Database**: PostgreSQL (At Render) / SQLite (Local)
 - **Infrastructure**: Render Cloud, WhiteNoise Static Asset Management
 
 ---
