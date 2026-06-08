@@ -83,67 +83,59 @@ def login_page(request):
             messages.error(request, "Rate limit exceeded. Please try again later.")
             return redirect('login')
 
-        role = request.POST.get('role', 'student')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        
-        # Sticky Admin Fallback: Allow hardcoded admin/admin123 regardless of database state
-        if role == 'admin' and email == 'admin' and password == 'admin123':
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        # ── Sticky SuperAdmin Fallback ─────────────────────────────────
+        # If someone types exactly "admin" / "admin123", bootstrap the superuser
+        if email == 'admin' and password == 'admin123':
             try:
                 user = User.objects.filter(username='admin').first()
                 if not user:
                     user = User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
                 else:
-                    # Sync password just in case it was changed
                     user.set_password('admin123')
                     user.is_active = True
                     user.save()
-                
-                # Reset fails on success
                 request.session['login_fails'] = 0
-                # Explicitly specify the backend since allauth adds multiple backends
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                log_activity(user, "Login", "SuperAdmin logged in via sticky fallback.")
                 return redirect('admin_dashboard')
             except Exception as e:
                 messages.error(request, f"Database error during sticky login: {str(e)}")
                 return redirect('login')
-        
+
+        # ── Standard Unified Authentication ───────────────────────────
         user = authenticate(request, username=email, password=password)
-        
+
         if user is not None:
-            # For admin role, just check superuser status or specific role
-            if role == 'admin' and user.is_superuser:
-                request.session['login_fails'] = 0
-                login(request, user)
-                log_activity(user, "Login", "Admin logged in successfully.")
-                return redirect('admin_dashboard')
-            
-            # Ensure profile exists using get_or_create to prevent 500 on first login
-            profile, created = UserProfile.objects.get_or_create(
-                user=user,
-                defaults={'role': 'admin' if user.is_superuser else role}
-            )
-            
-            if profile.role != role and not user.is_superuser:
-                messages.error(request, f'You do not have a {role} account.')
-                return redirect('login')
-            
-            # Reset fails on success
+            # Auto-detect role from profile — no role selector needed
+            if user.is_superuser:
+                detected_role = 'admin'
+            else:
+                profile, _ = UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'role': 'student'}
+                )
+                detected_role = profile.role  # 'student' | 'adviser' | 'admin'
+
             request.session['login_fails'] = 0
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            log_activity(user, "Login", f"{role.capitalize()} logged in successfully.")
-            if role == 'student' or profile.role == 'student':
+            log_activity(user, "Login", f"{detected_role.capitalize()} logged in successfully.")
+
+            if detected_role == 'student':
                 return redirect('student_dashboard')
-            elif role == 'adviser' or profile.role == 'adviser':
+            elif detected_role == 'adviser':
                 return redirect('adviser_dashboard')
-            elif user.is_superuser:
+            else:
+                # 'admin' role or superuser
                 return redirect('admin_dashboard')
-                    
+
         else:
             # Track failed attempts
             fails = request.session.get('login_fails', 0) + 1
             request.session['login_fails'] = fails
-            
+
             if fails >= 6:
                 lockout_time = timezone.now() + timedelta(hours=1)
                 request.session['login_lockout_until'] = lockout_time.isoformat()
@@ -154,9 +146,7 @@ def login_page(request):
             else:
                 messages.error(request, 'Invalid email or password.')
             return redirect('login')
-            
-    return render(request, 'core/login.html')
-            
+
     return render(request, 'core/login.html')
 
 @ratelimit(key='ip', rate='3/1h', method='POST', block=True)
