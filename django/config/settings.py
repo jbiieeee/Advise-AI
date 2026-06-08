@@ -232,16 +232,20 @@ mimetypes.add_type("text/css", ".css", True)
 
 
 # Email / SMTP Configuration (REQUIRED for Adviser OTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
-EMAIL_TIMEOUT = 10  # 10 second timeout
-# Load from Render Environment Variables
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = f"Advise AI Security <{EMAIL_HOST_USER}>"
+if os.environ.get('USE_CONSOLE_EMAIL') == 'True':
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = "Advise AI Security <local@advise-ai.test>"
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_SSL = False
+    EMAIL_USE_TLS = True
+    EMAIL_TIMEOUT = 10  # 10 second timeout
+    # Load from Render Environment Variables
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = f"Advise AI Security <{EMAIL_HOST_USER}>"
 
 # AI Assistant Settings
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'add a new one')
