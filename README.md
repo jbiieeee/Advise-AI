@@ -1,4 +1,4 @@
-# Advise-AI: Secure Intelligent Academic Portal (MEET Branch)
+# Advise-AI: Secure Intelligent Academic Portal (IAS2 Branch) For infoAssurance 2 Final project
 
 Welcome to the official repository for **Advise-AI**, a premium academic advising platform designed specifically for the modern institutional ecosystem. This branch (`stride`) represents the most secure iteration of the platform, implementing advanced threat modeling mitigations and AI-driven workflows.
 
