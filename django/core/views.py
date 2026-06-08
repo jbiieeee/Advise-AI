@@ -1453,11 +1453,38 @@ def admin_monitor_view(request):
     if not is_admin:
         return redirect('landing')
     
+    from django.db.models import Q
+    
+    date_filter = request.GET.get('date', '')
+    user_filter = request.GET.get('user', '')
+    
+    appointments = Appointment.objects.all().order_by('-created_at')
+    logs = ActivityLog.objects.all().order_by('-timestamp')
+    
+    if date_filter:
+        appointments = appointments.filter(date_time__date=date_filter)
+        logs = logs.filter(timestamp__date=date_filter)
+        
+    if user_filter:
+        appointments = appointments.filter(
+            Q(student__username__icontains=user_filter) | 
+            Q(adviser__username__icontains=user_filter) |
+            Q(student__first_name__icontains=user_filter) |
+            Q(adviser__first_name__icontains=user_filter)
+        )
+        logs = logs.filter(
+            Q(user__username__icontains=user_filter) |
+            Q(user__first_name__icontains=user_filter) |
+            Q(details__icontains=user_filter)
+        )
+    
     context = {
-        'appointment_monitoring': Appointment.objects.all().order_by('-created_at')[:100],
-        'activity_logs': ActivityLog.objects.all().order_by('-timestamp')[:100],
+        'appointment_monitoring': appointments[:500],
+        'activity_logs': logs[:500],
         'live_calls_count': Appointment.objects.filter(actual_start_at__isnull=False, actual_end_at__isnull=True).count(),
         'total_completed': Appointment.objects.filter(status='completed').count(),
+        'date_filter': date_filter,
+        'user_filter': user_filter,
     }
     return render(request, 'core/admin_monitor.html', context)
 

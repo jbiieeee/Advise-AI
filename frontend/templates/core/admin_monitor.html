@@ -70,6 +70,29 @@
                             <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black uppercase">Complete</span>
                         </div>
                     </div>
+                    
+                    <!-- Filters -->
+                    <div class="p-4 border-b bg-slate-50/50 flex items-center justify-between">
+                        <form method="GET" class="flex items-center gap-4 w-full">
+                            <div class="flex flex-col">
+                                <label for="date" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Filter by Date</label>
+                                <input type="date" id="date" name="date" value="{{ date_filter }}" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-navy focus:ring-1 focus:ring-navy">
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <label for="user" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Targeted User Search</label>
+                                <input type="text" id="user" name="user" value="{{ user_filter }}" placeholder="Search by username or name..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-navy focus:ring-1 focus:ring-navy w-full max-w-sm">
+                            </div>
+                            <div class="flex flex-col justify-end mt-4">
+                                <div class="flex gap-2">
+                                    <button type="submit" class="bg-navy bg-[#001F3F] text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-opacity-90 transition">Apply Filters</button>
+                                    {% if date_filter or user_filter %}
+                                        <a href="{% url 'admin_monitor' %}" class="bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-slate-300 transition">Clear</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="flex-1 overflow-y-auto custom-scrollbar">
                         <table class="w-full text-left">
                             <thead class="sticky top-0 bg-white/90 backdrop-blur-md z-10">
@@ -178,8 +201,12 @@
         updateClock();
 
         // Auto Refresh logic (every 30 seconds)
-        setTimeout(() => {
-            window.location.reload();
+        // Pause refresh if user is interacting with filters
+        setInterval(() => {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            if (activeTag !== 'input' && activeTag !== 'select' && activeTag !== 'textarea') {
+                window.location.reload();
+            }
         }, 30000);
     </script>
 </body>
