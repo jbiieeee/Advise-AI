@@ -2645,7 +2645,10 @@ def send_verification_otp(request):
             [user.email],
             fail_silently=False,
         )
-        messages.success(request, f"Verification code sent to {user.email}")
+        if getattr(settings, 'USE_CONSOLE_EMAIL', False):
+            messages.success(request, "Verification code written to the Render logs.")
+        else:
+            messages.success(request, f"Verification code sent to {user.email}")
     except Exception as e:
         messages.error(request, f"Failed to send email: {str(e)}. Please check your SMTP settings.")
         

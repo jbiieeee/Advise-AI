@@ -50,8 +50,15 @@ def social_apps(request):
     try:
         from allauth.socialaccount.models import SocialApp
         from django.conf import settings
-        # Get apps linked to current SITE_ID
-        active_apps = SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list('provider', flat=True)
+        installed_providers = {
+            app.rsplit('.', 1)[-1]
+            for app in settings.INSTALLED_APPS
+            if app.startswith('allauth.socialaccount.providers.')
+        }
+        active_apps = SocialApp.objects.filter(
+            sites__id=settings.SITE_ID,
+            provider__in=installed_providers,
+        ).values_list('provider', flat=True)
         return {'active_social_providers': set(active_apps)}
     except:
         return {'active_social_providers': set()}

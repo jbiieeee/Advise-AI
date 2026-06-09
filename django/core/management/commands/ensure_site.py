@@ -41,11 +41,6 @@ class Command(BaseCommand):
                 'client_id': os.environ.get('SOCIAL_AUTH_GITHUB_CLIENT_ID'),
                 'secret': os.environ.get('SOCIAL_AUTH_GITHUB_SECRET'),
                 'name': 'GitHub'
-            },
-            'facebook': {
-                'client_id': os.environ.get('SOCIAL_AUTH_FACEBOOK_CLIENT_ID'),
-                'secret': os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET'),
-                'name': 'Facebook'
             }
         }
 

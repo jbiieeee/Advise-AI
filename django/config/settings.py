@@ -14,6 +14,12 @@ from pathlib import Path
 import os
 import dj_database_url
 
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,7 +40,7 @@ if env_path.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-yfcjc+ig3hw8#v3yom%8%#9v*vr&%2vxv!bpvzhskuv183aa%#')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = env_bool('DEBUG', default='RENDER' not in os.environ)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -131,6 +137,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Allauth / Social Auth Settings
 LOGIN_REDIRECT_URL = 'student_dashboard'
 LOGOUT_REDIRECT_URL = 'landing'
+LOGIN_URL = 'login'
 
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_LOGIN_METHODS = {'email'}
@@ -210,7 +217,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'core' / 'static',
@@ -219,7 +226,14 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
     # Force security settings in production
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -232,7 +246,9 @@ mimetypes.add_type("text/css", ".css", True)
 
 
 # Email / SMTP Configuration (REQUIRED for Adviser OTP)
-if os.environ.get('USE_CONSOLE_EMAIL') == 'True':
+USE_CONSOLE_EMAIL = env_bool('USE_CONSOLE_EMAIL')
+
+if USE_CONSOLE_EMAIL:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = "Advise AI Security <local@advise-ai.test>"
 else:
