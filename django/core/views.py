@@ -1264,7 +1264,13 @@ def admin_dashboard(request):
                         new_user.last_name = " ".join(parts[1:])
                 new_user.save()
                 
-                UserProfile.objects.create(user=new_user, role='student', student_id=student_id, program=program, enrollment_status='enrolled')
+                UserProfile.objects.create(
+                    user=new_user,
+                    role='student',
+                    student_id=student_id,
+                    program=program,
+                    enrollment_status='not_enrolled'
+                )
                 messages.success(request, 'Student account created successfully.')
                 log_activity(user, "Student Added", f"Created student account for {email} ({program})")
             else:
