@@ -524,10 +524,7 @@ def student_dashboard(request):
                             # Reset fails on success
                             request.session['redemption_fails'] = 0
                             
-                            # Cumulative Enrollment logic: Only set to 'pending' if not currently 'enrolled'
-                            if profile.enrollment_status != 'enrolled':
-                                profile.enrollment_status = 'pending'
-                                profile.save()
+                            recalculate_enrollment_status(user)
                             
                             # Notify all Admins
                             admins = User.objects.filter(Q(is_superuser=True) | Q(userprofile__role='admin'))
@@ -651,8 +648,10 @@ def student_dashboard(request):
 
         return redirect('student_dashboard')
 
-    # Fetch data for dashboard
-    enrollment_status = profile.enrollment_status
+    # Fetch data for dashboard. Keep the stored status aligned with real records:
+    # not_enrolled -> pending after request/code redemption -> enrolled after approval.
+    enrollment_status = recalculate_enrollment_status(user)
+    profile.refresh_from_db(fields=['enrollment_status'])
     # Get curriculum status for tags early to identify passed subjects
     curriculum_records = StudentCurriculum.objects.filter(student=user)
     curriculum_status_map = {r.subject_id: r.status for r in curriculum_records}
@@ -2339,7 +2338,6 @@ def request_subject_enrollment(request):
             subject_id = data.get('subject_id')
             term_label = data.get('term_label', 'Manual Request')
             
-            user_profile = request.user.userprofile
             subject = CurriculumSubject.objects.get(id=subject_id)
             
             # Validation: Check StudentCurriculum status
@@ -2366,10 +2364,7 @@ def request_subject_enrollment(request):
                 enrollment.status = 'pending'
                 enrollment.save()
             
-            # Update student status to 'pending' if not already enrolled
-            if user_profile.enrollment_status != 'enrolled':
-                user_profile.enrollment_status = 'pending'
-                user_profile.save()
+            recalculate_enrollment_status(request.user)
             
             return JsonResponse({'status': 'success', 'message': f'Request for {subject.code} submitted.'})
         except Exception as e:
